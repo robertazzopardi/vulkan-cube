@@ -15,7 +15,7 @@ CFLAGS  += -g
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
 #   their path using -Lpath, something like:
-LFLAGS = -lvulkan `sdl2-config --libs`
+LFLAGS = -lvulkan `sdl2-config --libs` -lSDL2_image
 
 # scan-build
 SCAN =		scan-build
