@@ -95,6 +95,9 @@ clean:
 	$(RM) $(call FIXPATH,$(OBJECTS))
 	@echo Cleanup complete!
 
+clean_shaders:
+	$(RM) ./shaders/*.spv
+
 run: all
 	./$(OUTPUTMAIN)
 	@echo Executing 'run: all' complete!
@@ -102,10 +105,21 @@ run: all
 check: clean all
 	cppcheck -f --enable=all --inconclusive --check-library --debug-warnings --suppress=missingIncludeSystem --check-config $(INCLUDES) ./$(SRC)
 
-analyse:
-# scan-build make
-	clear
-	for file in $(SOURCES) ; do \
-    	$(SCAN) $(SCANFLAGS) $(CC) $(CFLAGS) --analyze -fsanitize=address $(INCLUDES) $$file ; \
-	done
-	rm *.plist
+# analyse:
+# # scan-build make
+# 	clear
+# 	for file in $(SOURCES) ; do \
+#     	$(SCAN) $(SCANFLAGS) $(CC) $(CFLAGS) --analyze -fsanitize=address $(INCLUDES) $$file ; \
+# 	done
+# 	rm *.plist
+
+compile_shaders: clean_shaders
+
+# Acess vulkan sdk path and point to the glslc shader compiler
+	GLSLC=$(VULKAN_SDK)/macOS/bin/glslc
+
+# Remove old compiled shaders, to make sure they are rebuilt
+
+# Compile the shaders to .spv files
+	GLSLC ./shaders/shader.vert -o ./shaders/vert.spv
+	GLSLC ./shaders/shader.frag -o ./shaders/frag.spv
