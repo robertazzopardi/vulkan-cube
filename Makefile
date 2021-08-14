@@ -91,6 +91,7 @@ $(MAIN): $(OBJECTS)
 
 .PHONY: clean
 clean:
+	clear
 	$(RM) $(OUTPUTMAIN)
 	$(RM) $(call FIXPATH,$(OBJECTS))
 	@echo Cleanup complete!
@@ -98,20 +99,16 @@ clean:
 clean_shaders:
 	$(RM) ./shaders/*.spv
 
-run: all
+run: clean all
 	./$(OUTPUTMAIN)
 	@echo Executing 'run: all' complete!
 
 check: clean all
 	cppcheck -f --enable=all --inconclusive --check-library --debug-warnings --suppress=missingIncludeSystem --check-config $(INCLUDES) ./$(SRC)
 
-# analyse:
-# # scan-build make
-# 	clear
-# 	for file in $(SOURCES) ; do \
-#     	$(SCAN) $(SCANFLAGS) $(CC) $(CFLAGS) --analyze -fsanitize=address $(INCLUDES) $$file ; \
-# 	done
-# 	rm *.plist
+analyse: clean
+	scan-build make
+	$(RM) *.plist
 
 compile_shaders: clean_shaders
 
