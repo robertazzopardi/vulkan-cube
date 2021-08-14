@@ -33,6 +33,7 @@ typedef struct {
     uint32_t verticesCount;
     uint16_t *indices;
     uint16_t indicesCount;
+    uint32_t index;
 } Shape;
 
 typedef struct {
@@ -113,8 +114,6 @@ typedef struct {
     SDL_Window *win;
     SDL_Event event;
     bool *framebufferResized;
-    int width;
-    int height;
 } Window;
 
 const float FRAME_DELAY = 1000.0f / 60.0f;
@@ -127,7 +126,7 @@ const int MAX_FRAMES_IN_FLIGHT = 2;
 const uint32_t MAX_FAMILY = 1000;
 
 #define SIZEOF(arr) (sizeof(arr) / sizeof(*arr))
-#define LENGTH(arr) (sizeof(arr[0]) * SIZEOF(arr))
+// #define LENGTH(arr) (sizeof(arr[0]) * SIZEOF(arr))
 
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
@@ -143,11 +142,21 @@ const bool enableValidationLayers = false;
 const bool enableValidationLayers = true;
 #endif
 
-static inline void freeMem(void *pointer) {
-    if (pointer) {
-        free(pointer);
-        pointer = NULL;
+static inline void freeMem(const size_t count, ...) {
+    va_list valist;
+
+    va_start(valist, count);
+
+    for (size_t i = 0; i < count; i++) {
+        void *ptr = va_arg(valist, void *);
+
+        if (ptr) {
+            free(ptr);
+            ptr = NULL;
+        }
     }
+
+    va_end(valist);
 }
 
 #pragma region VERTEX DATA
@@ -172,9 +181,9 @@ Vertex shape1[] = {
     {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
     {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
 };
-uint16_t indices1[] = {
-    0, 1, 2, 2, 3, 0,
-};
+// uint16_t indices1[] = {
+//     0, 1, 2, 2, 3, 0,
+// };
 
 Vertex shape2[] = {
     {{-0.5f, -0.5f, -1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
@@ -182,15 +191,67 @@ Vertex shape2[] = {
     {{0.5f, 0.5f, -1.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
     {{-0.5f, 0.5f, -1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
 };
-uint16_t indices2[] = {
-    4, 5, 6, 6, 7, 4,
-};
+// uint16_t indices2[] = {
+//     4, 5, 6, 6, 7, 4,
+// };
 
 // const uint16_t indices[] = {
 //     // 1
 //     0, 1, 2, 2, 3, 0,
 //     // 2
 //     4, 5, 6, 6, 7, 4};
+
+#pragma region
+
+bool isInVertexArray(Vertex vert, Vertex *arr, uint32_t vertIndex) {
+    for (uint32_t j = 0; j < vertIndex; j++) {
+        if (glm_vec3_eqv(vert.pos, arr[j].pos)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// uint16_t *calculateIndices(Vertex *vertices, uint32_t count) {
+void calculateIndices(Shape *vulkanShape, Shape shape) {
+    Vertex arr[shape.verticesCount];
+    uint32_t vertIndex = 0;
+
+    // uint16_t indis[shape.verticesCount + 2];
+    uint16_t *indis = malloc((shape.verticesCount + 2) * sizeof(*indis));
+    uint32_t indisIndex = 0;
+
+    for (uint32_t i = 0; i < shape.verticesCount; i++) {
+        Vertex vert = shape.vertices[i];
+
+        bool inArray = isInVertexArray(vert, arr, vertIndex);
+
+        if (!inArray) {
+            indis[indisIndex++] = vulkanShape->index++;
+            arr[vertIndex++] = vert;
+        }
+
+        if (vertIndex % 3 == 0) {
+            indis[indisIndex] = vulkanShape->index - 1;
+            indisIndex++;
+        }
+    }
+
+    indis[indisIndex++] = indis[0];
+
+    // for (uint32_t j = 0; j < indisIndex; j++) {
+    //     printf("%u ", indis[j]);
+    // }
+    // printf("\n");
+
+    memcpy(vulkanShape->indices + vulkanShape->indicesCount, indis,
+           indisIndex * sizeof(*indis));
+
+    freeMem(1, indis); // to remove
+}
+
+#pragma endregion
 
 void combineVerticesAndIndices(Vulkan *vulkan, uint32_t count, ...) {
     va_list valist;
@@ -207,10 +268,22 @@ void combineVerticesAndIndices(Vulkan *vulkan, uint32_t count, ...) {
 
         memcpy(vulkan->shapes.vertices + vulkan->shapes.verticesCount,
                shape.vertices, shape.verticesCount * sizeof(*shape.vertices));
-        memcpy(vulkan->shapes.indices + vulkan->shapes.indicesCount,
-               shape.indices, shape.indicesCount * sizeof(*shape.indices));
+        // memcpy(vulkan->shapes.indices + vulkan->shapes.indicesCount,
+        //        shape.indices, shape.indicesCount * sizeof(*shape.indices));
 
         vulkan->shapes.verticesCount += shape.verticesCount;
+        // vulkan->shapes.indicesCount += shape.indicesCount;
+
+        // uint16_t *indices = calculateIndices(&vulkan->shapes, shape);
+        // memcpy(vulkan->shapes.indices + vulkan->shapes.indicesCount, indices,
+        //        shape.indicesCount * sizeof(*shape.indices));
+
+        calculateIndices(&vulkan->shapes, shape);
+        // for (uint32_t j = 0; j < count * 6; j++) {
+        //     printf("%u ", vulkan->shapes.indices[j]);
+        // }
+        // printf("\n");
+
         vulkan->shapes.indicesCount += shape.indicesCount;
     }
 
@@ -406,6 +479,7 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance,
 #pragma endregion
 
 #pragma region CREATE SURFACE
+
 void createSurface(SDL_Window *window, Vulkan *vulkan) {
     if (!SDL_Vulkan_CreateSurface(window, vulkan->instance, &vulkan->surface)) {
         // failed to create a surface!
@@ -424,11 +498,13 @@ static int resizingEventCallback(void *data, SDL_Event *event) {
             // printf("resizing.....\n");
             *mainWindow->framebufferResized = true;
 
-            SDL_GetWindowSize(win, &mainWindow->width, &mainWindow->height);
+            // SDL_GetWindowSize(win, &mainWindow->width, &mainWindow->height);
         }
     }
+
     return 0;
 }
+
 #pragma endregion
 
 #pragma region PHYSICAL DEVICE
@@ -578,12 +654,13 @@ bool isDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface) {
         swapChainAdequate = swapChainSupport.formats != NULL &&
                             swapChainSupport.presentModes != NULL;
 
-        if (swapChainSupport.formats != NULL) {
-            freeMem(swapChainSupport.formats);
-        }
-        if (swapChainSupport.presentModes != NULL) {
-            freeMem(swapChainSupport.presentModes);
-        }
+        // if (swapChainSupport.formats) {
+        //     freeMem(swapChainSupport.formats);
+        // }
+        // if (swapChainSupport.presentModes) {
+        //     freeMem(swapChainSupport.presentModes);
+        // }
+        freeMem(2, swapChainSupport.formats, swapChainSupport.presentModes);
     }
 
     VkPhysicalDeviceFeatures supportedFeatures;
@@ -949,8 +1026,7 @@ void createGraphicsPipeline(Vulkan *vulkan) {
     createShaderModule(fragShaderCode.buff, fragShaderCode.len, vulkan->device,
                        &fragShaderModule);
 
-    freeMem(vertShaderCode.buff);
-    freeMem(fragShaderCode.buff);
+    freeMem(2, vertShaderCode.buff, fragShaderCode.buff);
 
     VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
     vertShaderStageInfo.sType =
@@ -1104,7 +1180,7 @@ void createGraphicsPipeline(Vulkan *vulkan) {
     vkDestroyShaderModule(vulkan->device, fragShaderModule, NULL);
     vkDestroyShaderModule(vulkan->device, vertShaderModule, NULL);
 
-    freeMem(attributeDescriptions);
+    freeMem(1, attributeDescriptions);
 }
 
 #pragma endregion
@@ -1174,17 +1250,23 @@ void createCommandBuffers(Vulkan *vulkan, Window window) {
         THROW_ERROR("failed to allocate command buffers!\n");
     }
 
+    int width, height;
+    SDL_GetWindowSize(window.win, &width, &height);
+
     VkViewport viewport;
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = window.width;
-    viewport.height = window.height;
+    // viewport.width = window.width;
+    // viewport.height = window.height;
+    viewport.width = width;
+    viewport.height = height;
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
 
     VkRect2D scissor;
     scissor.offset = (VkOffset2D){0, 0};
-    scissor.extent = (VkExtent2D){window.width, window.height};
+    // scissor.extent = (VkExtent2D){window.width, window.height};
+    scissor.extent = (VkExtent2D){width, height};
 
     for (uint32_t i = 0; i < vulkan->swapChainImagesCount; i++) {
         VkCommandBufferBeginInfo beginInfo = {};
@@ -1411,9 +1493,6 @@ void copyBuffer(Vulkan *vulkan, VkBuffer srcBuffer, VkBuffer dstBuffer,
 }
 
 void createVertexBuffer(Vulkan *vulkan) {
-    // printf("%lu %lu\n", LENGTH(vertices),
-    //        sizeof(*vulkan->vertices) * vulkan->verticesCount);
-    // VkDeviceSize bufferSize = LENGTH(vertices);
     VkDeviceSize bufferSize =
         sizeof(*vulkan->shapes.vertices) * vulkan->shapes.verticesCount;
 
@@ -1442,9 +1521,6 @@ void createVertexBuffer(Vulkan *vulkan) {
 }
 
 void createIndexBuffer(Vulkan *vulkan) {
-    // printf("%lu %lu\n", LENGTH(indices),
-    //        sizeof(*vulkan->indices) * vulkan->indicesCount);
-    // VkDeviceSize bufferSize = LENGTH(indices);
     VkDeviceSize bufferSize =
         sizeof(*vulkan->shapes.indices) * vulkan->shapes.indicesCount;
 
@@ -1454,10 +1530,6 @@ void createIndexBuffer(Vulkan *vulkan) {
                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                  vulkan, &stagingBuffer, &stagingBufferMemory);
-
-    // for (uint32_t i = 0; i < bufferSize; i++) {
-    //     printf("%u\n", vulkan->indices[i]);
-    // }
 
     void *data;
     vkMapMemory(vulkan->device, stagingBufferMemory, 0, bufferSize, 0, &data);
@@ -1491,6 +1563,8 @@ void createUniformBuffers(Vulkan *vulkan) {
                      vulkan, &vulkan->uniformBuffers[i],
                      &vulkan->uniformBuffersMemory[i]);
     }
+
+    glm_mat4_identity(vulkan->ubo.model);
 }
 
 void createDescriptorSets(Vulkan *vulkan) {
@@ -1506,7 +1580,6 @@ void createDescriptorSets(Vulkan *vulkan) {
     allocInfo.descriptorSetCount = vulkan->swapChainImagesCount;
     allocInfo.pSetLayouts = layouts;
 
-    // descriptorSets.resize(swapChainImages.size());
     vulkan->descriptorSets =
         malloc(vulkan->swapChainImagesCount * sizeof(*vulkan->descriptorSets));
     if (vkAllocateDescriptorSets(vulkan->device, &allocInfo,
@@ -1550,7 +1623,7 @@ void createDescriptorSets(Vulkan *vulkan) {
                                descriptorWrites, 0, NULL);
     }
 
-    freeMem(layouts);
+    freeMem(1, layouts);
 }
 
 void createDescriptorPool(Vulkan *vulkan) {
@@ -1606,10 +1679,8 @@ void cleanupSwapChain(Vulkan *vulkan) {
         vkFreeMemory(vulkan->device, vulkan->uniformBuffersMemory[i], NULL);
     }
 
-    freeMem(vulkan->swapChainFramebuffers);
-    freeMem(vulkan->swapChainImageViews);
-    freeMem(vulkan->uniformBuffers);
-    freeMem(vulkan->uniformBuffersMemory);
+    freeMem(4, vulkan->swapChainFramebuffers, vulkan->swapChainImageViews,
+            vulkan->uniformBuffers, vulkan->uniformBuffersMemory);
 
     vkDestroyDescriptorPool(vulkan->device, vulkan->descriptorPool, NULL);
 }
@@ -1644,14 +1715,16 @@ void recreateSwapChain(Window window, SDL_Event event, Vulkan *vulkan) {
     createDescriptorSets(vulkan);
     createCommandBuffers(vulkan, window);
 
-    freeMem(vulkan->imagesInFlight);
+    freeMem(1, vulkan->imagesInFlight);
 
     vulkan->imagesInFlight =
         calloc(vulkan->swapChainImagesCount, sizeof(*vulkan->imagesInFlight));
 }
+
 #pragma endregion
 
 #pragma region DRAW FRAME
+
 void updateUniformBuffer(Vulkan *vulkan, uint32_t currentImage, float dt) {
 
     glm_rotate(vulkan->ubo.model, dt * glm_rad(45.0f),
@@ -1748,6 +1821,7 @@ void drawFrame(Window window, SDL_Event event, Vulkan *vulkan,
 
     *currentFrame = (*currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
+
 #pragma endregion
 
 #pragma region TEXTURE MAPPING
@@ -2207,8 +2281,9 @@ void initVulkan(Window window, Vulkan *vulkan) {
 
     createTextureSampler(vulkan);
 
-    combineVerticesAndIndices(vulkan, 2, (Shape){shape1, 4, indices1, 6},
-                              (Shape){shape2, 4, indices2, 6});
+    combineVerticesAndIndices(vulkan, 2,
+                              (Shape){shape1, 4, NULL /*indices1*/, 6, 0},
+                              (Shape){shape2, 4, NULL /*indices2*/, 6, 0});
     createVertexBuffer(vulkan);
     createIndexBuffer(vulkan);
 
@@ -2231,11 +2306,6 @@ void cleanUpVulkan(Vulkan *vulkan) {
 
     vkDestroyImage(vulkan->device, vulkan->textureImage, NULL);
     vkFreeMemory(vulkan->device, vulkan->textureImageMemory, NULL);
-
-    freeMem(vulkan->descriptorSets);
-
-    freeMem(vulkan->shapes.vertices);
-    freeMem(vulkan->shapes.indices);
 
     vkDestroyDescriptorSetLayout(vulkan->device, vulkan->descriptorSetLayout,
                                  NULL);
@@ -2261,11 +2331,10 @@ void cleanUpVulkan(Vulkan *vulkan) {
         vkDestroyFence(vulkan->device, vulkan->inFlightFences[i], NULL);
     }
 
-    freeMem(vulkan->renderFinishedSemaphores);
-    freeMem(vulkan->imageAvailableSemaphores);
-    freeMem(vulkan->inFlightFences);
-    freeMem(vulkan->imagesInFlight);
-    freeMem(vulkan->commandBuffers);
+    freeMem(8, vulkan->descriptorSets, vulkan->shapes.vertices,
+            vulkan->shapes.indices, vulkan->renderFinishedSemaphores,
+            vulkan->imageAvailableSemaphores, vulkan->inFlightFences,
+            vulkan->imagesInFlight, vulkan->commandBuffers);
 
     vkDestroyCommandPool(vulkan->device, vulkan->commandPool, NULL);
 
@@ -2279,26 +2348,27 @@ void cleanUpVulkan(Vulkan *vulkan) {
     vkDestroySurfaceKHR(vulkan->instance, vulkan->surface, NULL);
     vkDestroyInstance(vulkan->instance, NULL);
 }
+
 #pragma endregion
 
 int main(void) {
     // Init SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_EVENTS) != 0) {
         SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
-        return -1;
+        return EXIT_FAILURE;
     }
 
     // init SDL Image
     if (IMG_Init(IMG_INIT_JPG) != IMG_INIT_JPG) {
         SDL_Log("Unable to initialize SDL_Image: %s", SDL_GetError());
-        return -1;
+        return EXIT_FAILURE;
     }
 
     // Set Up Window
-    Window window = {.width = WIDTH_INIT, .height = HEIGHT_INIT};
+    Window window = {0};
     window.win = SDL_CreateWindow(
-        APP_NAME, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window.width,
-        window.height, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
+        APP_NAME, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH_INIT,
+        HEIGHT_INIT, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
 
     // Add Window resize callback
     SDL_AddEventWatch(resizingEventCallback, &window);
@@ -2306,7 +2376,6 @@ int main(void) {
     // INIT VULKAN
     Vulkan vulkan;
     initVulkan(window, &vulkan);
-    glm_mat4_identity(vulkan.ubo.model);
 
     window.framebufferResized = &vulkan.framebufferResized;
 
@@ -2348,7 +2417,6 @@ int main(void) {
     cleanUpVulkan(&vulkan);
 
     SDL_DestroyWindow(window.win);
-    window.win = NULL;
 
     IMG_Quit();
 
