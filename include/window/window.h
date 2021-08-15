@@ -1,9 +1,9 @@
 #ifndef INCLUDE_WINDOW_WINDOW
 #define INCLUDE_WINDOW_WINDOW
 
-// #include "vulkan_handle/vulkan_handle.h"
 #include <stdbool.h>
 #include <stddef.h>
+#include <vulkan/vulkan.h>
 
 static const int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -20,6 +20,8 @@ struct Window {
     size_t currentFrame;
     bool *framebufferResized;
     bool running;
+
+    VkSurfaceKHR surface;
 };
 
 void start();
@@ -30,7 +32,7 @@ void createTextureImage(Vulkan *);
 
 void createCommandBuffers(Vulkan *, Window *);
 
-void createSurface(SDL_Window *, Vulkan *);
+void createSurface(Window *, Vulkan *);
 
 void drawFrame(Window *, SDL_Event, Vulkan *, float);
 

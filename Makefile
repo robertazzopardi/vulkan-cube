@@ -99,7 +99,7 @@ clean:
 clean_shaders:
 	$(RM) ./shaders/*.spv
 
-run: clean all
+run: all
 	./$(OUTPUTMAIN)
 	@echo Executing 'run: all' complete!
 

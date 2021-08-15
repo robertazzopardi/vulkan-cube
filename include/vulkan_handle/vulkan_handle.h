@@ -30,6 +30,8 @@ typedef struct Vulkan Vulkan;
 
 typedef struct Validation Validation;
 
+typedef struct Window Window;
+
 // typedef struct Device Device;
 
 struct Vulkan {
@@ -41,12 +43,12 @@ struct Vulkan {
 
     Device device;
 
-    VkSurfaceKHR surface;
+    // VkSurfaceKHR surface;
 
     VkSampleCountFlagBits msaaSamples;
 
-    VkQueue graphicsQueue;
-    VkQueue presentQueue;
+    // VkQueue graphicsQueue;
+    // VkQueue presentQueue;
 
     VkSwapchainKHR swapChain;
     VkImage *swapChainImages;
@@ -111,7 +113,7 @@ typedef struct Window Window;
 
 void initVulkan(Window *, Vulkan *);
 
-void cleanUpVulkan(Vulkan *);
+void cleanUpVulkan(Window *, Vulkan *);
 
 void createGraphicsPipeline(Vulkan *);
 
@@ -131,23 +133,12 @@ void createDescriptorSets(Vulkan *);
 
 void createRenderPass(Vulkan *);
 
-void createImageViews(Vulkan *);
-
-typedef struct SDL_Window SDL_Window;
-void createSwapChain(SDL_Window *, Vulkan *);
-
-void cleanupSwapChain(Vulkan *);
-
 void generateMipmaps(Vulkan *, VkImage, VkFormat, int32_t, int32_t, uint32_t);
 
 void copyBufferToImage(Vulkan *, VkBuffer, VkImage, uint32_t, uint32_t);
 
 void transitionImageLayout(Vulkan *, VkImage, VkFormat __unused, VkImageLayout,
                            VkImageLayout, uint32_t);
-
-void createImage(uint32_t, uint32_t, uint32_t, VkSampleCountFlagBits, VkFormat,
-                 VkImageTiling, VkImageUsageFlags, VkMemoryPropertyFlags,
-                 Vulkan *, VkImage *, VkDeviceMemory *);
 
 void createBuffer(VkDeviceSize, VkBufferUsageFlags, VkMemoryPropertyFlags,
                   Vulkan *, VkBuffer *, VkDeviceMemory *);

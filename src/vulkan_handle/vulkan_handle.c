@@ -6,6 +6,7 @@
 #include "memory.h"
 #include "swapchain.h"
 #include "vulkan_handle/device.h"
+#include "vulkan_handle/image_view.h"
 #include "vulkan_handle/validation.h"
 #include "window/window.h"
 #include <cglm/affine.h>
@@ -146,8 +147,7 @@ VkCommandBuffer beginSingleTimeCommands(Vulkan *vulkan) {
     allocInfo.commandBufferCount = 1;
 
     VkCommandBuffer commandBuffer;
-    vkAllocateCommandBuffers(vulkan->device.device, &allocInfo,
-                             &commandBuffer);
+    vkAllocateCommandBuffers(vulkan->device.device, &allocInfo, &commandBuffer);
 
     VkCommandBufferBeginInfo beginInfo = {};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -166,8 +166,8 @@ void endSingleTimeCommands(Vulkan *vulkan, VkCommandBuffer commandBuffer) {
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
 
-    vkQueueSubmit(vulkan->graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-    vkQueueWaitIdle(vulkan->graphicsQueue);
+    vkQueueSubmit(vulkan->device.graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(vulkan->device.graphicsQueue);
 
     vkFreeCommandBuffers(vulkan->device.device, vulkan->commandPool, 1,
                          &commandBuffer);
@@ -445,191 +445,6 @@ static VkVertexInputAttributeDescription *getAttributeDescriptions() {
     return attributeDescriptions;
 }
 
-#pragma endregion
-
-#pragma region CREATING INSTANCE
-
-#pragma endregion
-
-#pragma region DEBUG MESSENGER
-
-#pragma endregion
-
-#pragma region CREATE SURFACE
-
-#pragma endregion
-
-#pragma region PHYSICAL DEVICE
-
-VkSampleCountFlagBits getMaxUsableSampleCount(Vulkan *);
-
-#pragma endregion
-
-#pragma region LOGICAL DEVICE
-
-void createLogicalDevice(Vulkan *vulkan) {
-    QueueFamilyIndices queueFamilyIndices =
-        findQueueFamilies(vulkan->device.physicalDevice, vulkan->surface);
-
-    uint32_t uniqueQueueFamilies[] = {queueFamilyIndices.graphicsFamily,
-                                      queueFamilyIndices.presentFamily};
-    VkDeviceQueueCreateInfo queueCreateInfos[SIZEOF(uniqueQueueFamilies)];
-
-    float queuePriority = 1.0f;
-    for (uint32_t i = 0; i < SIZEOF(uniqueQueueFamilies); i++) {
-        VkDeviceQueueCreateInfo queueCreateInfo = {};
-        queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queueCreateInfo.queueFamilyIndex = uniqueQueueFamilies[i];
-        queueCreateInfo.queueCount = 1;
-        queueCreateInfo.pQueuePriorities = &queuePriority;
-        queueCreateInfos[i] = queueCreateInfo;
-    }
-
-    VkPhysicalDeviceFeatures deviceFeatures = {};
-    deviceFeatures.samplerAnisotropy = VK_TRUE;
-    // enable sample shading feature for the device
-    deviceFeatures.sampleRateShading = VK_TRUE;
-
-    VkDeviceCreateInfo createInfo = {};
-    createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    createInfo.queueCreateInfoCount = SIZEOF(queueCreateInfos);
-    createInfo.pQueueCreateInfos = queueCreateInfos;
-    createInfo.enabledExtensionCount = SIZEOF(deviceExtensions);
-    createInfo.ppEnabledExtensionNames = deviceExtensions;
-
-    createInfo.pEnabledFeatures = &deviceFeatures;
-
-    if (enableValidationLayers) {
-        createInfo.enabledLayerCount = SIZEOF(validationLayers);
-        createInfo.ppEnabledLayerNames = validationLayers;
-    } else {
-        createInfo.enabledLayerCount = 0;
-    }
-
-    if (vkCreateDevice(vulkan->device.physicalDevice, &createInfo, NULL,
-                       &vulkan->device.device) != VK_SUCCESS) {
-        THROW_ERROR("failed to create logical device!\n");
-    }
-
-    vkGetDeviceQueue(vulkan->device.device, queueFamilyIndices.graphicsFamily,
-                     0, &vulkan->graphicsQueue);
-    vkGetDeviceQueue(vulkan->device.device, queueFamilyIndices.presentFamily,
-                     0, &vulkan->presentQueue);
-}
-
-#pragma endregion
-
-#pragma region SWAP CHAIN
-
-VkSurfaceFormatKHR chooseSwapSurfaceFormat(VkSurfaceFormatKHR *availableFormats,
-                                           uint32_t count) {
-    for (uint32_t i = 0; i < count; i++) {
-        if (availableFormats[i].format == VK_FORMAT_B8G8R8A8_SRGB &&
-            availableFormats[i].colorSpace ==
-                VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
-            return availableFormats[i];
-        }
-    }
-
-    return availableFormats[0];
-}
-
-// void clamp(uint32_t *val, uint32_t min, uint32_t max) {
-//     if (*val < min) {
-//         *val = min;
-//     }
-//     if (*val > max) {
-//         *val = max;
-//     }
-// }
-
-VkPresentModeKHR chooseSwapPresentMode(VkPresentModeKHR *availablePresentModes,
-                                       uint32_t count) {
-    for (uint32_t i = 0; i < count; i++) {
-        if (availablePresentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR) {
-            return availablePresentModes[i];
-        }
-    }
-
-    return VK_PRESENT_MODE_FIFO_KHR;
-}
-
-void createSwapChain(SDL_Window *window, Vulkan *vulkan) {
-    SwapChainSupportDetails swapChainSupport =
-        querySwapChainSupport(vulkan->device.physicalDevice, vulkan->surface);
-
-    VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(
-        swapChainSupport.formats, swapChainSupport.formatCount);
-    VkPresentModeKHR presentMode = chooseSwapPresentMode(
-        swapChainSupport.presentModes, swapChainSupport.presentModeCount);
-    VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities, window);
-
-    vulkan->swapChainImagesCount =
-        swapChainSupport.capabilities.minImageCount + 1;
-    if (swapChainSupport.capabilities.maxImageCount > 0 &&
-        vulkan->swapChainImagesCount >
-            swapChainSupport.capabilities.maxImageCount) {
-        vulkan->swapChainImagesCount =
-            swapChainSupport.capabilities.maxImageCount;
-    }
-
-    VkSwapchainCreateInfoKHR createInfo = {};
-    createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    createInfo.surface = vulkan->surface;
-    createInfo.minImageCount = vulkan->swapChainImagesCount;
-    createInfo.imageFormat = surfaceFormat.format;
-    createInfo.imageColorSpace = surfaceFormat.colorSpace;
-    createInfo.imageExtent = extent;
-    createInfo.imageArrayLayers = 1;
-    createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-
-    QueueFamilyIndices queueFamilyIndices =
-        findQueueFamilies(vulkan->device.physicalDevice, vulkan->surface);
-
-    if (queueFamilyIndices.graphicsFamily != queueFamilyIndices.presentFamily) {
-        createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-        createInfo.queueFamilyIndexCount = 2;
-
-        uint32_t queueFamilyIndicesArr[] = {queueFamilyIndices.graphicsFamily,
-                                            queueFamilyIndices.presentFamily};
-        createInfo.pQueueFamilyIndices = queueFamilyIndicesArr;
-    } else {
-        createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    }
-
-    createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
-    createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-    createInfo.presentMode = presentMode;
-    createInfo.clipped = VK_TRUE;
-
-    createInfo.oldSwapchain = VK_NULL_HANDLE;
-
-    if (vkCreateSwapchainKHR(vulkan->device.device, &createInfo, NULL,
-                             &vulkan->swapChain) != VK_SUCCESS) {
-        THROW_ERROR("failed to create swap chain!\n");
-    }
-
-    vkGetSwapchainImagesKHR(vulkan->device.device, vulkan->swapChain,
-                            &vulkan->swapChainImagesCount, NULL);
-
-    vulkan->swapChainImages =
-        malloc(vulkan->swapChainImagesCount * sizeof(*vulkan->swapChainImages));
-
-    if (vulkan->swapChainImages == NULL) {
-        THROW_ERROR("Could not init swap chain images\n");
-    }
-    vkGetSwapchainImagesKHR(vulkan->device.device, vulkan->swapChain,
-                            &vulkan->swapChainImagesCount,
-                            vulkan->swapChainImages);
-
-    vulkan->swapChainImageFormat = surfaceFormat.format;
-    vulkan->swapChainExtent = extent;
-}
-
-#pragma endregion
-
-#pragma region RENDER PASS
-
 VkFormat findDepthFormat(Vulkan *);
 
 void createRenderPass(Vulkan *vulkan) {
@@ -886,8 +701,8 @@ void createGraphicsPipeline(Vulkan *vulkan) {
     pipelineLayoutInfo.setLayoutCount = 1;
     pipelineLayoutInfo.pSetLayouts = &vulkan->descriptorSetLayout;
 
-    if (vkCreatePipelineLayout(vulkan->device.device, &pipelineLayoutInfo,
-                               NULL, &vulkan->pipelineLayout) != VK_SUCCESS) {
+    if (vkCreatePipelineLayout(vulkan->device.device, &pipelineLayoutInfo, NULL,
+                               &vulkan->pipelineLayout) != VK_SUCCESS) {
         THROW_ERROR("failed to create pipeline layout!\n");
     }
 
@@ -965,9 +780,9 @@ void createFramebuffers(Vulkan *vulkan) {
 
 #pragma region COMMAND POOL
 
-void createCommandPool(Vulkan *vulkan) {
+void createCommandPool(Window *window, Vulkan *vulkan) {
     QueueFamilyIndices queueFamilyIndices =
-        findQueueFamilies(vulkan->device.physicalDevice, vulkan->surface);
+        findQueueFamilies(vulkan->device.physicalDevice, window->surface);
 
     VkCommandPoolCreateInfo poolInfo = {};
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -1167,44 +982,10 @@ void copyBufferToImage(Vulkan *vulkan, VkBuffer buffer, VkImage image,
     endSingleTimeCommands(vulkan, commandBuffer);
 }
 
-VkImageView createImageView(VkDevice device, VkImage image, VkFormat format,
-                            VkImageAspectFlags aspectFlags,
-                            uint32_t mipLevels) {
-    VkImageViewCreateInfo viewInfo = {};
-    viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    viewInfo.image = image;
-    viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    viewInfo.format = format;
-    // viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    viewInfo.subresourceRange.aspectMask = aspectFlags;
-    viewInfo.subresourceRange.baseMipLevel = 0;
-    viewInfo.subresourceRange.levelCount = mipLevels;
-    viewInfo.subresourceRange.baseArrayLayer = 0;
-    viewInfo.subresourceRange.layerCount = 1;
-
-    VkImageView imageView;
-    if (vkCreateImageView(device, &viewInfo, NULL, &imageView) != VK_SUCCESS) {
-        THROW_ERROR("failed to create texture image view!\n");
-    }
-
-    return imageView;
-}
-
 void createTextureImageView(Vulkan *vulkan) {
     vulkan->textureImageView = createImageView(
         vulkan->device.device, vulkan->textureImage, VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_ASPECT_COLOR_BIT, vulkan->mipLevels);
-}
-
-void createImageViews(Vulkan *vulkan) {
-    vulkan->swapChainImageViews = malloc(vulkan->swapChainImagesCount *
-                                         sizeof(*vulkan->swapChainImageViews));
-
-    for (uint32_t i = 0; i < vulkan->swapChainImagesCount; i++) {
-        vulkan->swapChainImageViews[i] = createImageView(
-            vulkan->device.device, vulkan->swapChainImages[i],
-            vulkan->swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
-    }
 }
 
 void createTextureSampler(Vulkan *vulkan) {
@@ -1311,46 +1092,6 @@ void createColorResources(Vulkan *vulkan) {
 
 #pragma region RECREATE SWAP CHAIN
 
-void cleanupSwapChain(Vulkan *vulkan) {
-    vkDestroyImageView(vulkan->device.device, vulkan->colorImageView, NULL);
-    vkDestroyImage(vulkan->device.device, vulkan->colorImage, NULL);
-    vkFreeMemory(vulkan->device.device, vulkan->colorImageMemory, NULL);
-
-    vkDestroyImageView(vulkan->device.device, vulkan->depthImageView, NULL);
-    vkDestroyImage(vulkan->device.device, vulkan->depthImage, NULL);
-    vkFreeMemory(vulkan->device.device, vulkan->depthImageMemory, NULL);
-
-    vkFreeCommandBuffers(vulkan->device.device, vulkan->commandPool,
-                         vulkan->swapChainImagesCount, vulkan->commandBuffers);
-
-    vkDestroyPipeline(vulkan->device.device, vulkan->graphicsPipeline, NULL);
-    vkDestroyPipelineLayout(vulkan->device.device, vulkan->pipelineLayout,
-                            NULL);
-    vkDestroyRenderPass(vulkan->device.device, vulkan->renderPass, NULL);
-
-    vkDestroySwapchainKHR(vulkan->device.device, vulkan->swapChain, NULL);
-
-    for (uint32_t i = 0; i < vulkan->swapChainImagesCount; i++) {
-        vkDestroyFramebuffer(vulkan->device.device,
-                             vulkan->swapChainFramebuffers[i], NULL);
-
-        vkDestroyImageView(vulkan->device.device,
-                           vulkan->swapChainImageViews[i], NULL);
-
-        vkDestroyBuffer(vulkan->device.device, vulkan->uniformBuffers[i],
-                        NULL);
-
-        vkFreeMemory(vulkan->device.device, vulkan->uniformBuffersMemory[i],
-                     NULL);
-    }
-
-    freeMem(4, vulkan->swapChainFramebuffers, vulkan->swapChainImageViews,
-            vulkan->uniformBuffers, vulkan->uniformBuffersMemory);
-
-    vkDestroyDescriptorPool(vulkan->device.device, vulkan->descriptorPool,
-                            NULL);
-}
-
 void generateMipmaps(Vulkan *vulkan, VkImage image, VkFormat imageFormat,
                      int32_t texWidth, int32_t texHeight, uint32_t mipLevels) {
     // Check if image format supports linear blitting
@@ -1441,13 +1182,13 @@ void initVulkan(Window *window, Vulkan *vulkan) {
 
     setupDebugMessenger(vulkan);
 
-    createSurface(window->win, vulkan);
+    createSurface(window, vulkan);
 
-    pickPhysicalDevice(vulkan);
+    pickPhysicalDevice(window, vulkan);
 
-    createLogicalDevice(vulkan);
+    createLogicalDevice(window, vulkan);
 
-    createSwapChain(window->win, vulkan);
+    createSwapChain(window, vulkan);
 
     createImageViews(vulkan);
 
@@ -1463,7 +1204,7 @@ void initVulkan(Window *window, Vulkan *vulkan) {
 
     createFramebuffers(vulkan);
 
-    createCommandPool(vulkan);
+    createCommandPool(window, vulkan);
 
     createTextureImage(vulkan);
 
@@ -1487,7 +1228,7 @@ void initVulkan(Window *window, Vulkan *vulkan) {
     createSyncObjects(vulkan);
 }
 
-void cleanUpVulkan(Vulkan *vulkan) {
+void cleanUpVulkan(Window *window, Vulkan *vulkan) {
     cleanupSwapChain(vulkan);
 
     vkDestroySampler(vulkan->device.device, vulkan->textureSampler, NULL);
@@ -1536,6 +1277,6 @@ void cleanUpVulkan(Vulkan *vulkan) {
                                       vulkan->validation->debugMessenger, NULL);
     }
 
-    vkDestroySurfaceKHR(vulkan->instance.instance, vulkan->surface, NULL);
+    vkDestroySurfaceKHR(vulkan->instance.instance, window->surface, NULL);
     vkDestroyInstance(vulkan->instance.instance, NULL);
 }

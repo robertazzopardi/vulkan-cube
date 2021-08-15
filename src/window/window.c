@@ -1,6 +1,7 @@
 #include "window.h"
 #include "error_handle.h"
 #include "vulkan_handle/device.h"
+#include "vulkan_handle/image_view.h"
 #include "vulkan_handle/instance.h"
 #include "vulkan_handle/memory.h"
 #include "vulkan_handle/vulkan_handle.h"
@@ -15,9 +16,9 @@ const float FRAME_DELAY = 1000.0f / 60.0f;
 #define WIDTH_INIT 1280
 #define HEIGHT_INIT 720
 
-void createSurface(SDL_Window *window, Vulkan *vulkan) {
-    if (!SDL_Vulkan_CreateSurface(window, vulkan->instance.instance,
-                                  &vulkan->surface)) {
+void createSurface(Window *window, Vulkan *vulkan) {
+    if (!SDL_Vulkan_CreateSurface(window->win, vulkan->instance.instance,
+                                  &window->surface)) {
         // failed to create a surface!
         THROW_ERROR("failed to create window surface!\n");
     }
@@ -148,36 +149,6 @@ void createTextureImage(Vulkan *vulkan) {
                     image->w, image->h, vulkan->mipLevels);
 
     SDL_FreeSurface(image);
-}
-
-void recreateSwapChain(Window *window, SDL_Event event, Vulkan *vulkan) {
-    int width = 0, height = 0;
-    SDL_Vulkan_GetDrawableSize(window->win, &width, &height);
-    while (width == 0 || height == 0) {
-        SDL_Vulkan_GetDrawableSize(window->win, &width, &height);
-        SDL_PollEvent(&event);
-    }
-
-    vkDeviceWaitIdle(vulkan->device.device);
-
-    cleanupSwapChain(vulkan);
-
-    createSwapChain(window->win, vulkan);
-    createImageViews(vulkan);
-    createRenderPass(vulkan);
-    createGraphicsPipeline(vulkan);
-    createColorResources(vulkan);
-    createDepthResources(vulkan);
-    createFramebuffers(vulkan);
-    createUniformBuffers(vulkan);
-    createDescriptorPool(vulkan);
-    createDescriptorSets(vulkan);
-    createCommandBuffers(vulkan, window);
-
-    freeMem(1, vulkan->imagesInFlight);
-
-    vulkan->imagesInFlight =
-        calloc(vulkan->swapChainImagesCount, sizeof(*vulkan->imagesInFlight));
 }
 
 VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR capabilities,
@@ -347,7 +318,7 @@ void drawFrame(Window *window, SDL_Event event, Vulkan *vulkan, float dt) {
     vkResetFences(vulkan->device.device, 1,
                   &vulkan->inFlightFences[window->currentFrame]);
 
-    if (vkQueueSubmit(vulkan->graphicsQueue, 1, &submitInfo,
+    if (vkQueueSubmit(vulkan->device.graphicsQueue, 1, &submitInfo,
                       vulkan->inFlightFences[window->currentFrame]) !=
         VK_SUCCESS) {
         THROW_ERROR("failed to submit draw command buffer!\n");
@@ -363,7 +334,7 @@ void drawFrame(Window *window, SDL_Event event, Vulkan *vulkan, float dt) {
     presentInfo.pSwapchains = swapChains;
     presentInfo.pImageIndices = &imageIndex;
 
-    result = vkQueuePresentKHR(vulkan->presentQueue, &presentInfo);
+    result = vkQueuePresentKHR(vulkan->device.presentQueue, &presentInfo);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
         vulkan->framebufferResized) {
@@ -449,7 +420,7 @@ void start() {
     vkDeviceWaitIdle(vulkan.device.device);
 
     // CLEAN UP
-    cleanUpVulkan(&vulkan);
+    cleanUpVulkan(&window, &vulkan);
 
     cleanupSDL(window.win);
 }

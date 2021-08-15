@@ -2,7 +2,9 @@
 #include "error_handle.h"
 #include "vulkan_handle/memory.h"
 #include "vulkan_handle/swapchain.h"
+#include "vulkan_handle/validation.h"
 #include "vulkan_handle/vulkan_handle.h"
+#include "window/window.h"
 #include <string.h>
 
 const uint32_t MAX_FAMILY = 1000;
@@ -145,7 +147,7 @@ VkSampleCountFlagBits getMaxUsableSampleCount(Vulkan *vulkan) {
     return VK_SAMPLE_COUNT_1_BIT;
 }
 
-void pickPhysicalDevice(Vulkan *vulkan) {
+void pickPhysicalDevice(Window *window, Vulkan *vulkan) {
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(vulkan->instance.instance, &deviceCount, NULL);
 
@@ -158,7 +160,7 @@ void pickPhysicalDevice(Vulkan *vulkan) {
                                devices);
 
     for (uint32_t i = 0; i < deviceCount; i++) {
-        if (isDeviceSuitable(devices[i], vulkan->surface)) {
+        if (isDeviceSuitable(devices[i], window->surface)) {
             vulkan->device.physicalDevice = devices[i];
             vulkan->msaaSamples = getMaxUsableSampleCount(vulkan);
             break;
@@ -168,4 +170,54 @@ void pickPhysicalDevice(Vulkan *vulkan) {
     if (vulkan->device.physicalDevice == VK_NULL_HANDLE) {
         THROW_ERROR("failed to find a suitable GPU!\n");
     }
+}
+
+void createLogicalDevice(Window *window, Vulkan *vulkan) {
+    QueueFamilyIndices queueFamilyIndices =
+        findQueueFamilies(vulkan->device.physicalDevice, window->surface);
+
+    uint32_t uniqueQueueFamilies[] = {queueFamilyIndices.graphicsFamily,
+                                      queueFamilyIndices.presentFamily};
+    VkDeviceQueueCreateInfo queueCreateInfos[SIZEOF(uniqueQueueFamilies)];
+
+    float queuePriority = 1.0f;
+    for (uint32_t i = 0; i < SIZEOF(uniqueQueueFamilies); i++) {
+        VkDeviceQueueCreateInfo queueCreateInfo = {};
+        queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queueCreateInfo.queueFamilyIndex = uniqueQueueFamilies[i];
+        queueCreateInfo.queueCount = 1;
+        queueCreateInfo.pQueuePriorities = &queuePriority;
+        queueCreateInfos[i] = queueCreateInfo;
+    }
+
+    VkPhysicalDeviceFeatures deviceFeatures = {};
+    deviceFeatures.samplerAnisotropy = VK_TRUE;
+    // enable sample shading feature for the device
+    deviceFeatures.sampleRateShading = VK_TRUE;
+
+    VkDeviceCreateInfo createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    createInfo.queueCreateInfoCount = SIZEOF(queueCreateInfos);
+    createInfo.pQueueCreateInfos = queueCreateInfos;
+    createInfo.enabledExtensionCount = SIZEOF(deviceExtensions);
+    createInfo.ppEnabledExtensionNames = deviceExtensions;
+
+    createInfo.pEnabledFeatures = &deviceFeatures;
+
+    if (enableValidationLayers) {
+        createInfo.enabledLayerCount = SIZEOF(validationLayers);
+        createInfo.ppEnabledLayerNames = validationLayers;
+    } else {
+        createInfo.enabledLayerCount = 0;
+    }
+
+    if (vkCreateDevice(vulkan->device.physicalDevice, &createInfo, NULL,
+                       &vulkan->device.device) != VK_SUCCESS) {
+        THROW_ERROR("failed to create logical device!\n");
+    }
+
+    vkGetDeviceQueue(vulkan->device.device, queueFamilyIndices.graphicsFamily,
+                     0, &vulkan->device.graphicsQueue);
+    vkGetDeviceQueue(vulkan->device.device, queueFamilyIndices.presentFamily, 0,
+                     &vulkan->device.presentQueue);
 }

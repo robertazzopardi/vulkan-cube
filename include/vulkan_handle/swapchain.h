@@ -3,6 +3,10 @@
 
 #include <vulkan/vulkan.h>
 
+typedef struct Vulkan Vulkan;
+
+typedef struct Window Window;
+
 typedef struct {
     VkSurfaceCapabilitiesKHR capabilities;
     VkSurfaceFormatKHR *formats;
@@ -12,5 +16,9 @@ typedef struct {
 } SwapChainSupportDetails;
 
 SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice, VkSurfaceKHR);
+
+void createSwapChain(Window *, Vulkan *);
+
+void cleanupSwapChain(Vulkan *);
 
 #endif /* INCLUDE_VULKAN_HANDLE_SWAPCHAIN */
