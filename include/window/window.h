@@ -30,13 +30,7 @@ void start();
 
 void createTextureImage(Vulkan *);
 
-void createCommandBuffers(Vulkan *, Window *);
-
 void createSurface(Window *, Vulkan *);
-
-void drawFrame(Window *, SDL_Event, Vulkan *, float);
-
-void recreateSwapChain(Window *, SDL_Event, Vulkan *);
 
 typedef struct VkSurfaceCapabilitiesKHR VkSurfaceCapabilitiesKHR;
 struct VkExtent2d;

@@ -2,7 +2,10 @@
 #define INCLUDE_VULKAN_HANDLE_VULKAN_HANDLE
 
 #include "device.h"
+#include "graphics_pipeline.h"
 #include "instance.h"
+#include "render.h"
+#include "swapchain.h"
 #include <cglm/cglm.h>
 #include <vulkan/vulkan.h>
 
@@ -50,22 +53,26 @@ struct Vulkan {
     // VkQueue graphicsQueue;
     // VkQueue presentQueue;
 
-    VkSwapchainKHR swapChain;
-    VkImage *swapChainImages;
-    uint32_t swapChainImagesCount;
-    VkFormat swapChainImageFormat;
-    VkExtent2D swapChainExtent;
+    // VkSwapchainKHR swapChain;
+    // VkImage *swapChainImages;
+    // uint32_t swapChainImagesCount;
+    // VkFormat swapChainImageFormat;
+    // VkExtent2D swapChainExtent;
+    // VkImageView *swapChainImageViews;
+    // VkFramebuffer *swapChainFramebuffers;
+    SwapChain swapchain;
 
-    VkImageView *swapChainImageViews;
-
-    VkRenderPass renderPass;
+    // VkRenderPass renderPass;
 
     VkDescriptorSetLayout descriptorSetLayout;
 
-    VkPipelineLayout pipelineLayout;
-    VkPipeline graphicsPipeline;
+    // VkPipelineLayout pipelineLayout;
+    // VkPipeline graphicsPipeline;
+    GraphicsPipeline graphicsPipeline;
 
-    VkFramebuffer *swapChainFramebuffers;
+    Buffers buffers;
+
+    Semaphores semaphores;
 
     VkBuffer vertexBuffer;
     VkDeviceMemory vertexBufferMemory;
@@ -89,7 +96,7 @@ struct Vulkan {
     VkImageView textureImageView;
     VkSampler textureSampler;
 
-    VkCommandPool commandPool;
+    // VkCommandPool commandPool;
 
     VkImage colorImage;
     VkDeviceMemory colorImageMemory;
@@ -99,12 +106,12 @@ struct Vulkan {
     VkDeviceMemory depthImageMemory;
     VkImageView depthImageView;
 
-    VkCommandBuffer *commandBuffers;
+    // VkCommandBuffer *commandBuffers;
 
-    VkSemaphore *imageAvailableSemaphores;
-    VkSemaphore *renderFinishedSemaphores;
-    VkFence *inFlightFences;
-    VkFence *imagesInFlight;
+    // VkSemaphore *imageAvailableSemaphores;
+    // VkSemaphore *renderFinishedSemaphores;
+    // VkFence *inFlightFences;
+    // VkFence *imagesInFlight;
 
     bool framebufferResized;
 };
@@ -114,8 +121,6 @@ typedef struct Window Window;
 void initVulkan(Window *, Vulkan *);
 
 void cleanUpVulkan(Window *, Vulkan *);
-
-void createGraphicsPipeline(Vulkan *);
 
 void createColorResources(Vulkan *);
 
@@ -129,9 +134,9 @@ void updateUniformBuffer(Vulkan *, uint32_t, float);
 
 void createDescriptorPool(Vulkan *);
 
-void createDescriptorSets(Vulkan *);
+VkFormat findDepthFormat(Vulkan *);
 
-void createRenderPass(Vulkan *);
+void createDescriptorSets(Vulkan *);
 
 void generateMipmaps(Vulkan *, VkImage, VkFormat, int32_t, int32_t, uint32_t);
 

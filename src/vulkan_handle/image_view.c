@@ -1,5 +1,6 @@
 #include "vulkan_handle/image_view.h"
 #include "error_handle.h"
+#include "vulkan_handle/swapchain.h"
 #include "vulkan_handle/vulkan_handle.h"
 
 VkImageView createImageView(VkDevice device, VkImage image, VkFormat format,
@@ -26,12 +27,14 @@ VkImageView createImageView(VkDevice device, VkImage image, VkFormat format,
 }
 
 void createImageViews(Vulkan *vulkan) {
-    vulkan->swapChainImageViews = malloc(vulkan->swapChainImagesCount *
-                                         sizeof(*vulkan->swapChainImageViews));
+    vulkan->swapchain.swapChainImageViews =
+        malloc(vulkan->swapchain.swapChainImagesCount *
+               sizeof(*vulkan->swapchain.swapChainImageViews));
 
-    for (uint32_t i = 0; i < vulkan->swapChainImagesCount; i++) {
-        vulkan->swapChainImageViews[i] = createImageView(
-            vulkan->device.device, vulkan->swapChainImages[i],
-            vulkan->swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+    for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
+        vulkan->swapchain.swapChainImageViews[i] = createImageView(
+            vulkan->device.device, vulkan->swapchain.swapChainImages[i],
+            vulkan->swapchain.swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT,
+            1);
     }
 }

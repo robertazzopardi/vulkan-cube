@@ -58,8 +58,6 @@ Vertex shape2[] = {
 //     // 2
 //     4, 5, 6, 6, 7, 4};
 
-#pragma region VERTEX / INDEX / UNIFORM BUFFER
-
 void createDescriptorSetLayout(Vulkan *vulkan) {
     VkDescriptorSetLayoutBinding uboLayoutBinding = {};
     uboLayoutBinding.binding = 0;
@@ -143,7 +141,7 @@ VkCommandBuffer beginSingleTimeCommands(Vulkan *vulkan) {
     VkCommandBufferAllocateInfo allocInfo = {};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandPool = vulkan->commandPool;
+    allocInfo.commandPool = vulkan->buffers.commandPool;
     allocInfo.commandBufferCount = 1;
 
     VkCommandBuffer commandBuffer;
@@ -169,7 +167,7 @@ void endSingleTimeCommands(Vulkan *vulkan, VkCommandBuffer commandBuffer) {
     vkQueueSubmit(vulkan->device.graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
     vkQueueWaitIdle(vulkan->device.graphicsQueue);
 
-    vkFreeCommandBuffers(vulkan->device.device, vulkan->commandPool, 1,
+    vkFreeCommandBuffers(vulkan->device.device, vulkan->buffers.commandPool, 1,
                          &commandBuffer);
 }
 
@@ -245,12 +243,13 @@ void createIndexBuffer(Vulkan *vulkan) {
 void createUniformBuffers(Vulkan *vulkan) {
     VkDeviceSize bufferSize = sizeof(UniformBufferObject);
 
-    vulkan->uniformBuffers =
-        malloc(vulkan->swapChainImagesCount * sizeof(*vulkan->uniformBuffers));
-    vulkan->uniformBuffersMemory = malloc(
-        vulkan->swapChainImagesCount * sizeof(*vulkan->uniformBuffersMemory));
+    vulkan->uniformBuffers = malloc(vulkan->swapchain.swapChainImagesCount *
+                                    sizeof(*vulkan->uniformBuffers));
+    vulkan->uniformBuffersMemory =
+        malloc(vulkan->swapchain.swapChainImagesCount *
+               sizeof(*vulkan->uniformBuffersMemory));
 
-    for (size_t i = 0; i < vulkan->swapChainImagesCount; i++) {
+    for (size_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
         createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                          VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -263,25 +262,25 @@ void createUniformBuffers(Vulkan *vulkan) {
 
 void createDescriptorSets(Vulkan *vulkan) {
     VkDescriptorSetLayout *layouts =
-        malloc(vulkan->swapChainImagesCount * sizeof(*layouts));
-    for (uint32_t i = 0; i < vulkan->swapChainImagesCount; i++) {
+        malloc(vulkan->swapchain.swapChainImagesCount * sizeof(*layouts));
+    for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
         layouts[i] = vulkan->descriptorSetLayout;
     }
 
     VkDescriptorSetAllocateInfo allocInfo = {};
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     allocInfo.descriptorPool = vulkan->descriptorPool;
-    allocInfo.descriptorSetCount = vulkan->swapChainImagesCount;
+    allocInfo.descriptorSetCount = vulkan->swapchain.swapChainImagesCount;
     allocInfo.pSetLayouts = layouts;
 
-    vulkan->descriptorSets =
-        malloc(vulkan->swapChainImagesCount * sizeof(*vulkan->descriptorSets));
+    vulkan->descriptorSets = malloc(vulkan->swapchain.swapChainImagesCount *
+                                    sizeof(*vulkan->descriptorSets));
     if (vkAllocateDescriptorSets(vulkan->device.device, &allocInfo,
                                  vulkan->descriptorSets) != VK_SUCCESS) {
         THROW_ERROR("failed to allocate descriptor sets!\n");
     }
 
-    for (size_t i = 0; i < vulkan->swapChainImagesCount; i++) {
+    for (size_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
         VkDescriptorBufferInfo bufferInfo = {};
         bufferInfo.buffer = vulkan->uniformBuffers[i];
         bufferInfo.offset = 0;
@@ -323,27 +322,21 @@ void createDescriptorSets(Vulkan *vulkan) {
 void createDescriptorPool(Vulkan *vulkan) {
     VkDescriptorPoolSize poolSizes[2];
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSizes[0].descriptorCount = vulkan->swapChainImagesCount;
+    poolSizes[0].descriptorCount = vulkan->swapchain.swapChainImagesCount;
     poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    poolSizes[1].descriptorCount = vulkan->swapChainImagesCount;
+    poolSizes[1].descriptorCount = vulkan->swapchain.swapChainImagesCount;
 
     VkDescriptorPoolCreateInfo poolInfo = {};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     poolInfo.poolSizeCount = SIZEOF(poolSizes);
     poolInfo.pPoolSizes = poolSizes;
-    poolInfo.maxSets = vulkan->swapChainImagesCount;
+    poolInfo.maxSets = vulkan->swapchain.swapChainImagesCount;
 
     if (vkCreateDescriptorPool(vulkan->device.device, &poolInfo, NULL,
                                &vulkan->descriptorPool) != VK_SUCCESS) {
         THROW_ERROR("failed to create descriptor pool!\n");
     }
 }
-
-#pragma endregion
-
-#pragma region VERTEX DATA
-
-#pragma region
 
 bool isInVertexArray(Vertex vert, Vertex *arr, uint32_t vertIndex) {
     for (uint32_t j = 0; j < vertIndex; j++) {
@@ -386,8 +379,6 @@ void calculateIndices(Shape *vulkanShape, Shape shape) {
     freeMem(1, indis);
 }
 
-#pragma endregion
-
 void combineVerticesAndIndices(Vulkan *vulkan, uint32_t count, ...) {
     va_list valist;
 
@@ -414,437 +405,6 @@ void combineVerticesAndIndices(Vulkan *vulkan, uint32_t count, ...) {
     va_end(valist);
 }
 
-static VkVertexInputBindingDescription getBindingDescription() {
-    VkVertexInputBindingDescription bindingDescription = {};
-    bindingDescription.binding = 0;
-    bindingDescription.stride = sizeof(Vertex);
-    bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-    return bindingDescription;
-}
-
-static VkVertexInputAttributeDescription *getAttributeDescriptions() {
-    VkVertexInputAttributeDescription *attributeDescriptions =
-        malloc(3 * sizeof(*attributeDescriptions));
-
-    attributeDescriptions[0].binding = 0;
-    attributeDescriptions[0].location = 0;
-    attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-    attributeDescriptions[0].offset = offsetof(Vertex, pos);
-
-    attributeDescriptions[1].binding = 0;
-    attributeDescriptions[1].location = 1;
-    attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-    attributeDescriptions[1].offset = offsetof(Vertex, colour);
-
-    attributeDescriptions[2].binding = 0;
-    attributeDescriptions[2].location = 2;
-    attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-    attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
-
-    return attributeDescriptions;
-}
-
-VkFormat findDepthFormat(Vulkan *);
-
-void createRenderPass(Vulkan *vulkan) {
-    VkAttachmentDescription colorAttachment = {};
-    colorAttachment.format = vulkan->swapChainImageFormat;
-    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-    colorAttachment.samples = vulkan->msaaSamples;
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-    VkAttachmentDescription depthAttachment = {};
-    depthAttachment.format = findDepthFormat(vulkan);
-    depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    depthAttachment.finalLayout =
-        VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-    depthAttachment.samples = vulkan->msaaSamples;
-
-    VkAttachmentDescription colorAttachmentResolve = {};
-    colorAttachmentResolve.format = vulkan->swapChainImageFormat;
-    colorAttachmentResolve.samples = VK_SAMPLE_COUNT_1_BIT;
-    colorAttachmentResolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    colorAttachmentResolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    colorAttachmentResolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    colorAttachmentResolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    colorAttachmentResolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachmentResolve.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-    VkAttachmentReference colorAttachmentRef = {};
-    colorAttachmentRef.attachment = 0;
-    colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-    VkAttachmentReference depthAttachmentRef = {};
-    depthAttachmentRef.attachment = 1;
-    depthAttachmentRef.layout =
-        VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-    VkAttachmentReference colorAttachmentResolveRef = {};
-    colorAttachmentResolveRef.attachment = 2;
-    colorAttachmentResolveRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-    VkSubpassDescription subpass = {};
-    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass.colorAttachmentCount = 1;
-    subpass.pColorAttachments = &colorAttachmentRef;
-    subpass.pDepthStencilAttachment = &depthAttachmentRef;
-    subpass.pResolveAttachments = &colorAttachmentResolveRef;
-
-    VkSubpassDependency dependency = {};
-    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-    dependency.dstSubpass = 0;
-    dependency.srcAccessMask = 0;
-    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-                              VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-                              VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
-                               VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-
-    VkAttachmentDescription attachments[] = {colorAttachment, depthAttachment,
-                                             colorAttachmentResolve};
-    VkRenderPassCreateInfo renderPassInfo = {};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    renderPassInfo.attachmentCount = SIZEOF(attachments);
-    renderPassInfo.pAttachments = attachments;
-    renderPassInfo.subpassCount = 1;
-    renderPassInfo.pSubpasses = &subpass;
-    renderPassInfo.dependencyCount = 1;
-    renderPassInfo.pDependencies = &dependency;
-
-    if (vkCreateRenderPass(vulkan->device.device, &renderPassInfo, NULL,
-                           &vulkan->renderPass) != VK_SUCCESS) {
-        THROW_ERROR("failed to create render pass!\n");
-    }
-}
-
-#pragma endregion
-
-#pragma region GRAPHICS PIPELINE
-
-void createShaderModule(char *code, uint32_t length, VkDevice device,
-                        VkShaderModule *shaderModule) {
-    VkShaderModuleCreateInfo createInfo = {};
-    createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    createInfo.codeSize = length;
-    createInfo.pCode = (uint32_t *)code;
-
-    if (vkCreateShaderModule(device, &createInfo, NULL, shaderModule) !=
-        VK_SUCCESS) {
-        THROW_ERROR("failed to create shader module!\n");
-    }
-}
-
-typedef struct {
-    char *buff;
-    uint32_t len;
-} FileData;
-
-FileData readFile(const char *path) {
-    FileData data;
-
-    FILE *file = fopen(path, "r");
-    if (file == NULL) {
-        printf("File not found: %s\n", path);
-        exit(EXIT_FAILURE);
-    }
-
-    // get filesize
-    fseek(file, 0, SEEK_END);
-    data.len = ftell(file);
-
-    fseek(file, 0, SEEK_SET);
-    // allocate buffer **note** that if you like
-    // to use the buffer as a c-string then you must also
-    // allocate space for the terminating null character
-    data.buff = malloc(data.len);
-    // read the file into buffer
-    fread(data.buff, data.len, 1, file);
-    // close the file
-    fclose(file);
-
-    return data;
-}
-
-void createGraphicsPipeline(Vulkan *vulkan) {
-    FileData vertShaderCode = readFile("shaders/vert.spv");
-    FileData fragShaderCode = readFile("shaders/frag.spv");
-
-    VkShaderModule vertShaderModule;
-    createShaderModule(vertShaderCode.buff, vertShaderCode.len,
-                       vulkan->device.device, &vertShaderModule);
-    VkShaderModule fragShaderModule;
-    createShaderModule(fragShaderCode.buff, fragShaderCode.len,
-                       vulkan->device.device, &fragShaderModule);
-
-    freeMem(2, vertShaderCode.buff, fragShaderCode.buff);
-
-    VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
-    vertShaderStageInfo.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-    vertShaderStageInfo.module = vertShaderModule;
-    vertShaderStageInfo.pName = "main";
-
-    VkPipelineShaderStageCreateInfo fragShaderStageInfo = {};
-    fragShaderStageInfo.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    fragShaderStageInfo.module = fragShaderModule;
-    fragShaderStageInfo.pName = "main";
-
-    VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo,
-                                                      fragShaderStageInfo};
-
-    VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
-    vertexInputInfo.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-
-    VkVertexInputBindingDescription bindingDescription =
-        getBindingDescription();
-    VkVertexInputAttributeDescription *attributeDescriptions =
-        getAttributeDescriptions();
-
-    vertexInputInfo.vertexBindingDescriptionCount = 1;
-    vertexInputInfo.vertexAttributeDescriptionCount = 3;
-    vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
-    vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions;
-
-    VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
-    inputAssembly.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-    inputAssembly.primitiveRestartEnable = VK_FALSE;
-
-    VkViewport viewport = {};
-    viewport.x = 0.0f;
-    viewport.y = 0.0f;
-    viewport.width = (float)vulkan->swapChainExtent.width;
-    viewport.height = (float)vulkan->swapChainExtent.height;
-    viewport.minDepth = 0.0f;
-    viewport.maxDepth = 1.0f;
-
-    VkRect2D scissor = {};
-    scissor.offset = (VkOffset2D){0, 0};
-    scissor.extent = vulkan->swapChainExtent;
-
-    VkPipelineViewportStateCreateInfo viewportState = {};
-    viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-    viewportState.viewportCount = 1;
-    viewportState.pViewports = &viewport;
-    viewportState.scissorCount = 1;
-    viewportState.pScissors = &scissor;
-
-    VkPipelineRasterizationStateCreateInfo rasterizer = {};
-    rasterizer.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-    rasterizer.depthClampEnable = VK_FALSE;
-    rasterizer.rasterizerDiscardEnable = VK_FALSE;
-    rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-    rasterizer.lineWidth = 1.0f;
-    rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-    rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-    rasterizer.depthBiasEnable = VK_FALSE;
-
-    VkPipelineMultisampleStateCreateInfo multisampling = {};
-    multisampling.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    multisampling.sampleShadingEnable = VK_FALSE;
-    multisampling.rasterizationSamples = vulkan->msaaSamples;
-    // multisampling.sampleShadingEnable =
-    //     VK_TRUE; // enable sample shading in the pipeline
-    // multisampling.minSampleShading =
-    //     .2f; // min fraction for sample shading; closer to one is smoother
-
-    VkPipelineDepthStencilStateCreateInfo depthStencil = {};
-    depthStencil.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    depthStencil.depthTestEnable = VK_TRUE;
-    depthStencil.depthWriteEnable = VK_TRUE;
-    depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
-    depthStencil.depthBoundsTestEnable = VK_FALSE;
-    depthStencil.stencilTestEnable = VK_FALSE;
-
-    VkPipelineColorBlendAttachmentState colorBlendAttachment = {};
-    colorBlendAttachment.colorWriteMask =
-        VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
-        VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-    colorBlendAttachment.blendEnable = VK_FALSE;
-
-    VkPipelineColorBlendStateCreateInfo colorBlending = {};
-    colorBlending.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-    colorBlending.logicOpEnable = VK_FALSE;
-    colorBlending.logicOp = VK_LOGIC_OP_COPY;
-    colorBlending.attachmentCount = 1;
-    colorBlending.pAttachments = &colorBlendAttachment;
-    colorBlending.blendConstants[0] = 0.0f;
-    colorBlending.blendConstants[1] = 0.0f;
-    colorBlending.blendConstants[2] = 0.0f;
-    colorBlending.blendConstants[3] = 0.0f;
-
-    VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
-    pipelineLayoutInfo.pushConstantRangeCount = 0;
-    pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = 1;
-    pipelineLayoutInfo.pSetLayouts = &vulkan->descriptorSetLayout;
-
-    if (vkCreatePipelineLayout(vulkan->device.device, &pipelineLayoutInfo, NULL,
-                               &vulkan->pipelineLayout) != VK_SUCCESS) {
-        THROW_ERROR("failed to create pipeline layout!\n");
-    }
-
-    VkDynamicState dynamicStates[] = {VK_DYNAMIC_STATE_VIEWPORT,
-                                      VK_DYNAMIC_STATE_SCISSOR};
-
-    VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo;
-    dynamicStateCreateInfo.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-    dynamicStateCreateInfo.pNext = NULL;
-    dynamicStateCreateInfo.flags = 0;
-    dynamicStateCreateInfo.dynamicStateCount = 2;
-    dynamicStateCreateInfo.pDynamicStates = dynamicStates;
-
-    VkGraphicsPipelineCreateInfo pipelineInfo = {};
-    pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    pipelineInfo.stageCount = 2;
-    pipelineInfo.pStages = shaderStages;
-    pipelineInfo.pVertexInputState = &vertexInputInfo;
-    pipelineInfo.pInputAssemblyState = &inputAssembly;
-    pipelineInfo.pViewportState = &viewportState;
-    pipelineInfo.pRasterizationState = &rasterizer;
-    pipelineInfo.pMultisampleState = &multisampling;
-    pipelineInfo.pDynamicState = &dynamicStateCreateInfo;
-    pipelineInfo.pColorBlendState = &colorBlending;
-    pipelineInfo.layout = vulkan->pipelineLayout;
-    pipelineInfo.renderPass = vulkan->renderPass;
-    pipelineInfo.subpass = 0;
-    pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
-    pipelineInfo.pDepthStencilState = &depthStencil;
-
-    if (vkCreateGraphicsPipelines(vulkan->device.device, VK_NULL_HANDLE, 1,
-                                  &pipelineInfo, NULL,
-                                  &vulkan->graphicsPipeline) != VK_SUCCESS) {
-        THROW_ERROR("failed to create graphics pipeline!\n");
-    }
-
-    vkDestroyShaderModule(vulkan->device.device, fragShaderModule, NULL);
-    vkDestroyShaderModule(vulkan->device.device, vertShaderModule, NULL);
-
-    freeMem(1, attributeDescriptions);
-}
-
-#pragma endregion
-
-#pragma region FRAME BUFFERS
-
-void createFramebuffers(Vulkan *vulkan) {
-    vulkan->swapChainFramebuffers = malloc(
-        vulkan->swapChainImagesCount * sizeof(*vulkan->swapChainFramebuffers));
-
-    for (uint32_t i = 0; i < vulkan->swapChainImagesCount; i++) {
-        VkImageView attachments[] = {vulkan->colorImageView,
-                                     vulkan->depthImageView,
-                                     vulkan->swapChainImageViews[i]};
-
-        VkFramebufferCreateInfo framebufferInfo = {};
-        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = vulkan->renderPass;
-        framebufferInfo.attachmentCount = SIZEOF(attachments);
-        framebufferInfo.pAttachments = attachments;
-        framebufferInfo.width = vulkan->swapChainExtent.width;
-        framebufferInfo.height = vulkan->swapChainExtent.height;
-        framebufferInfo.layers = 1;
-
-        if (vkCreateFramebuffer(vulkan->device.device, &framebufferInfo, NULL,
-                                &vulkan->swapChainFramebuffers[i]) !=
-            VK_SUCCESS) {
-            THROW_ERROR("failed to create framebuffer!\n");
-        }
-    }
-}
-
-#pragma endregion
-
-#pragma region COMMAND POOL
-
-void createCommandPool(Window *window, Vulkan *vulkan) {
-    QueueFamilyIndices queueFamilyIndices =
-        findQueueFamilies(vulkan->device.physicalDevice, window->surface);
-
-    VkCommandPoolCreateInfo poolInfo = {};
-    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily;
-
-    if (vkCreateCommandPool(vulkan->device.device, &poolInfo, NULL,
-                            &vulkan->commandPool) != VK_SUCCESS) {
-        THROW_ERROR("failed to create command pool!\n");
-    }
-}
-
-#pragma endregion
-
-#pragma region COMMAND BUFFER
-
-#pragma endregion
-
-#pragma region SYNC OBJECTS
-
-void createSyncObjects(Vulkan *vulkan) {
-    VkSemaphore *imageAvailableSemaphoresTemp =
-        malloc(MAX_FRAMES_IN_FLIGHT * sizeof(*imageAvailableSemaphoresTemp));
-    VkSemaphore *renderFinishedSemaphoresTemp =
-        malloc(MAX_FRAMES_IN_FLIGHT * sizeof(*renderFinishedSemaphoresTemp));
-    VkFence *inFlightFencesTemp =
-        malloc(MAX_FRAMES_IN_FLIGHT * sizeof(*inFlightFencesTemp));
-    vulkan->imagesInFlight =
-        calloc(vulkan->swapChainImagesCount, sizeof(*vulkan->imagesInFlight));
-
-    VkSemaphoreCreateInfo semaphoreInfo = {};
-    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-    VkFenceCreateInfo fenceInfo = {};
-    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        if (vkCreateSemaphore(vulkan->device.device, &semaphoreInfo, NULL,
-                              &imageAvailableSemaphoresTemp[i]) != VK_SUCCESS ||
-            vkCreateSemaphore(vulkan->device.device, &semaphoreInfo, NULL,
-                              &renderFinishedSemaphoresTemp[i]) != VK_SUCCESS ||
-            vkCreateFence(vulkan->device.device, &fenceInfo, NULL,
-                          &inFlightFencesTemp[i]) != VK_SUCCESS) {
-            printf("failed to create synchronization objects for a frame!\n");
-        }
-    }
-
-    vulkan->imageAvailableSemaphores = imageAvailableSemaphoresTemp;
-    vulkan->renderFinishedSemaphores = renderFinishedSemaphoresTemp;
-    vulkan->inFlightFences = inFlightFencesTemp;
-}
-
-#pragma endregion
-
-void createImageViews(Vulkan *);
-
-void createDepthResources(Vulkan *);
-
-#pragma endregion
-
-#pragma region DRAW FRAME
-
 void updateUniformBuffer(Vulkan *vulkan, uint32_t currentImage, float dt) {
 
     glm_rotate(vulkan->ubo.model, dt * glm_rad(45.0f),
@@ -854,8 +414,8 @@ void updateUniformBuffer(Vulkan *vulkan, uint32_t currentImage, float dt) {
                (vec3){0.0f, 0.0f, 1.0f}, vulkan->ubo.view);
 
     glm_perspective(glm_rad(45.0f),
-                    vulkan->swapChainExtent.width /
-                        vulkan->swapChainExtent.height,
+                    vulkan->swapchain.swapChainExtent.width /
+                        vulkan->swapchain.swapChainExtent.height,
                     0.1f, 20.0f, vulkan->ubo.proj);
 
     vulkan->ubo.proj[1][1] *= -1;
@@ -868,10 +428,6 @@ void updateUniformBuffer(Vulkan *vulkan, uint32_t currentImage, float dt) {
     vkUnmapMemory(vulkan->device.device,
                   vulkan->uniformBuffersMemory[currentImage]);
 }
-
-#pragma endregion
-
-#pragma region TEXTURE MAPPING
 
 void createImage(uint32_t width, uint32_t height, uint32_t mipLevels,
                  VkSampleCountFlagBits numSamples, VkFormat format,
@@ -1016,10 +572,6 @@ void createTextureSampler(Vulkan *vulkan) {
     }
 }
 
-#pragma endregion
-
-#pragma region DEPTH_BUFFERING
-
 VkFormat findSupportedFormat(const VkFormat *candidates, size_t length,
                              VkImageTiling tiling,
                              VkFormatFeatureFlags features,
@@ -1054,8 +606,9 @@ VkFormat findDepthFormat(Vulkan *vulkan) {
 void createDepthResources(Vulkan *vulkan) {
     VkFormat depthFormat = findDepthFormat(vulkan);
 
-    createImage(vulkan->swapChainExtent.width, vulkan->swapChainExtent.height,
-                1, vulkan->msaaSamples, depthFormat, VK_IMAGE_TILING_OPTIMAL,
+    createImage(vulkan->swapchain.swapChainExtent.width,
+                vulkan->swapchain.swapChainExtent.height, 1,
+                vulkan->msaaSamples, depthFormat, VK_IMAGE_TILING_OPTIMAL,
                 VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vulkan,
                 &vulkan->depthImage, &vulkan->depthImageMemory);
@@ -1065,19 +618,12 @@ void createDepthResources(Vulkan *vulkan) {
                         VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 }
 
-#pragma endregion
-
-#pragma region MIPMAPS
-
-#pragma endregion
-
-#pragma region MULTI_SAMPLING
-
 void createColorResources(Vulkan *vulkan) {
-    VkFormat colorFormat = vulkan->swapChainImageFormat;
+    VkFormat colorFormat = vulkan->swapchain.swapChainImageFormat;
 
-    createImage(vulkan->swapChainExtent.width, vulkan->swapChainExtent.height,
-                1, vulkan->msaaSamples, colorFormat, VK_IMAGE_TILING_OPTIMAL,
+    createImage(vulkan->swapchain.swapChainExtent.width,
+                vulkan->swapchain.swapChainExtent.height, 1,
+                vulkan->msaaSamples, colorFormat, VK_IMAGE_TILING_OPTIMAL,
                 VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT |
                     VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vulkan,
@@ -1087,10 +633,6 @@ void createColorResources(Vulkan *vulkan) {
         createImageView(vulkan->device.device, vulkan->colorImage, colorFormat,
                         VK_IMAGE_ASPECT_COLOR_BIT, 1);
 }
-
-#pragma endregion
-
-#pragma region RECREATE SWAP CHAIN
 
 void generateMipmaps(Vulkan *vulkan, VkImage image, VkFormat imageFormat,
                      int32_t texWidth, int32_t texHeight, uint32_t mipLevels) {
@@ -1240,13 +782,13 @@ void cleanUpVulkan(Window *window, Vulkan *vulkan) {
     vkDestroyDescriptorSetLayout(vulkan->device.device,
                                  vulkan->descriptorSetLayout, NULL);
 
-    if (vulkan->graphicsPipeline == VK_NULL_HANDLE) {
-        vkDestroyPipeline(vulkan->device.device, vulkan->graphicsPipeline,
-                          NULL);
+    if (vulkan->graphicsPipeline.graphicsPipeline == VK_NULL_HANDLE) {
+        vkDestroyPipeline(vulkan->device.device,
+                          vulkan->graphicsPipeline.graphicsPipeline, NULL);
     }
-    if (vulkan->pipelineLayout == VK_NULL_HANDLE) {
-        vkDestroyPipelineLayout(vulkan->device.device, vulkan->pipelineLayout,
-                                NULL);
+    if (vulkan->graphicsPipeline.pipelineLayout == VK_NULL_HANDLE) {
+        vkDestroyPipelineLayout(vulkan->device.device,
+                                vulkan->graphicsPipeline.pipelineLayout, NULL);
     }
 
     vkDestroyBuffer(vulkan->device.device, vulkan->indexBuffer, NULL);
@@ -1257,18 +799,23 @@ void cleanUpVulkan(Window *window, Vulkan *vulkan) {
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         vkDestroySemaphore(vulkan->device.device,
-                           vulkan->renderFinishedSemaphores[i], NULL);
+                           vulkan->semaphores.renderFinishedSemaphores[i],
+                           NULL);
         vkDestroySemaphore(vulkan->device.device,
-                           vulkan->imageAvailableSemaphores[i], NULL);
-        vkDestroyFence(vulkan->device.device, vulkan->inFlightFences[i], NULL);
+                           vulkan->semaphores.imageAvailableSemaphores[i],
+                           NULL);
+        vkDestroyFence(vulkan->device.device,
+                       vulkan->semaphores.inFlightFences[i], NULL);
     }
 
     freeMem(8, vulkan->descriptorSets, vulkan->shapes.vertices,
-            vulkan->shapes.indices, vulkan->renderFinishedSemaphores,
-            vulkan->imageAvailableSemaphores, vulkan->inFlightFences,
-            vulkan->imagesInFlight, vulkan->commandBuffers);
+            vulkan->shapes.indices, vulkan->semaphores.renderFinishedSemaphores,
+            vulkan->semaphores.imageAvailableSemaphores,
+            vulkan->semaphores.inFlightFences,
+            vulkan->semaphores.imagesInFlight, vulkan->buffers.commandBuffers);
 
-    vkDestroyCommandPool(vulkan->device.device, vulkan->commandPool, NULL);
+    vkDestroyCommandPool(vulkan->device.device, vulkan->buffers.commandPool,
+                         NULL);
 
     vkDestroyDevice(vulkan->device.device, NULL);
 

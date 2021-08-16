@@ -75,10 +75,11 @@ void recreateSwapChain(Window *window, SDL_Event event, Vulkan *vulkan) {
     createDescriptorSets(vulkan);
     createCommandBuffers(vulkan, window);
 
-    freeMem(1, vulkan->imagesInFlight);
+    freeMem(1, vulkan->semaphores.imagesInFlight);
 
-    vulkan->imagesInFlight =
-        calloc(vulkan->swapChainImagesCount, sizeof(*vulkan->imagesInFlight));
+    vulkan->semaphores.imagesInFlight =
+        calloc(vulkan->swapchain.swapChainImagesCount,
+               sizeof(*vulkan->semaphores.imagesInFlight));
 }
 
 VkPresentModeKHR chooseSwapPresentMode(VkPresentModeKHR *availablePresentModes,
@@ -116,19 +117,19 @@ void createSwapChain(Window *window, Vulkan *vulkan) {
     VkExtent2D extent =
         chooseSwapExtent(swapChainSupport.capabilities, window->win);
 
-    vulkan->swapChainImagesCount =
+    vulkan->swapchain.swapChainImagesCount =
         swapChainSupport.capabilities.minImageCount + 1;
     if (swapChainSupport.capabilities.maxImageCount > 0 &&
-        vulkan->swapChainImagesCount >
+        vulkan->swapchain.swapChainImagesCount >
             swapChainSupport.capabilities.maxImageCount) {
-        vulkan->swapChainImagesCount =
+        vulkan->swapchain.swapChainImagesCount =
             swapChainSupport.capabilities.maxImageCount;
     }
 
     VkSwapchainCreateInfoKHR createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
     createInfo.surface = window->surface;
-    createInfo.minImageCount = vulkan->swapChainImagesCount;
+    createInfo.minImageCount = vulkan->swapchain.swapChainImagesCount;
     createInfo.imageFormat = surfaceFormat.format;
     createInfo.imageColorSpace = surfaceFormat.colorSpace;
     createInfo.imageExtent = extent;
@@ -157,25 +158,26 @@ void createSwapChain(Window *window, Vulkan *vulkan) {
     createInfo.oldSwapchain = VK_NULL_HANDLE;
 
     if (vkCreateSwapchainKHR(vulkan->device.device, &createInfo, NULL,
-                             &vulkan->swapChain) != VK_SUCCESS) {
+                             &vulkan->swapchain.swapChain) != VK_SUCCESS) {
         THROW_ERROR("failed to create swap chain!\n");
     }
 
-    vkGetSwapchainImagesKHR(vulkan->device.device, vulkan->swapChain,
-                            &vulkan->swapChainImagesCount, NULL);
+    vkGetSwapchainImagesKHR(vulkan->device.device, vulkan->swapchain.swapChain,
+                            &vulkan->swapchain.swapChainImagesCount, NULL);
 
-    vulkan->swapChainImages =
-        malloc(vulkan->swapChainImagesCount * sizeof(*vulkan->swapChainImages));
+    vulkan->swapchain.swapChainImages =
+        malloc(vulkan->swapchain.swapChainImagesCount *
+               sizeof(*vulkan->swapchain.swapChainImages));
 
-    if (vulkan->swapChainImages == NULL) {
+    if (vulkan->swapchain.swapChainImages == NULL) {
         THROW_ERROR("Could not init swap chain images\n");
     }
-    vkGetSwapchainImagesKHR(vulkan->device.device, vulkan->swapChain,
-                            &vulkan->swapChainImagesCount,
-                            vulkan->swapChainImages);
+    vkGetSwapchainImagesKHR(vulkan->device.device, vulkan->swapchain.swapChain,
+                            &vulkan->swapchain.swapChainImagesCount,
+                            vulkan->swapchain.swapChainImages);
 
-    vulkan->swapChainImageFormat = surfaceFormat.format;
-    vulkan->swapChainExtent = extent;
+    vulkan->swapchain.swapChainImageFormat = surfaceFormat.format;
+    vulkan->swapchain.swapChainExtent = extent;
 }
 
 void cleanupSwapChain(Vulkan *vulkan) {
@@ -187,22 +189,26 @@ void cleanupSwapChain(Vulkan *vulkan) {
     vkDestroyImage(vulkan->device.device, vulkan->depthImage, NULL);
     vkFreeMemory(vulkan->device.device, vulkan->depthImageMemory, NULL);
 
-    vkFreeCommandBuffers(vulkan->device.device, vulkan->commandPool,
-                         vulkan->swapChainImagesCount, vulkan->commandBuffers);
+    vkFreeCommandBuffers(vulkan->device.device, vulkan->buffers.commandPool,
+                         vulkan->swapchain.swapChainImagesCount,
+                         vulkan->buffers.commandBuffers);
 
-    vkDestroyPipeline(vulkan->device.device, vulkan->graphicsPipeline, NULL);
-    vkDestroyPipelineLayout(vulkan->device.device, vulkan->pipelineLayout,
-                            NULL);
-    vkDestroyRenderPass(vulkan->device.device, vulkan->renderPass, NULL);
+    vkDestroyPipeline(vulkan->device.device,
+                      vulkan->graphicsPipeline.graphicsPipeline, NULL);
+    vkDestroyPipelineLayout(vulkan->device.device,
+                            vulkan->graphicsPipeline.pipelineLayout, NULL);
+    vkDestroyRenderPass(vulkan->device.device,
+                        vulkan->graphicsPipeline.renderPass, NULL);
 
-    vkDestroySwapchainKHR(vulkan->device.device, vulkan->swapChain, NULL);
+    vkDestroySwapchainKHR(vulkan->device.device, vulkan->swapchain.swapChain,
+                          NULL);
 
-    for (uint32_t i = 0; i < vulkan->swapChainImagesCount; i++) {
+    for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
         vkDestroyFramebuffer(vulkan->device.device,
-                             vulkan->swapChainFramebuffers[i], NULL);
+                             vulkan->buffers.swapChainFramebuffers[i], NULL);
 
         vkDestroyImageView(vulkan->device.device,
-                           vulkan->swapChainImageViews[i], NULL);
+                           vulkan->swapchain.swapChainImageViews[i], NULL);
 
         vkDestroyBuffer(vulkan->device.device, vulkan->uniformBuffers[i], NULL);
 
@@ -210,8 +216,9 @@ void cleanupSwapChain(Vulkan *vulkan) {
                      NULL);
     }
 
-    freeMem(4, vulkan->swapChainFramebuffers, vulkan->swapChainImageViews,
-            vulkan->uniformBuffers, vulkan->uniformBuffersMemory);
+    freeMem(4, vulkan->buffers.swapChainFramebuffers,
+            vulkan->swapchain.swapChainImageViews, vulkan->uniformBuffers,
+            vulkan->uniformBuffersMemory);
 
     vkDestroyDescriptorPool(vulkan->device.device, vulkan->descriptorPool,
                             NULL);
