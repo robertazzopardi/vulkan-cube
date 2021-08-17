@@ -28,8 +28,6 @@ void start();
 
 // void createInstance(SDL_Window *, Vulkan *);
 
-void createTextureImage(Vulkan *);
-
 void createSurface(Window *, Vulkan *);
 
 typedef struct VkSurfaceCapabilitiesKHR VkSurfaceCapabilitiesKHR;

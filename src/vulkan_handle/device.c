@@ -100,12 +100,6 @@ bool isDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface) {
         swapChainAdequate = swapChainSupport.formats != NULL &&
                             swapChainSupport.presentModes != NULL;
 
-        // if (swapChainSupport.formats) {
-        //     freeMem(swapChainSupport.formats);
-        // }
-        // if (swapChainSupport.presentModes) {
-        //     freeMem(swapChainSupport.presentModes);
-        // }
         freeMem(2, swapChainSupport.formats, swapChainSupport.presentModes);
     }
 

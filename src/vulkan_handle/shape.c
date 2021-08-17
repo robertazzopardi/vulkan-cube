@@ -105,6 +105,49 @@ void combineVerticesAndIndices(Vulkan *vulkan, uint32_t count, ...) {
     va_end(valist);
 }
 
+void createDepthResources(Vulkan *vulkan) {
+    VkFormat depthFormat = findDepthFormat(vulkan);
+
+    createImage(vulkan->swapchain.swapChainExtent.width,
+                vulkan->swapchain.swapChainExtent.height, 1,
+                vulkan->msaaSamples, depthFormat, VK_IMAGE_TILING_OPTIMAL,
+                VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vulkan,
+                &vulkan->depth.depthImage, &vulkan->depth.depthImageMemory);
+
+    vulkan->depth.depthImageView =
+        createImageView(vulkan->device.device, vulkan->depth.depthImage,
+                        depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
+}
+
+void createFramebuffers(Vulkan *vulkan) {
+    vulkan->renderBuffers.swapChainFramebuffers =
+        malloc(vulkan->swapchain.swapChainImagesCount *
+               sizeof(*vulkan->renderBuffers.swapChainFramebuffers));
+
+    for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
+        VkImageView attachments[] = {vulkan->texture.colorImageView,
+                                     vulkan->depth.depthImageView,
+                                     vulkan->swapchain.swapChainImageViews[i]};
+
+        VkFramebufferCreateInfo framebufferInfo = {};
+        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebufferInfo.renderPass = vulkan->graphicsPipeline.renderPass;
+        framebufferInfo.attachmentCount = SIZEOF(attachments);
+        framebufferInfo.pAttachments = attachments;
+        framebufferInfo.width = vulkan->swapchain.swapChainExtent.width;
+        framebufferInfo.height = vulkan->swapchain.swapChainExtent.height;
+        framebufferInfo.layers = 1;
+
+        if (vkCreateFramebuffer(
+                vulkan->device.device, &framebufferInfo, NULL,
+                &vulkan->renderBuffers.swapChainFramebuffers[i]) !=
+            VK_SUCCESS) {
+            THROW_ERROR("failed to create framebuffer!\n");
+        }
+    }
+}
+
 void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
                   VkMemoryPropertyFlags properties, Vulkan *vulkan,
                   VkBuffer *buffer, VkDeviceMemory *bufferMemory) {

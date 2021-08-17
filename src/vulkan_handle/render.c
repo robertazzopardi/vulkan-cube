@@ -6,34 +6,6 @@
 #include <SDL_events.h>
 #include <SDL_video.h>
 
-void createFramebuffers(Vulkan *vulkan) {
-    vulkan->renderBuffers.swapChainFramebuffers =
-        malloc(vulkan->swapchain.swapChainImagesCount *
-               sizeof(*vulkan->renderBuffers.swapChainFramebuffers));
-
-    for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
-        VkImageView attachments[] = {vulkan->colorImageView,
-                                     vulkan->depthImageView,
-                                     vulkan->swapchain.swapChainImageViews[i]};
-
-        VkFramebufferCreateInfo framebufferInfo = {};
-        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = vulkan->graphicsPipeline.renderPass;
-        framebufferInfo.attachmentCount = SIZEOF(attachments);
-        framebufferInfo.pAttachments = attachments;
-        framebufferInfo.width = vulkan->swapchain.swapChainExtent.width;
-        framebufferInfo.height = vulkan->swapchain.swapChainExtent.height;
-        framebufferInfo.layers = 1;
-
-        if (vkCreateFramebuffer(
-                vulkan->device.device, &framebufferInfo, NULL,
-                &vulkan->renderBuffers.swapChainFramebuffers[i]) !=
-            VK_SUCCESS) {
-            THROW_ERROR("failed to create framebuffer!\n");
-        }
-    }
-}
-
 void createCommandPool(Window *window, Vulkan *vulkan) {
     QueueFamilyIndices queueFamilyIndices =
         findQueueFamilies(vulkan->device.physicalDevice, window->surface);

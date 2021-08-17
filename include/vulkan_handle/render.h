@@ -26,8 +26,6 @@ struct Semaphores {
     VkFence *imagesInFlight;
 };
 
-void createFramebuffers(Vulkan *);
-
 void createCommandPool(Window *, Vulkan *);
 
 void createCommandBuffers(Vulkan *, Window *);

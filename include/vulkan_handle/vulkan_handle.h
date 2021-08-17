@@ -7,6 +7,7 @@
 #include "render.h"
 #include "shape.h"
 #include "swapchain.h"
+#include "texture.h"
 #include "uniforms.h"
 #include <cglm/cglm.h>
 #include <vulkan/vulkan.h>
@@ -63,25 +64,22 @@ struct Vulkan {
     ShapeBuffers shapeBuffers;
 
     Shape shapes;
-    uint32_t shapeCount;
+
+    Depth depth;
 
     UniformBufferObject ubo;
 
-    uint32_t mipLevels;
-    VkImage textureImage;
-    VkDeviceMemory textureImageMemory;
-    VkImageView textureImageView;
-    VkSampler textureSampler;
+    Texture texture;
 
     // VkCommandPool commandPool;
 
-    VkImage colorImage;
-    VkDeviceMemory colorImageMemory;
-    VkImageView colorImageView;
+    // VkImage colorImage;
+    // VkDeviceMemory colorImageMemory;
+    // VkImageView colorImageView;
 
-    VkImage depthImage;
-    VkDeviceMemory depthImageMemory;
-    VkImageView depthImageView;
+    // VkImage depthImage;
+    // VkDeviceMemory depthImageMemory;
+    // VkImageView depthImageView;
 
     // VkCommandBuffer *commandBuffers;
 
@@ -93,25 +91,13 @@ struct Vulkan {
     bool framebufferResized;
 };
 
-typedef struct Window Window;
-
 void initVulkan(Window *, Vulkan *);
 
 void cleanUpVulkan(Window *, Vulkan *);
 
-void createColorResources(Vulkan *);
-
-void createDepthResources(Vulkan *);
-
-void createFramebuffers(Vulkan *);
-
 VkFormat findDepthFormat(Vulkan *);
 
-void generateMipmaps(Vulkan *, VkImage, VkFormat, int32_t, int32_t, uint32_t);
-
 void copyBuffer(Vulkan *, VkBuffer, VkBuffer, VkDeviceSize);
-
-void copyBufferToImage(Vulkan *, VkBuffer, VkImage, uint32_t, uint32_t);
 
 VkCommandBuffer beginSingleTimeCommands(Vulkan *);
 

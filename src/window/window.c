@@ -1,7 +1,7 @@
 #include "window.h"
 #include "error_handle.h"
 #include "vulkan_handle/device.h"
-#include "vulkan_handle/image_view.h"
+
 #include "vulkan_handle/instance.h"
 #include "vulkan_handle/memory.h"
 #include "vulkan_handle/swapchain.h"
@@ -97,105 +97,6 @@ static int resizingEventCallback(void *data, SDL_Event *event) {
 //         THROW_ERROR("failed to create instance!\n");
 //     }
 // }
-
-void transitionImageLayout(Vulkan *vulkan, VkImage image,
-                           VkFormat format __unused, VkImageLayout oldLayout,
-                           VkImageLayout newLayout, uint32_t mipLevels) {
-    VkCommandBuffer commandBuffer = beginSingleTimeCommands(vulkan);
-
-    VkImageMemoryBarrier barrier = {};
-    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    barrier.oldLayout = oldLayout;
-    barrier.newLayout = newLayout;
-    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    barrier.image = image;
-    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    barrier.subresourceRange.baseMipLevel = 0;
-    barrier.subresourceRange.levelCount = mipLevels;
-    barrier.subresourceRange.baseArrayLayer = 0;
-    barrier.subresourceRange.layerCount = 1;
-
-    VkPipelineStageFlags sourceStage;
-    VkPipelineStageFlags destinationStage;
-
-    if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
-        newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
-        barrier.srcAccessMask = 0;
-        barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-
-        sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-        destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-    } else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
-               newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
-        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-
-        sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-        destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-    } else {
-        THROW_ERROR("unsupported layout transition!\n");
-    }
-
-    vkCmdPipelineBarrier(commandBuffer, sourceStage, destinationStage, 0, 0,
-                         NULL, 0, NULL, 1, &barrier);
-
-    endSingleTimeCommands(vulkan, commandBuffer);
-}
-
-void createTextureImage(Vulkan *vulkan) {
-    SDL_Surface *image =
-        IMG_Load("/Users/rob/Pictures/Affs/20160312_211430_Original.jpg");
-
-    // convert to desired format
-    image = SDL_ConvertSurfaceFormat(image, SDL_PIXELFORMAT_ABGR8888, 0);
-
-    VkDeviceSize imageSize = image->w * image->h * image->format->BytesPerPixel;
-
-    vulkan->mipLevels =
-        (uint32_t)(floor(log2(glm_max(image->w, image->h)))) + 1;
-
-    if (!image) {
-        printf("Could not load texture: %s", SDL_GetError());
-        exit(EXIT_FAILURE);
-    }
-
-    VkBuffer stagingBuffer;
-    VkDeviceMemory stagingBufferMemory;
-    createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                     VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                 vulkan, &stagingBuffer, &stagingBufferMemory);
-
-    void *data;
-    vkMapMemory(vulkan->device.device, stagingBufferMemory, 0, imageSize, 0,
-                &data);
-    memcpy(data, image->pixels, (size_t)imageSize);
-    vkUnmapMemory(vulkan->device.device, stagingBufferMemory);
-
-    createImage(image->w, image->h, vulkan->mipLevels, VK_SAMPLE_COUNT_1_BIT,
-                VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL,
-                VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
-                    VK_IMAGE_USAGE_TRANSFER_DST_BIT |
-                    VK_IMAGE_USAGE_SAMPLED_BIT,
-                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vulkan,
-                &vulkan->textureImage, &vulkan->textureImageMemory);
-
-    transitionImageLayout(vulkan, vulkan->textureImage, VK_FORMAT_R8G8B8A8_SRGB,
-                          VK_IMAGE_LAYOUT_UNDEFINED,
-                          VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                          vulkan->mipLevels);
-    copyBufferToImage(vulkan, stagingBuffer, vulkan->textureImage,
-                      (uint32_t)image->w, (uint32_t)image->h);
-
-    vkDestroyBuffer(vulkan->device.device, stagingBuffer, NULL);
-    vkFreeMemory(vulkan->device.device, stagingBufferMemory, NULL);
-
-    generateMipmaps(vulkan, vulkan->textureImage, VK_FORMAT_R8G8B8A8_SRGB,
-                    image->w, image->h, vulkan->mipLevels);
-
-    SDL_FreeSurface(image);
-}
 
 VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR capabilities,
                             SDL_Window *window) {

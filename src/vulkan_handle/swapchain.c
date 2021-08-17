@@ -1,6 +1,5 @@
 #include "vulkan_handle/swapchain.h"
 #include "error_handle.h"
-#include "vulkan_handle/image_view.h"
 #include "vulkan_handle/memory.h"
 #include "vulkan_handle/vulkan_handle.h"
 #include "window/window.h"
@@ -181,13 +180,15 @@ void createSwapChain(Window *window, Vulkan *vulkan) {
 }
 
 void cleanupSwapChain(Vulkan *vulkan) {
-    vkDestroyImageView(vulkan->device.device, vulkan->colorImageView, NULL);
-    vkDestroyImage(vulkan->device.device, vulkan->colorImage, NULL);
-    vkFreeMemory(vulkan->device.device, vulkan->colorImageMemory, NULL);
+    vkDestroyImageView(vulkan->device.device, vulkan->texture.colorImageView,
+                       NULL);
+    vkDestroyImage(vulkan->device.device, vulkan->texture.colorImage, NULL);
+    vkFreeMemory(vulkan->device.device, vulkan->texture.colorImageMemory, NULL);
 
-    vkDestroyImageView(vulkan->device.device, vulkan->depthImageView, NULL);
-    vkDestroyImage(vulkan->device.device, vulkan->depthImage, NULL);
-    vkFreeMemory(vulkan->device.device, vulkan->depthImageMemory, NULL);
+    vkDestroyImageView(vulkan->device.device, vulkan->depth.depthImageView,
+                       NULL);
+    vkDestroyImage(vulkan->device.device, vulkan->depth.depthImage, NULL);
+    vkFreeMemory(vulkan->device.device, vulkan->depth.depthImageMemory, NULL);
 
     vkFreeCommandBuffers(vulkan->device.device,
                          vulkan->renderBuffers.commandPool,

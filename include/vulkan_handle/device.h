@@ -1,9 +1,8 @@
 #ifndef INCLUDE_VULKAN_HANDLE_DEVICE
 #define INCLUDE_VULKAN_HANDLE_DEVICE
 
-#include <vulkan/vulkan.h>
-
 #include <stdint.h>
+#include <vulkan/vulkan.h>
 
 static const char *deviceExtensions[] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
