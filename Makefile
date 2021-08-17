@@ -91,7 +91,7 @@ $(MAIN): $(OBJECTS)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
 clean_shaders:
-	$(RM) $(OUTPUT)/shaders/*.spv
+	$(RM) $(SRC)/shaders/*.spv
 
 .PHONY: clean
 clean: clean_shaders
@@ -117,7 +117,9 @@ compile_shaders: clean_shaders
 	GLSLC=$(VULKAN_SDK)/macOS/bin/glslc
 
 # Compile the shaders to .spv files
-	$(MD) $(OUTPUT)/shaders
+	GLSLC $(SRC)/shaders/shader.vert -o $(SRC)/shaders/vert.spv
+	GLSLC $(SRC)/shaders/shader.frag -o $(SRC)/shaders/frag.spv
 
-	GLSLC $(SRC)/shaders/shader.vert -o $(OUTPUT)/shaders/vert.spv
-	GLSLC $(SRC)/shaders/shader.frag -o $(OUTPUT)/shaders/frag.spv
+	$(MD) $(INCLUDE)/shaders
+	xxd -i $(SRC)/shaders/frag.spv > $(INCLUDE)/shaders/frag_shader.h
+	xxd -i $(SRC)/shaders/vert.spv > $(INCLUDE)/shaders/vert_shader.h

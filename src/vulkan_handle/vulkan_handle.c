@@ -211,3 +211,5 @@ void cleanUpVulkan(Window *window, Vulkan *vulkan) {
     vkDestroySurfaceKHR(vulkan->instance.instance, window->surface, NULL);
     vkDestroyInstance(vulkan->instance.instance, NULL);
 }
+
+// xxd -i src/shaders/shader.frag > tmp.h

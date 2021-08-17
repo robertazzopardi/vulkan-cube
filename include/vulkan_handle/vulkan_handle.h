@@ -18,76 +18,20 @@ typedef struct Validation Validation;
 
 typedef struct Window Window;
 
-// typedef struct Device Device;
-
 struct Vulkan {
-    // VkInstance instance;
     Instance instance;
-
-    // VkDebugUtilsMessengerEXT debugMessenger;
     Validation *validation;
-
     Device device;
-
-    // VkSurfaceKHR surface;
-
     VkSampleCountFlagBits msaaSamples;
-
-    // VkQueue graphicsQueue;
-    // VkQueue presentQueue;
-
-    // VkSwapchainKHR swapChain;
-    // VkImage *swapChainImages;
-    // uint32_t swapChainImagesCount;
-    // VkFormat swapChainImageFormat;
-    // VkExtent2D swapChainExtent;
-    // VkImageView *swapChainImageViews;
-    // VkFramebuffer *swapChainFramebuffers;
     SwapChain swapchain;
-
-    // VkRenderPass renderPass;
-
-    // VkDescriptorSetLayout descriptorSetLayout;
-
-    // VkPipelineLayout pipelineLayout;
-    // VkPipeline graphicsPipeline;
     GraphicsPipeline graphicsPipeline;
-
     RenderBuffers renderBuffers;
-
     Semaphores semaphores;
-
-    // VkBuffer vertexBuffer;
-    // VkDeviceMemory vertexBufferMemory;
-    // VkBuffer indexBuffer;
-    // VkDeviceMemory indexBufferMemory;
     ShapeBuffers shapeBuffers;
-
     Shape shapes;
-
     Depth depth;
-
     UniformBufferObject ubo;
-
     Texture texture;
-
-    // VkCommandPool commandPool;
-
-    // VkImage colorImage;
-    // VkDeviceMemory colorImageMemory;
-    // VkImageView colorImageView;
-
-    // VkImage depthImage;
-    // VkDeviceMemory depthImageMemory;
-    // VkImageView depthImageView;
-
-    // VkCommandBuffer *commandBuffers;
-
-    // VkSemaphore *imageAvailableSemaphores;
-    // VkSemaphore *renderFinishedSemaphores;
-    // VkFence *inFlightFences;
-    // VkFence *imagesInFlight;
-
     bool framebufferResized;
 };
 
