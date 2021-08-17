@@ -9,9 +9,9 @@ typedef struct Window Window;
 
 typedef union SDL_Event SDL_Event;
 
-typedef struct Buffers Buffers;
+typedef struct RenderBuffers RenderBuffers;
 
-struct Buffers {
+struct RenderBuffers {
     VkFramebuffer *swapChainFramebuffers;
     VkCommandPool commandPool;
     VkCommandBuffer *commandBuffers;

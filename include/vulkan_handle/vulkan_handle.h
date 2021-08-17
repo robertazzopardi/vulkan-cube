@@ -5,29 +5,11 @@
 #include "graphics_pipeline.h"
 #include "instance.h"
 #include "render.h"
+#include "shape.h"
 #include "swapchain.h"
+#include "uniforms.h"
 #include <cglm/cglm.h>
 #include <vulkan/vulkan.h>
-
-typedef struct {
-    mat4 model;
-    mat4 view;
-    mat4 proj;
-} UniformBufferObject;
-
-typedef struct {
-    vec3 pos;
-    vec3 colour;
-    vec2 texCoord;
-} Vertex;
-
-typedef struct {
-    Vertex *vertices;
-    uint32_t verticesCount;
-    uint16_t *indices;
-    uint16_t indicesCount;
-    uint32_t index;
-} Shape;
 
 typedef struct Vulkan Vulkan;
 
@@ -64,31 +46,26 @@ struct Vulkan {
 
     // VkRenderPass renderPass;
 
-    VkDescriptorSetLayout descriptorSetLayout;
+    // VkDescriptorSetLayout descriptorSetLayout;
 
     // VkPipelineLayout pipelineLayout;
     // VkPipeline graphicsPipeline;
     GraphicsPipeline graphicsPipeline;
 
-    Buffers buffers;
+    RenderBuffers renderBuffers;
 
     Semaphores semaphores;
 
-    VkBuffer vertexBuffer;
-    VkDeviceMemory vertexBufferMemory;
-    VkBuffer indexBuffer;
-    VkDeviceMemory indexBufferMemory;
+    // VkBuffer vertexBuffer;
+    // VkDeviceMemory vertexBufferMemory;
+    // VkBuffer indexBuffer;
+    // VkDeviceMemory indexBufferMemory;
+    ShapeBuffers shapeBuffers;
 
     Shape shapes;
     uint32_t shapeCount;
 
     UniformBufferObject ubo;
-
-    VkBuffer *uniformBuffers;
-    VkDeviceMemory *uniformBuffersMemory;
-
-    VkDescriptorPool descriptorPool;
-    VkDescriptorSet *descriptorSets;
 
     uint32_t mipLevels;
     VkImage textureImage;
@@ -128,24 +105,16 @@ void createDepthResources(Vulkan *);
 
 void createFramebuffers(Vulkan *);
 
-void createUniformBuffers(Vulkan *);
-
-void updateUniformBuffer(Vulkan *, uint32_t, float);
-
-void createDescriptorPool(Vulkan *);
-
 VkFormat findDepthFormat(Vulkan *);
-
-void createDescriptorSets(Vulkan *);
 
 void generateMipmaps(Vulkan *, VkImage, VkFormat, int32_t, int32_t, uint32_t);
 
+void copyBuffer(Vulkan *, VkBuffer, VkBuffer, VkDeviceSize);
+
 void copyBufferToImage(Vulkan *, VkBuffer, VkImage, uint32_t, uint32_t);
 
-void transitionImageLayout(Vulkan *, VkImage, VkFormat __unused, VkImageLayout,
-                           VkImageLayout, uint32_t);
+VkCommandBuffer beginSingleTimeCommands(Vulkan *);
 
-void createBuffer(VkDeviceSize, VkBufferUsageFlags, VkMemoryPropertyFlags,
-                  Vulkan *, VkBuffer *, VkDeviceMemory *);
+void endSingleTimeCommands(Vulkan *, VkCommandBuffer);
 
 #endif /* INCLUDE_VULKAN_HANDLE_VULKAN_HANDLE */

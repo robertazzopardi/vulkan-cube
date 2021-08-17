@@ -24,7 +24,7 @@ SCAN =		scan-build
 SCANFLAGS =	-v -analyze-headers -no-failure-reports -enable-checker deadcode.DeadStores --status-bugs
 
 # define output directory
-OUTPUT	:= output
+OUTPUT	:= bin
 
 # define source directory
 SRC		:= src
@@ -73,7 +73,7 @@ OBJECTS		:= $(SOURCES:.c=.o)
 
 OUTPUTMAIN	:= $(call FIXPATH,$(OUTPUT)/$(MAIN))
 
-all: $(OUTPUT) $(MAIN)
+all: compile_shaders $(OUTPUT) $(MAIN)
 	@echo Executing 'all' complete!
 
 $(OUTPUT):
@@ -89,15 +89,15 @@ $(MAIN): $(OBJECTS)
 .c.o:
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
+clean_shaders:
+	$(RM) $(OUTPUT)/shaders/*.spv
+
 .PHONY: clean
-clean:
+clean: clean_shaders
 	clear
 	$(RM) $(OUTPUTMAIN)
 	$(RM) $(call FIXPATH,$(OBJECTS))
 	@echo Cleanup complete!
-
-clean_shaders:
-	$(RM) ./shaders/*.spv
 
 run: all
 	./$(OUTPUTMAIN)
@@ -115,8 +115,8 @@ compile_shaders: clean_shaders
 # Acess vulkan sdk path and point to the glslc shader compiler
 	GLSLC=$(VULKAN_SDK)/macOS/bin/glslc
 
-# Remove old compiled shaders, to make sure they are rebuilt
-
 # Compile the shaders to .spv files
-	GLSLC ./shaders/shader.vert -o ./shaders/vert.spv
-	GLSLC ./shaders/shader.frag -o ./shaders/frag.spv
+	$(MD) $(OUTPUT)/shaders
+
+	GLSLC $(SRC)/shaders/shader.vert -o $(OUTPUT)/shaders/vert.spv
+	GLSLC $(SRC)/shaders/shader.frag -o $(OUTPUT)/shaders/frag.spv

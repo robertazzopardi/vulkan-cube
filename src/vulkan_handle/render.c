@@ -7,9 +7,9 @@
 #include <SDL_video.h>
 
 void createFramebuffers(Vulkan *vulkan) {
-    vulkan->buffers.swapChainFramebuffers =
+    vulkan->renderBuffers.swapChainFramebuffers =
         malloc(vulkan->swapchain.swapChainImagesCount *
-               sizeof(*vulkan->buffers.swapChainFramebuffers));
+               sizeof(*vulkan->renderBuffers.swapChainFramebuffers));
 
     for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
         VkImageView attachments[] = {vulkan->colorImageView,
@@ -25,8 +25,9 @@ void createFramebuffers(Vulkan *vulkan) {
         framebufferInfo.height = vulkan->swapchain.swapChainExtent.height;
         framebufferInfo.layers = 1;
 
-        if (vkCreateFramebuffer(vulkan->device.device, &framebufferInfo, NULL,
-                                &vulkan->buffers.swapChainFramebuffers[i]) !=
+        if (vkCreateFramebuffer(
+                vulkan->device.device, &framebufferInfo, NULL,
+                &vulkan->renderBuffers.swapChainFramebuffers[i]) !=
             VK_SUCCESS) {
             THROW_ERROR("failed to create framebuffer!\n");
         }
@@ -42,26 +43,26 @@ void createCommandPool(Window *window, Vulkan *vulkan) {
     poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily;
 
     if (vkCreateCommandPool(vulkan->device.device, &poolInfo, NULL,
-                            &vulkan->buffers.commandPool) != VK_SUCCESS) {
+                            &vulkan->renderBuffers.commandPool) != VK_SUCCESS) {
         THROW_ERROR("failed to create command pool!\n");
     }
 }
 
 void createCommandBuffers(Vulkan *vulkan, Window *window) {
-    vulkan->buffers.commandBuffers =
+    vulkan->renderBuffers.commandBuffers =
         malloc(vulkan->swapchain.swapChainImagesCount *
-               sizeof(*vulkan->buffers.commandBuffers));
+               sizeof(*vulkan->renderBuffers.commandBuffers));
 
     VkCommandBufferAllocateInfo allocInfo = {};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = vulkan->buffers.commandPool;
+    allocInfo.commandPool = vulkan->renderBuffers.commandPool;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = vulkan->swapchain.swapChainImagesCount;
 
     if (vkAllocateCommandBuffers(vulkan->device.device, &allocInfo,
-                                 vulkan->buffers.commandBuffers) !=
+                                 vulkan->renderBuffers.commandBuffers) !=
         VK_SUCCESS) {
-        THROW_ERROR("failed to allocate command buffers!\n");
+        THROW_ERROR("failed to allocate command renderBuffers!\n");
     }
 
     int width, height;
@@ -86,7 +87,7 @@ void createCommandBuffers(Vulkan *vulkan, Window *window) {
         VkCommandBufferBeginInfo beginInfo = {};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-        if (vkBeginCommandBuffer(vulkan->buffers.commandBuffers[i],
+        if (vkBeginCommandBuffer(vulkan->renderBuffers.commandBuffers[i],
                                  &beginInfo) != VK_SUCCESS) {
             THROW_ERROR("failed to begin recording command buffer!\n");
         }
@@ -96,7 +97,8 @@ void createCommandBuffers(Vulkan *vulkan, Window *window) {
         renderPassInfo.renderPass = vulkan->graphicsPipeline.renderPass;
         renderPassInfo.renderArea.offset = (VkOffset2D){0, 0};
         renderPassInfo.renderArea.extent = vulkan->swapchain.swapChainExtent;
-        renderPassInfo.framebuffer = vulkan->buffers.swapChainFramebuffers[i];
+        renderPassInfo.framebuffer =
+            vulkan->renderBuffers.swapChainFramebuffers[i];
 
         VkClearValue clearValues[] = {{.color = {{0.0f, 0.0f, 0.0f, 1.0f}}},
                                       {{{1.0f, 0}}}};
@@ -104,41 +106,40 @@ void createCommandBuffers(Vulkan *vulkan, Window *window) {
         renderPassInfo.clearValueCount = SIZEOF(clearValues);
         renderPassInfo.pClearValues = clearValues;
 
-        vkCmdBeginRenderPass(vulkan->buffers.commandBuffers[i], &renderPassInfo,
-                             VK_SUBPASS_CONTENTS_INLINE);
+        vkCmdBeginRenderPass(vulkan->renderBuffers.commandBuffers[i],
+                             &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        vkCmdSetViewport(vulkan->buffers.commandBuffers[i], 0, 1, &viewport);
+        vkCmdSetViewport(vulkan->renderBuffers.commandBuffers[i], 0, 1,
+                         &viewport);
 
-        vkCmdSetScissor(vulkan->buffers.commandBuffers[i], 0, 1, &scissor);
+        vkCmdSetScissor(vulkan->renderBuffers.commandBuffers[i], 0, 1,
+                        &scissor);
 
-        vkCmdBindPipeline(vulkan->buffers.commandBuffers[i],
+        vkCmdBindPipeline(vulkan->renderBuffers.commandBuffers[i],
                           VK_PIPELINE_BIND_POINT_GRAPHICS,
                           vulkan->graphicsPipeline.graphicsPipeline);
 
-        VkBuffer vertexBuffers[] = {vulkan->vertexBuffer};
+        VkBuffer vertexBuffers[] = {vulkan->shapeBuffers.vertexBuffer};
         VkDeviceSize offsets[] = {0};
 
-        vkCmdBindVertexBuffers(vulkan->buffers.commandBuffers[i], 0, 1,
+        vkCmdBindVertexBuffers(vulkan->renderBuffers.commandBuffers[i], 0, 1,
                                vertexBuffers, offsets);
 
-        vkCmdBindIndexBuffer(vulkan->buffers.commandBuffers[i],
-                             vulkan->indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+        vkCmdBindIndexBuffer(vulkan->renderBuffers.commandBuffers[i],
+                             vulkan->shapeBuffers.indexBuffer, 0,
+                             VK_INDEX_TYPE_UINT16);
 
-        vkCmdBindDescriptorSets(vulkan->buffers.commandBuffers[i],
+        vkCmdBindDescriptorSets(vulkan->renderBuffers.commandBuffers[i],
                                 VK_PIPELINE_BIND_POINT_GRAPHICS,
                                 vulkan->graphicsPipeline.pipelineLayout, 0, 1,
-                                &vulkan->descriptorSets[i], 0, NULL);
+                                &vulkan->ubo.descriptorSets[i], 0, NULL);
 
-        // printf("%lu %u\n", SIZEOF(indices), vulkan->indicesCount);
-        vkCmdDrawIndexed(vulkan->buffers.commandBuffers[i],
-                         vulkan->shapes.indicesCount
-                         // SIZEOF(indices)
-                         ,
-                         1, 0, 0, 0);
+        vkCmdDrawIndexed(vulkan->renderBuffers.commandBuffers[i],
+                         vulkan->shapes.indicesCount, 1, 0, 0, 0);
 
-        vkCmdEndRenderPass(vulkan->buffers.commandBuffers[i]);
+        vkCmdEndRenderPass(vulkan->renderBuffers.commandBuffers[i]);
 
-        if (vkEndCommandBuffer(vulkan->buffers.commandBuffers[i]) !=
+        if (vkEndCommandBuffer(vulkan->renderBuffers.commandBuffers[i]) !=
             VK_SUCCESS) {
             THROW_ERROR("failed to record command buffer!\n");
         }
@@ -219,7 +220,8 @@ void drawFrame(Window *window, SDL_Event event, Vulkan *vulkan, float dt) {
     submitInfo.pWaitDstStageMask = waitStages;
 
     submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &vulkan->buffers.commandBuffers[imageIndex];
+    submitInfo.pCommandBuffers =
+        &vulkan->renderBuffers.commandBuffers[imageIndex];
 
     VkSemaphore signalSemaphores[] = {
         vulkan->semaphores.renderFinishedSemaphores[window->currentFrame]};

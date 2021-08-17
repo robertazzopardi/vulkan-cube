@@ -1,8 +1,10 @@
-#ifndef INCLUDE_ERROR_HANDLE
-#define INCLUDE_ERROR_HANDLE
+#ifndef INCLUDE_UTILITY_ERROR_HANDLE
+#define INCLUDE_UTILITY_ERROR_HANDLE
+
+#include <stdio.h>
 
 #define THROW_ERROR(errorMsg)                                                  \
     printf("%s\n", errorMsg);                                                  \
     exit(EXIT_FAILURE);
 
-#endif /* INCLUDE_ERROR_HANDLE */
+#endif /* INCLUDE_UTILITY_ERROR_HANDLE */

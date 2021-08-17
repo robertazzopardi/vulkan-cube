@@ -189,9 +189,10 @@ void cleanupSwapChain(Vulkan *vulkan) {
     vkDestroyImage(vulkan->device.device, vulkan->depthImage, NULL);
     vkFreeMemory(vulkan->device.device, vulkan->depthImageMemory, NULL);
 
-    vkFreeCommandBuffers(vulkan->device.device, vulkan->buffers.commandPool,
+    vkFreeCommandBuffers(vulkan->device.device,
+                         vulkan->renderBuffers.commandPool,
                          vulkan->swapchain.swapChainImagesCount,
-                         vulkan->buffers.commandBuffers);
+                         vulkan->renderBuffers.commandBuffers);
 
     vkDestroyPipeline(vulkan->device.device,
                       vulkan->graphicsPipeline.graphicsPipeline, NULL);
@@ -205,21 +206,23 @@ void cleanupSwapChain(Vulkan *vulkan) {
 
     for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
         vkDestroyFramebuffer(vulkan->device.device,
-                             vulkan->buffers.swapChainFramebuffers[i], NULL);
+                             vulkan->renderBuffers.swapChainFramebuffers[i],
+                             NULL);
 
         vkDestroyImageView(vulkan->device.device,
                            vulkan->swapchain.swapChainImageViews[i], NULL);
 
-        vkDestroyBuffer(vulkan->device.device, vulkan->uniformBuffers[i], NULL);
+        vkDestroyBuffer(vulkan->device.device, vulkan->ubo.uniformBuffers[i],
+                        NULL);
 
-        vkFreeMemory(vulkan->device.device, vulkan->uniformBuffersMemory[i],
+        vkFreeMemory(vulkan->device.device, vulkan->ubo.uniformBuffersMemory[i],
                      NULL);
     }
 
-    freeMem(4, vulkan->buffers.swapChainFramebuffers,
-            vulkan->swapchain.swapChainImageViews, vulkan->uniformBuffers,
-            vulkan->uniformBuffersMemory);
+    freeMem(4, vulkan->renderBuffers.swapChainFramebuffers,
+            vulkan->swapchain.swapChainImageViews, vulkan->ubo.uniformBuffers,
+            vulkan->ubo.uniformBuffersMemory);
 
-    vkDestroyDescriptorPool(vulkan->device.device, vulkan->descriptorPool,
+    vkDestroyDescriptorPool(vulkan->device.device, vulkan->ubo.descriptorPool,
                             NULL);
 }

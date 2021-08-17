@@ -1,6 +1,9 @@
 #include "vulkan_handle/graphics_pipeline.h"
 #include "error_handle.h"
+#include "utility/file_handle.h"
+#include "utility/file_handle.h"
 #include "vulkan_handle/memory.h"
+#include "vulkan_handle/shape.h"
 #include "vulkan_handle/vulkan_handle.h"
 
 void createShaderModule(char *code, uint32_t length, VkDevice device,
@@ -16,71 +19,9 @@ void createShaderModule(char *code, uint32_t length, VkDevice device,
     }
 }
 
-typedef struct {
-    char *buff;
-    uint32_t len;
-} FileData;
-
-FileData readFile(const char *path) {
-    FileData data;
-
-    FILE *file = fopen(path, "r");
-    if (file == NULL) {
-        printf("File not found: %s\n", path);
-        exit(EXIT_FAILURE);
-    }
-
-    // get filesize
-    fseek(file, 0, SEEK_END);
-    data.len = ftell(file);
-
-    fseek(file, 0, SEEK_SET);
-    // allocate buffer **note** that if you like
-    // to use the buffer as a c-string then you must also
-    // allocate space for the terminating null character
-    data.buff = malloc(data.len);
-    // read the file into buffer
-    fread(data.buff, data.len, 1, file);
-    // close the file
-    fclose(file);
-
-    return data;
-}
-
-static VkVertexInputBindingDescription getBindingDescription() {
-    VkVertexInputBindingDescription bindingDescription = {};
-    bindingDescription.binding = 0;
-    bindingDescription.stride = sizeof(Vertex);
-    bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-    return bindingDescription;
-}
-
-static VkVertexInputAttributeDescription *getAttributeDescriptions() {
-    VkVertexInputAttributeDescription *attributeDescriptions =
-        malloc(3 * sizeof(*attributeDescriptions));
-
-    attributeDescriptions[0].binding = 0;
-    attributeDescriptions[0].location = 0;
-    attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-    attributeDescriptions[0].offset = offsetof(Vertex, pos);
-
-    attributeDescriptions[1].binding = 0;
-    attributeDescriptions[1].location = 1;
-    attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-    attributeDescriptions[1].offset = offsetof(Vertex, colour);
-
-    attributeDescriptions[2].binding = 0;
-    attributeDescriptions[2].location = 2;
-    attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-    attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
-
-    return attributeDescriptions;
-}
-
 void createGraphicsPipeline(Vulkan *vulkan) {
-    FileData vertShaderCode = readFile("shaders/vert.spv");
-    FileData fragShaderCode = readFile("shaders/frag.spv");
+    FileData vertShaderCode = readFile("bin/shaders/vert.spv");
+    FileData fragShaderCode = readFile("bin/shaders/frag.spv");
 
     VkShaderModule vertShaderModule;
     createShaderModule(vertShaderCode.buff, vertShaderCode.len,
@@ -199,7 +140,7 @@ void createGraphicsPipeline(Vulkan *vulkan) {
     pipelineLayoutInfo.pushConstantRangeCount = 0;
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = 1;
-    pipelineLayoutInfo.pSetLayouts = &vulkan->descriptorSetLayout;
+    pipelineLayoutInfo.pSetLayouts = &vulkan->ubo.descriptorSetLayout;
 
     if (vkCreatePipelineLayout(vulkan->device.device, &pipelineLayoutInfo, NULL,
                                &vulkan->graphicsPipeline.pipelineLayout) !=
