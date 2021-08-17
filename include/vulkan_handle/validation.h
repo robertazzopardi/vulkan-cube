@@ -23,12 +23,6 @@ struct Validation {
 
 bool checkValidationLayerSupport();
 
-typedef uint32_t VkBool32;
-
-VkBool32 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT,
-                       VkDebugUtilsMessageTypeFlagsEXT,
-                       const VkDebugUtilsMessengerCallbackDataEXT *, void *);
-
 void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT *);
 
 void setupDebugMessenger(Vulkan *);

@@ -5,35 +5,31 @@
 #include <stddef.h>
 #include <vulkan/vulkan.h>
 
+#define APP_NAME "Vulkan App"
+
 static const int MAX_FRAMES_IN_FLIGHT = 2;
 
 typedef struct SDL_Window SDL_Window;
 typedef union SDL_Event SDL_Event;
-
 typedef struct Vulkan Vulkan;
-
 typedef struct Window Window;
+typedef struct VkSurfaceCapabilitiesKHR VkSurfaceCapabilitiesKHR;
+typedef struct VkExtent2d VkExtent2d;
 
 struct Window {
     SDL_Window *win;
     SDL_Event *event;
     size_t currentFrame;
-    bool *framebufferResized;
+    bool windowResized;
     bool running;
 
     VkSurfaceKHR surface;
 };
 
-void start();
-
-// void createInstance(SDL_Window *, Vulkan *);
+void initialise();
 
 void createSurface(Window *, Vulkan *);
 
-typedef struct VkSurfaceCapabilitiesKHR VkSurfaceCapabilitiesKHR;
-struct VkExtent2d;
-
-struct VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR,
-                                   SDL_Window *);
+VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR, SDL_Window *);
 
 #endif /* INCLUDE_WINDOW_WINDOW */

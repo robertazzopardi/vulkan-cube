@@ -223,8 +223,8 @@ void drawFrame(Window *window, SDL_Event event, Vulkan *vulkan, float dt) {
     result = vkQueuePresentKHR(vulkan->device.presentQueue, &presentInfo);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
-        vulkan->framebufferResized) {
-        vulkan->framebufferResized = false;
+        window->windowResized) {
+        window->windowResized = false;
         recreateSwapChain(window, event, vulkan);
     } else if (result != VK_SUCCESS) {
         THROW_ERROR("failed to present swap chain image!\n");

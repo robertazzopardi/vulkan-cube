@@ -143,15 +143,14 @@ VkSampleCountFlagBits getMaxUsableSampleCount(Vulkan *vulkan) {
 
 void pickPhysicalDevice(Window *window, Vulkan *vulkan) {
     uint32_t deviceCount = 0;
-    vkEnumeratePhysicalDevices(vulkan->instance.instance, &deviceCount, NULL);
+    vkEnumeratePhysicalDevices(vulkan->instance, &deviceCount, NULL);
 
     if (deviceCount == 0) {
         THROW_ERROR("failed to find GPUs with Vulkan support!\n");
     }
 
     VkPhysicalDevice devices[deviceCount];
-    vkEnumeratePhysicalDevices(vulkan->instance.instance, &deviceCount,
-                               devices);
+    vkEnumeratePhysicalDevices(vulkan->instance, &deviceCount, devices);
 
     for (uint32_t i = 0; i < deviceCount; i++) {
         if (isDeviceSuitable(devices[i], window->surface)) {

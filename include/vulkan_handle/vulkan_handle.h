@@ -3,23 +3,19 @@
 
 #include "device.h"
 #include "graphics_pipeline.h"
-#include "instance.h"
 #include "render.h"
 #include "shape.h"
 #include "swapchain.h"
 #include "texture.h"
 #include "uniforms.h"
-#include <cglm/cglm.h>
 #include <vulkan/vulkan.h>
 
 typedef struct Vulkan Vulkan;
-
 typedef struct Validation Validation;
-
 typedef struct Window Window;
 
 struct Vulkan {
-    Instance instance;
+    VkInstance instance;
     Validation *validation;
     Device device;
     VkSampleCountFlagBits msaaSamples;
@@ -32,7 +28,6 @@ struct Vulkan {
     Depth depth;
     UniformBufferObject ubo;
     Texture texture;
-    bool framebufferResized;
 };
 
 void initVulkan(Window *, Vulkan *);

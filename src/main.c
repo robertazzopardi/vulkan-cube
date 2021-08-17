@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 int main(void) {
-    start();
+    initialise();
 
     return EXIT_SUCCESS;
 }

@@ -2,12 +2,11 @@
 #include "error_handle.h"
 #include "shaders/frag_shader.h"
 #include "shaders/vert_shader.h"
-
 #include "vulkan_handle/memory.h"
 #include "vulkan_handle/shape.h"
 #include "vulkan_handle/vulkan_handle.h"
 
-void createShaderModule(char *code, uint32_t length, VkDevice device,
+void createShaderModule(unsigned char *code, uint32_t length, VkDevice device,
                         VkShaderModule *shaderModule) {
     VkShaderModuleCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -21,17 +20,12 @@ void createShaderModule(char *code, uint32_t length, VkDevice device,
 }
 
 void createGraphicsPipeline(Vulkan *vulkan) {
-    // FileData vertShaderCode = readFile("bin/shaders/vert.spv");
-    // FileData fragShaderCode = readFile("bin/shaders/frag.spv");
-
     VkShaderModule vertShaderModule;
-    createShaderModule((char *)src_shaders_vert_spv, src_shaders_vert_spv_len,
+    createShaderModule(src_shaders_vert_spv, src_shaders_vert_spv_len,
                        vulkan->device.device, &vertShaderModule);
     VkShaderModule fragShaderModule;
-    createShaderModule((char *)src_shaders_frag_spv, src_shaders_frag_spv_len,
+    createShaderModule(src_shaders_frag_spv, src_shaders_frag_spv_len,
                        vulkan->device.device, &fragShaderModule);
-
-    // freeMem(2, vertShaderCode.buff, fragShaderCode.buff);
 
     VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
     vertShaderStageInfo.sType =
