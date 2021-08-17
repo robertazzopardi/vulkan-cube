@@ -1,6 +1,6 @@
 # Vulkan-Tutorial In C
 
-Somewhat modularised version of the popular vulkan-tutorial in C and SDL
+Somewhat modularised version of the [vulkan-tutorial](https://vulkan-tutorial.com/) in C and SDL. The origional tutorial code can be found [here](https://github.com/Overv/VulkanTutorial).
 
 ## Requirements
 
@@ -11,6 +11,8 @@ Somewhat modularised version of the popular vulkan-tutorial in C and SDL
 - SDL2
 
 - SDL2_Image
+
+- cglm (add to CPATH)
 
 > All of the above should be in the PATH
 
