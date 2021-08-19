@@ -14,7 +14,7 @@ typedef union SDL_Event SDL_Event;
 typedef struct Vulkan Vulkan;
 typedef struct VkSurfaceKHR_T *VkSurfaceKHR;
 
-typedef union Time {
+typedef struct Time {
     uint64_t now;
     uint64_t last;
     double dt;

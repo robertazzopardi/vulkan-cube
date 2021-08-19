@@ -119,7 +119,7 @@ void initialise() {
             handleUserInput(&window);
 
             // Update
-            // printf("%.f\n", 1.0f / window.time.dt);
+            printf("%.f\n", 1.0f / window.time.dt);
 
             // Rendering
             drawFrame(&window, &vulkan);
