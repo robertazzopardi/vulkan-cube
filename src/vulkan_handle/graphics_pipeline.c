@@ -5,6 +5,7 @@
 #include "vulkan_handle/memory.h"
 #include "vulkan_handle/shape.h"
 #include "vulkan_handle/vulkan_handle.h"
+#include <vulkan/vulkan.h>
 
 void createShaderModule(unsigned char *code, uint32_t length, VkDevice device,
                         VkShaderModule *shaderModule) {
@@ -67,14 +68,14 @@ void createGraphicsPipeline(Vulkan *vulkan) {
     VkViewport viewport = {};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = (float)vulkan->swapchain.swapChainExtent.width;
-    viewport.height = (float)vulkan->swapchain.swapChainExtent.height;
+    viewport.width = (float)vulkan->swapchain.swapChainExtent->width;
+    viewport.height = (float)vulkan->swapchain.swapChainExtent->height;
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
 
     VkRect2D scissor = {};
     scissor.offset = (VkOffset2D){0, 0};
-    scissor.extent = vulkan->swapchain.swapChainExtent;
+    scissor.extent = *vulkan->swapchain.swapChainExtent;
 
     VkPipelineViewportStateCreateInfo viewportState = {};
     viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -185,7 +186,7 @@ void createGraphicsPipeline(Vulkan *vulkan) {
 
 void createRenderPass(Vulkan *vulkan) {
     VkAttachmentDescription colorAttachment = {};
-    colorAttachment.format = vulkan->swapchain.swapChainImageFormat;
+    colorAttachment.format = *vulkan->swapchain.swapChainImageFormat;
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
     colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -209,7 +210,7 @@ void createRenderPass(Vulkan *vulkan) {
     depthAttachment.samples = vulkan->msaaSamples;
 
     VkAttachmentDescription colorAttachmentResolve = {};
-    colorAttachmentResolve.format = vulkan->swapchain.swapChainImageFormat;
+    colorAttachmentResolve.format = *vulkan->swapchain.swapChainImageFormat;
     colorAttachmentResolve.samples = VK_SAMPLE_COUNT_1_BIT;
     colorAttachmentResolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     colorAttachmentResolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;

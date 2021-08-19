@@ -1,18 +1,17 @@
 #ifndef INCLUDE_VULKAN_HANDLE_GRAPHICS_PIPELINE
 #define INCLUDE_VULKAN_HANDLE_GRAPHICS_PIPELINE
 
-#include "graphics_pipeline.h"
-#include <vulkan/vulkan.h>
+typedef struct VkPipelineLayout_T *VkPipelineLayout;
+typedef struct VkPipeline_T *VkPipeline;
+typedef struct VkRenderPass_T *VkRenderPass;
 
-typedef struct Vulkan Vulkan;
-
-typedef struct GraphicsPipeline GraphicsPipeline;
-
-struct GraphicsPipeline {
+typedef struct GraphicsPipeline {
     VkPipelineLayout pipelineLayout;
     VkPipeline graphicsPipeline;
     VkRenderPass renderPass;
-};
+} GraphicsPipeline;
+
+typedef struct Vulkan Vulkan;
 
 void createGraphicsPipeline(Vulkan *);
 

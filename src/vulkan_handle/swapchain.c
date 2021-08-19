@@ -5,20 +5,41 @@
 #include "window/window.h"
 #include <SDL_events.h>
 #include <SDL_vulkan.h>
+#include <cglm/cglm.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <vulkan/vulkan.h>
 
+VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR capabilities,
+                            SDL_Window *window) {
+    if (capabilities.currentExtent.width != UINT32_MAX) {
+        return capabilities.currentExtent;
+    } else {
+        int width, height;
+        SDL_GetWindowSize(window, &width, &height);
+
+        VkExtent2D actualExtent = {(uint32_t)width, (uint32_t)height};
+
+        glm_clamp(actualExtent.width, capabilities.minImageExtent.width,
+                  capabilities.maxImageExtent.width);
+        glm_clamp(actualExtent.height, capabilities.minImageExtent.height,
+                  capabilities.maxImageExtent.height);
+
+        return actualExtent;
+    }
+}
+
 SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device,
                                               VkSurfaceKHR surface) {
-    SwapChainSupportDetails details = {};
+    SwapChainSupportDetails details = {0};
     details.formats = NULL;
     details.presentModes = NULL;
     details.formatCount = 0;
     details.presentModeCount = 0;
+    details.capabilities = malloc(1 * sizeof(*details.capabilities));
 
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface,
-                                              &details.capabilities);
+                                              details.capabilities);
 
     vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &details.formatCount,
                                          NULL);
@@ -114,15 +135,15 @@ void createSwapChain(Window *window, Vulkan *vulkan) {
     VkPresentModeKHR presentMode = chooseSwapPresentMode(
         swapChainSupport.presentModes, swapChainSupport.presentModeCount);
     VkExtent2D extent =
-        chooseSwapExtent(swapChainSupport.capabilities, window->win);
+        chooseSwapExtent(*swapChainSupport.capabilities, window->win);
 
     vulkan->swapchain.swapChainImagesCount =
-        swapChainSupport.capabilities.minImageCount + 1;
-    if (swapChainSupport.capabilities.maxImageCount > 0 &&
+        swapChainSupport.capabilities->minImageCount + 1;
+    if (swapChainSupport.capabilities->maxImageCount > 0 &&
         vulkan->swapchain.swapChainImagesCount >
-            swapChainSupport.capabilities.maxImageCount) {
+            swapChainSupport.capabilities->maxImageCount) {
         vulkan->swapchain.swapChainImagesCount =
-            swapChainSupport.capabilities.maxImageCount;
+            swapChainSupport.capabilities->maxImageCount;
     }
 
     VkSwapchainCreateInfoKHR createInfo = {};
@@ -149,7 +170,7 @@ void createSwapChain(Window *window, Vulkan *vulkan) {
         createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
     }
 
-    createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
+    createInfo.preTransform = swapChainSupport.capabilities->currentTransform;
     createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
     createInfo.presentMode = presentMode;
     createInfo.clipped = VK_TRUE;
@@ -175,8 +196,12 @@ void createSwapChain(Window *window, Vulkan *vulkan) {
                             &vulkan->swapchain.swapChainImagesCount,
                             vulkan->swapchain.swapChainImages);
 
-    vulkan->swapchain.swapChainImageFormat = surfaceFormat.format;
-    vulkan->swapchain.swapChainExtent = extent;
+    vulkan->swapchain.swapChainImageFormat =
+        malloc(1 * sizeof(*vulkan->swapchain.swapChainImageFormat));
+    *vulkan->swapchain.swapChainImageFormat = surfaceFormat.format;
+    vulkan->swapchain.swapChainExtent =
+        malloc(1 * sizeof(*vulkan->swapchain.swapChainExtent));
+    *vulkan->swapchain.swapChainExtent = extent;
 }
 
 void cleanupSwapChain(Vulkan *vulkan) {
@@ -220,8 +245,10 @@ void cleanupSwapChain(Vulkan *vulkan) {
                      NULL);
     }
 
-    freeMem(4, vulkan->renderBuffers.swapChainFramebuffers,
+    freeMem(6, vulkan->renderBuffers.swapChainFramebuffers,
             vulkan->swapchain.swapChainImageViews, vulkan->ubo.uniformBuffers,
+            vulkan->swapchain.swapChainImageFormat,
+            vulkan->swapchain.swapChainExtent,
             vulkan->ubo.uniformBuffersMemory);
 
     vkDestroyDescriptorPool(vulkan->device.device, vulkan->ubo.descriptorPool,

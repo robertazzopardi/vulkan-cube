@@ -1,14 +1,16 @@
 #ifndef INCLUDE_VULKAN_HANDLE_UNIFORMS
 #define INCLUDE_VULKAN_HANDLE_UNIFORMS
 
-#include <cglm/cglm.h>
-#include <vulkan/vulkan.h>
+typedef float vec4[4];
+typedef vec4 mat4[4];
 
-typedef struct Vulkan Vulkan;
+typedef struct VkDescriptorSetLayout_T *VkDescriptorSetLayout;
+typedef struct VkBuffer_T *VkBuffer;
+typedef struct VkDeviceMemory_T *VkDeviceMemory;
+typedef struct VkDescriptorPool_T *VkDescriptorPool;
+typedef struct VkDescriptorSet_T *VkDescriptorSet;
 
-typedef struct UniformBufferObject UniformBufferObject;
-
-struct UniformBufferObject {
+typedef struct UniformBufferObject {
     mat4 model;
     mat4 view;
     mat4 proj;
@@ -20,13 +22,17 @@ struct UniformBufferObject {
 
     VkDescriptorPool descriptorPool;
     VkDescriptorSet *descriptorSets;
-};
+} UniformBufferObject;
+
+typedef struct Vulkan Vulkan;
+
+typedef unsigned int uint32_t;
+
+void updateUniformBuffer(Vulkan *, uint32_t, float);
 
 void createDescriptorSetLayout(Vulkan *);
 
 void createUniformBuffers(Vulkan *);
-
-void updateUniformBuffer(Vulkan *, uint32_t, float);
 
 void createDescriptorPool(Vulkan *);
 

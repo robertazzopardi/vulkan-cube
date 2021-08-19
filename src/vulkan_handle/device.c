@@ -1,13 +1,17 @@
 #include "vulkan_handle/device.h"
 #include "error_handle.h"
+#include "utility/error_handle.h"
 #include "vulkan_handle/memory.h"
 #include "vulkan_handle/swapchain.h"
 #include "vulkan_handle/validation.h"
 #include "vulkan_handle/vulkan_handle.h"
 #include "window/window.h"
 #include <string.h>
+#include <vulkan/vulkan.h>
 
 const uint32_t MAX_FAMILY = 1000;
+
+static const char *deviceExtensions[] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
 bool isComplete(QueueFamilyIndices queueFamilyIndices) {
     return queueFamilyIndices.graphicsFamily != MAX_FAMILY &&
@@ -100,7 +104,8 @@ bool isDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface) {
         swapChainAdequate = swapChainSupport.formats != NULL &&
                             swapChainSupport.presentModes != NULL;
 
-        freeMem(2, swapChainSupport.formats, swapChainSupport.presentModes);
+        freeMem(3, swapChainSupport.formats, swapChainSupport.presentModes,
+                swapChainSupport.capabilities);
     }
 
     VkPhysicalDeviceFeatures supportedFeatures;

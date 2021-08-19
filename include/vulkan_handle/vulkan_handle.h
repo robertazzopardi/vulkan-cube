@@ -10,11 +10,10 @@
 #include "uniforms.h"
 #include <vulkan/vulkan.h>
 
-typedef struct Vulkan Vulkan;
 typedef struct Validation Validation;
 typedef struct Window Window;
 
-struct Vulkan {
+typedef struct Vulkan {
     VkInstance instance;
     Validation *validation;
     Device device;
@@ -28,7 +27,7 @@ struct Vulkan {
     Depth depth;
     UniformBufferObject ubo;
     Texture texture;
-};
+} Vulkan;
 
 void initVulkan(Window *, Vulkan *);
 
@@ -36,10 +35,10 @@ void cleanUpVulkan(Window *, Vulkan *);
 
 VkFormat findDepthFormat(Vulkan *);
 
-void copyBuffer(Vulkan *, VkBuffer, VkBuffer, VkDeviceSize);
-
 VkCommandBuffer beginSingleTimeCommands(Vulkan *);
 
 void endSingleTimeCommands(Vulkan *, VkCommandBuffer);
+
+void copyBuffer(Vulkan *, VkBuffer, VkBuffer, VkDeviceSize);
 
 #endif /* INCLUDE_VULKAN_HANDLE_VULKAN_HANDLE */

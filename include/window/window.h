@@ -14,7 +14,7 @@ typedef union SDL_Event SDL_Event;
 typedef struct Vulkan Vulkan;
 typedef struct VkSurfaceKHR_T *VkSurfaceKHR;
 
-typedef struct Time {
+typedef union Time {
     uint64_t now;
     uint64_t last;
     double dt;
@@ -33,10 +33,5 @@ typedef struct Window {
 void initialise();
 
 void createSurface(Window *, Vulkan *);
-
-typedef struct VkSurfaceCapabilitiesKHR VkSurfaceCapabilitiesKHR;
-typedef struct VkExtent2D VkExtent2D;
-
-VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR, SDL_Window *);
 
 #endif /* INCLUDE_WINDOW_WINDOW */

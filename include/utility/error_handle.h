@@ -2,6 +2,7 @@
 #define INCLUDE_UTILITY_ERROR_HANDLE
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #define THROW_ERROR(errorMsg)                                                  \
     printf("%s\n", errorMsg);                                                  \

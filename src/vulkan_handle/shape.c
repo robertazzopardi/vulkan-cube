@@ -2,7 +2,9 @@
 #include "error_handle.h"
 #include "vulkan_handle/memory.h"
 #include "vulkan_handle/vulkan_handle.h"
+#include <cglm/cglm.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <vulkan/vulkan.h>
@@ -108,8 +110,8 @@ void combineVerticesAndIndices(Vulkan *vulkan, uint32_t count, ...) {
 void createDepthResources(Vulkan *vulkan) {
     VkFormat depthFormat = findDepthFormat(vulkan);
 
-    createImage(vulkan->swapchain.swapChainExtent.width,
-                vulkan->swapchain.swapChainExtent.height, 1,
+    createImage(vulkan->swapchain.swapChainExtent->width,
+                vulkan->swapchain.swapChainExtent->height, 1,
                 vulkan->msaaSamples, depthFormat, VK_IMAGE_TILING_OPTIMAL,
                 VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vulkan,
@@ -135,8 +137,8 @@ void createFramebuffers(Vulkan *vulkan) {
         framebufferInfo.renderPass = vulkan->graphicsPipeline.renderPass;
         framebufferInfo.attachmentCount = SIZEOF(attachments);
         framebufferInfo.pAttachments = attachments;
-        framebufferInfo.width = vulkan->swapchain.swapChainExtent.width;
-        framebufferInfo.height = vulkan->swapchain.swapChainExtent.height;
+        framebufferInfo.width = vulkan->swapchain.swapChainExtent->width;
+        framebufferInfo.height = vulkan->swapchain.swapChainExtent->height;
         framebufferInfo.layers = 1;
 
         if (vkCreateFramebuffer(

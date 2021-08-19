@@ -1,37 +1,33 @@
 #ifndef INCLUDE_VULKAN_HANDLE_DEVICE
 #define INCLUDE_VULKAN_HANDLE_DEVICE
 
-#include <stdint.h>
-#include <vulkan/vulkan.h>
+typedef struct VkPhysicalDevice_T *VkPhysicalDevice;
+typedef struct VkDevice_T *VkDevice;
+typedef struct VkQueue_T *VkQueue;
 
-static const char *deviceExtensions[] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
-
-typedef struct Device Device;
-
-typedef struct Window Window;
-
-// typedef struct VkPhysicalDevice VkPhysicalDevice;
-// typedef struct VkDevice VkDevice;
-
-struct Device {
+typedef struct Device {
     VkPhysicalDevice physicalDevice;
     VkDevice device;
 
     VkQueue graphicsQueue;
     VkQueue presentQueue;
-};
+} Device;
 
-typedef struct Vulkan Vulkan;
+typedef unsigned int uint32_t;
 
-void pickPhysicalDevice(Window *, Vulkan *);
-
-typedef struct {
+typedef struct QueueFamilyIndices {
     uint32_t graphicsFamily;
     uint32_t presentFamily;
 } QueueFamilyIndices;
 
+typedef struct VkSurfaceKHR_T *VkSurfaceKHR;
+
 QueueFamilyIndices findQueueFamilies(VkPhysicalDevice, VkSurfaceKHR);
 
+typedef struct Window Window;
+typedef struct Vulkan Vulkan;
+
 void createLogicalDevice(Window *, Vulkan *);
+void pickPhysicalDevice(Window *, Vulkan *);
 
 #endif /* INCLUDE_VULKAN_HANDLE_DEVICE */

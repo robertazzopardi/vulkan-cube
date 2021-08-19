@@ -2,6 +2,7 @@
 #include "error_handle.h"
 #include "vulkan_handle/memory.h"
 #include "vulkan_handle/vulkan_handle.h"
+#include <cglm/cglm.h>
 #include <string.h>
 #include <vulkan/vulkan.h>
 
@@ -143,8 +144,8 @@ void updateUniformBuffer(Vulkan *vulkan, uint32_t currentImage,
                (vec3){0.0f, 0.0f, 1.0f}, vulkan->ubo.view);
 
     glm_perspective(glm_rad(45.0f),
-                    vulkan->swapchain.swapChainExtent.width /
-                        vulkan->swapchain.swapChainExtent.height,
+                    vulkan->swapchain.swapChainExtent->width /
+                        vulkan->swapchain.swapChainExtent->height,
                     0.1f, 20.0f, vulkan->ubo.proj);
 
     vulkan->ubo.proj[1][1] *= -1;

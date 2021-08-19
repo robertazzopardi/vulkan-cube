@@ -2,7 +2,6 @@
 #define INCLUDE_VULKAN_HANDLE_VALIDATION
 
 #include <stdbool.h>
-#include <vulkan/vulkan.h>
 
 static const char *validationLayers[] = {"VK_LAYER_KHRONOS_validation"};
 
@@ -13,19 +12,25 @@ static const bool enableValidationLayers = false;
 static const bool enableValidationLayers = true;
 #endif
 
-typedef struct Validation Validation;
+typedef struct VkDebugUtilsMessengerEXT_T *VkDebugUtilsMessengerEXT;
+
+typedef struct Validation {
+    VkDebugUtilsMessengerEXT debugMessenger;
+} Validation;
 
 typedef struct Vulkan Vulkan;
 
-struct Validation {
-    VkDebugUtilsMessengerEXT debugMessenger;
-};
+void setupDebugMessenger(Vulkan *);
 
 bool checkValidationLayerSupport();
 
+typedef struct VkDebugUtilsMessengerCreateInfoEXT
+    VkDebugUtilsMessengerCreateInfoEXT;
+
 void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT *);
 
-void setupDebugMessenger(Vulkan *);
+typedef struct VkInstance_T *VkInstance;
+typedef struct VkAllocationCallbacks VkAllocationCallbacks;
 
 void DestroyDebugUtilsMessengerEXT(VkInstance, VkDebugUtilsMessengerEXT,
                                    const VkAllocationCallbacks *);

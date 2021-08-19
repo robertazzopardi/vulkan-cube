@@ -4,6 +4,7 @@
 #include "vulkan_handle/vulkan_handle.h"
 #include <SDL.h>
 #include <SDL_image.h>
+#include <cglm/cglm.h>
 #include <vulkan/vulkan.h>
 
 void copyBufferToImage(Vulkan *vulkan, VkBuffer buffer, VkImage image,
@@ -322,16 +323,16 @@ void createImageViews(Vulkan *vulkan) {
     for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
         vulkan->swapchain.swapChainImageViews[i] = createImageView(
             vulkan->device.device, vulkan->swapchain.swapChainImages[i],
-            vulkan->swapchain.swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT,
+            *vulkan->swapchain.swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT,
             1);
     }
 }
 
 void createColorResources(Vulkan *vulkan) {
-    VkFormat colorFormat = vulkan->swapchain.swapChainImageFormat;
+    VkFormat colorFormat = *vulkan->swapchain.swapChainImageFormat;
 
-    createImage(vulkan->swapchain.swapChainExtent.width,
-                vulkan->swapchain.swapChainExtent.height, 1,
+    createImage(vulkan->swapchain.swapChainExtent->width,
+                vulkan->swapchain.swapChainExtent->height, 1,
                 vulkan->msaaSamples, colorFormat, VK_IMAGE_TILING_OPTIMAL,
                 VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT |
                     VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,

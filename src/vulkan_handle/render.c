@@ -5,6 +5,7 @@
 #include "window/window.h"
 #include <SDL_events.h>
 #include <SDL_video.h>
+#include <vulkan/vulkan.h>
 
 void createCommandPool(Window *window, Vulkan *vulkan) {
     QueueFamilyIndices queueFamilyIndices =
@@ -68,7 +69,7 @@ void createCommandBuffers(Vulkan *vulkan, Window *window) {
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         renderPassInfo.renderPass = vulkan->graphicsPipeline.renderPass;
         renderPassInfo.renderArea.offset = (VkOffset2D){0, 0};
-        renderPassInfo.renderArea.extent = vulkan->swapchain.swapChainExtent;
+        renderPassInfo.renderArea.extent = *vulkan->swapchain.swapChainExtent;
         renderPassInfo.framebuffer =
             vulkan->renderBuffers.swapChainFramebuffers[i];
 

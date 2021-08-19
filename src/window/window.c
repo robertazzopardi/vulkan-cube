@@ -42,25 +42,6 @@ static int resizingEventCallback(void *data, SDL_Event *event) {
     return 0;
 }
 
-VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR capabilities,
-                            SDL_Window *window) {
-    if (capabilities.currentExtent.width != UINT32_MAX) {
-        return capabilities.currentExtent;
-    } else {
-        int width, height;
-        SDL_GetWindowSize(window, &width, &height);
-
-        VkExtent2D actualExtent = {(uint32_t)width, (uint32_t)height};
-
-        glm_clamp(actualExtent.width, capabilities.minImageExtent.width,
-                  capabilities.maxImageExtent.width);
-        glm_clamp(actualExtent.height, capabilities.minImageExtent.height,
-                  capabilities.maxImageExtent.height);
-
-        return actualExtent;
-    }
-}
-
 static inline void initSDL() {
     // Init SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_EVENTS) != 0) {

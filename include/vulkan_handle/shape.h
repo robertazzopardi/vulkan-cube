@@ -1,31 +1,31 @@
 #ifndef INCLUDE_VULKAN_HANDLE_SHAPE
 #define INCLUDE_VULKAN_HANDLE_SHAPE
 
-#include <cglm/cglm.h>
-#include <stdint.h>
-#include <vulkan/vulkan.h>
+// cglm types
+typedef float vec2[2];
+typedef float vec3[3];
 
-typedef struct Vulkan Vulkan;
-
-typedef struct Vertex Vertex;
-
-typedef struct Shape Shape;
-
-typedef struct Depth Depth;
-
-struct Vertex {
+typedef struct Vertex {
     vec3 pos;
     vec3 colour;
     vec2 texCoord;
-};
+} Vertex;
 
-struct Depth {
+typedef struct VkImage_T *VkImage;
+typedef struct VkDeviceMemory_T *VkDeviceMemory;
+typedef struct VkImageView_T *VkImageView;
+
+typedef struct Depth {
     VkImage depthImage;
     VkDeviceMemory depthImageMemory;
     VkImageView depthImageView;
-};
+} Depth;
 
-struct Shape {
+typedef unsigned short uint16_t;
+typedef unsigned int uint32_t;
+typedef unsigned long long uint64_t;
+
+typedef struct Shape {
     Vertex *vertices;
     uint32_t verticesCount;
 
@@ -34,36 +34,25 @@ struct Shape {
 
     uint32_t index;
     // uint32_t shapeCount;
-};
+} Shape;
 
-typedef struct ShapeBuffers ShapeBuffers;
+typedef struct VkBuffer_T *VkBuffer;
 
-struct ShapeBuffers {
+typedef struct ShapeBuffers {
     VkBuffer vertexBuffer;
     VkDeviceMemory vertexBufferMemory;
     VkBuffer indexBuffer;
     VkDeviceMemory indexBufferMemory;
-};
+} ShapeBuffers;
 
-static Vertex shape1[] = {
-    {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-    {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-    {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-    {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-};
-
-static Vertex shape2[] = {
-    {{-0.5f, -0.5f, -1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-    {{0.5f, -0.5f, -1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-    {{0.5f, 0.5f, -1.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-    {{-0.5f, 0.5f, -1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-};
-
-VkVertexInputBindingDescription getBindingDescription();
-
-VkVertexInputAttributeDescription *getAttributeDescriptions();
+typedef struct Vulkan Vulkan;
 
 void combineVerticesAndIndices(Vulkan *, uint32_t, ...);
+
+typedef uint64_t VkDeviceSize;
+typedef uint32_t VkFlags;
+typedef VkFlags VkBufferUsageFlags;
+typedef VkFlags VkMemoryPropertyFlags;
 
 void createBuffer(VkDeviceSize, VkBufferUsageFlags, VkMemoryPropertyFlags,
                   Vulkan *, VkBuffer *, VkDeviceMemory *);
@@ -75,5 +64,13 @@ void createIndexBuffer(Vulkan *);
 void createDepthResources(Vulkan *);
 
 void createFramebuffers(Vulkan *);
+
+typedef struct VkVertexInputBindingDescription VkVertexInputBindingDescription;
+typedef struct VkVertexInputAttributeDescription
+    VkVertexInputAttributeDescription;
+
+VkVertexInputBindingDescription getBindingDescription();
+
+VkVertexInputAttributeDescription *getAttributeDescriptions();
 
 #endif /* INCLUDE_VULKAN_HANDLE_SHAPE */
