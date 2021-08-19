@@ -61,7 +61,7 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR capabilities,
     }
 }
 
-void initSDL() {
+static inline void initSDL() {
     // Init SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_EVENTS) != 0) {
         SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
@@ -75,22 +75,45 @@ void initSDL() {
     }
 }
 
-void cleanupSDL(SDL_Window *win) {
-    SDL_DestroyWindow(win);
+static inline void cleanup(Window *window) {
+    freeMem(1, window->event);
+
+    SDL_DestroyWindow(window->win);
 
     IMG_Quit();
 
     SDL_Quit();
 }
 
-static Window createWindow() {
+static inline Window createWindow() {
     Window window = {0};
     window.win = SDL_CreateWindow(
         APP_NAME, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH_INIT,
         HEIGHT_INIT, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
     window.running = true;
-    window.windowResized = false;
+    window.event = malloc(1 * sizeof(*window.event));
+    window.time.now = SDL_GetPerformanceCounter();
+
+    // Add Window resize callback
+    SDL_AddEventWatch(resizingEventCallback, &window);
+
     return window;
+}
+
+static inline void calculateDeltaTime(Time *time) {
+    time->last = time->now;
+    time->now = SDL_GetPerformanceCounter();
+    time->dt = (time->now - time->last) / (double)SDL_GetPerformanceFrequency();
+}
+
+static inline void handleUserInput(Window *window) {
+    while (SDL_PollEvent(window->event)) {
+        switch (window->event->type) {
+        case SDL_QUIT:
+            window->running = false;
+            break;
+        }
+    }
 }
 
 void initialise() {
@@ -99,46 +122,32 @@ void initialise() {
     // Set Up Window
     Window window = createWindow();
 
-    // Add Window resize callback
-    SDL_AddEventWatch(resizingEventCallback, &window);
-
-    // INIT VULKAN
+    // Init Vulkan
     Vulkan vulkan = {0};
     initVulkan(&window, &vulkan);
 
-    // MAIN LOOP
-    SDL_Event event;
-
-    uint64_t start = SDL_GetPerformanceCounter();
-    float dt;
-
+    // Main Loop
     while (window.running) {
-        // Delta Time
-        uint64_t last = start;
-        start = SDL_GetPerformanceCounter();
-        dt = (((start - last) * 1000) / SDL_GetPerformanceFrequency()) * 0.001;
+        // Calculate frame delay
+        calculateDeltaTime(&window.time);
 
-        // Handle Events
-        while (SDL_PollEvent(&event)) {
-            switch (event.type) {
-            case SDL_QUIT:
-                window.running = false;
-                break;
-            }
+        // Frame rate limiting
+        uint32_t timeout = SDL_GetTicks() + FRAME_DELAY;
+        while (!SDL_TICKS_PASSED(SDL_GetTicks(), timeout)) {
+            // Handle Input
+            handleUserInput(&window);
+
+            // Update
+            // printf("%.f\n", 1.0f / window.time.dt);
+
+            // Rendering
+            drawFrame(&window, &vulkan);
         }
-
-        // Update
-
-        // Drawing
-        drawFrame(&window, event, &vulkan, dt);
-
-        SDL_Delay(floor(FRAME_DELAY - dt));
     }
 
     vkDeviceWaitIdle(vulkan.device.device);
 
-    // CLEAN UP
+    // Clean Up
     cleanUpVulkan(&window, &vulkan);
-
-    cleanupSDL(window.win);
+    cleanup(&window);
 }

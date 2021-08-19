@@ -34,7 +34,7 @@ SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice, VkSurfaceKHR);
 
 void createSwapChain(Window *, Vulkan *);
 
-void recreateSwapChain(Window *, SDL_Event, Vulkan *);
+void recreateSwapChain(Window *, Vulkan *);
 
 void cleanupSwapChain(Vulkan *);
 

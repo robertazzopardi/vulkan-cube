@@ -152,7 +152,7 @@ void createSyncObjects(Vulkan *vulkan) {
     vulkan->semaphores.inFlightFences = inFlightFencesTemp;
 }
 
-void drawFrame(Window *window, SDL_Event event, Vulkan *vulkan, float dt) {
+void drawFrame(Window *window, Vulkan *vulkan) {
     vkWaitForFences(vulkan->device.device, 1,
                     &vulkan->semaphores.inFlightFences[window->currentFrame],
                     VK_TRUE, UINT64_MAX);
@@ -164,13 +164,13 @@ void drawFrame(Window *window, SDL_Event event, Vulkan *vulkan, float dt) {
         VK_NULL_HANDLE, &imageIndex);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-        recreateSwapChain(window, event, vulkan);
+        recreateSwapChain(window, vulkan);
         return;
     } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
         THROW_ERROR("failed to acquire swap chain image!\n");
     }
 
-    updateUniformBuffer(vulkan, imageIndex, dt);
+    updateUniformBuffer(vulkan, imageIndex, window->time.dt);
 
     if (vulkan->semaphores.imagesInFlight[imageIndex] != VK_NULL_HANDLE) {
         vkWaitForFences(vulkan->device.device, 1,
@@ -225,7 +225,7 @@ void drawFrame(Window *window, SDL_Event event, Vulkan *vulkan, float dt) {
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
         window->windowResized) {
         window->windowResized = false;
-        recreateSwapChain(window, event, vulkan);
+        recreateSwapChain(window, vulkan);
     } else if (result != VK_SUCCESS) {
         THROW_ERROR("failed to present swap chain image!\n");
     }

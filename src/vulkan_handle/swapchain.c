@@ -50,12 +50,12 @@ SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device,
     return details;
 }
 
-void recreateSwapChain(Window *window, SDL_Event event, Vulkan *vulkan) {
+void recreateSwapChain(Window *window, Vulkan *vulkan) {
     int width = 0, height = 0;
     SDL_Vulkan_GetDrawableSize(window->win, &width, &height);
     while (width == 0 || height == 0) {
         SDL_Vulkan_GetDrawableSize(window->win, &width, &height);
-        SDL_PollEvent(&event);
+        SDL_PollEvent(window->event);
     }
 
     vkDeviceWaitIdle(vulkan->device.device);

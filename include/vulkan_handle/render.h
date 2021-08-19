@@ -30,7 +30,7 @@ void createCommandPool(Window *, Vulkan *);
 
 void createCommandBuffers(Vulkan *, Window *);
 
-void drawFrame(Window *, SDL_Event, Vulkan *, float);
+void drawFrame(Window *, Vulkan *);
 
 void createSyncObjects(Vulkan *);
 

@@ -133,10 +133,11 @@ void createUniformBuffers(Vulkan *vulkan) {
     glm_mat4_identity(vulkan->ubo.model);
 }
 
-void updateUniformBuffer(Vulkan *vulkan, uint32_t currentImage, float dt) {
+void updateUniformBuffer(Vulkan *vulkan, uint32_t currentImage,
+                         float dt __unused) {
 
-    glm_rotate(vulkan->ubo.model, dt * glm_rad(45.0f),
-               (vec3){0.0f, 0.0f, 1.0f});
+    // glm_rotate(vulkan->ubo.model, dt * glm_rad(45.0f),
+    //            (vec3){0.0f, 0.0f, 1.0f});
 
     glm_lookat((vec3){2.0f, 0.0f, 3.0f}, (vec3){0.0f, 0.0f, 0.0f},
                (vec3){0.0f, 0.0f, 1.0f}, vulkan->ubo.view);
