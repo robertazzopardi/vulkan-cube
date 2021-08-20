@@ -152,8 +152,8 @@ void createUniformBuffers(Vulkan *vulkan) {
 }
 
 void updateUniformBuffer(Vulkan *vulkan, uint32_t currentImage, float dt) {
-    glm_rotate(vulkan->ubo.model, dt * glm_rad(20.0f),
-               (vec3){1.0f, 1.0f, -1.0f});
+    glm_rotate(vulkan->ubo.model, dt * glm_rad(45.0f),
+               (vec3){0.0f, 0.0f, 1.0f});
 
     glm_lookat((vec3){2.0f, 2.0f, 2.0f}, (vec3){0.0f, 0.0f, 0.0f},
                (vec3){0.0f, 0.0f, 1.0f}, vulkan->ubo.view);
