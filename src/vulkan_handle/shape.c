@@ -1,6 +1,7 @@
 #include "vulkan_handle/shape.h"
 #include "error_handle.h"
 #include "vulkan_handle/memory.h"
+#include "vulkan_handle/texture.h"
 #include "vulkan_handle/vulkan_handle.h"
 #include <cglm/vec3.h>
 #include <stdarg.h>
@@ -19,8 +20,26 @@ VkVertexInputBindingDescription getBindingDescription() {
 }
 
 VkVertexInputAttributeDescription *getAttributeDescriptions() {
+    // VkVertexInputAttributeDescription *attributeDescriptions =
+    //     malloc(3 * sizeof(*attributeDescriptions));
+
+    // attributeDescriptions[0].binding = 0;
+    // attributeDescriptions[0].location = 0;
+    // attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+    // attributeDescriptions[0].offset = offsetof(Vertex, pos);
+
+    // attributeDescriptions[1].binding = 0;
+    // attributeDescriptions[1].location = 1;
+    // attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+    // attributeDescriptions[1].offset = offsetof(Vertex, colour);
+
+    // attributeDescriptions[2].binding = 0;
+    // attributeDescriptions[2].location = 2;
+    // attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+    // attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
+
     VkVertexInputAttributeDescription *attributeDescriptions =
-        malloc(3 * sizeof(*attributeDescriptions));
+        malloc(2 * sizeof(*attributeDescriptions));
 
     attributeDescriptions[0].binding = 0;
     attributeDescriptions[0].location = 0;
@@ -32,10 +51,10 @@ VkVertexInputAttributeDescription *getAttributeDescriptions() {
     attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
     attributeDescriptions[1].offset = offsetof(Vertex, colour);
 
-    attributeDescriptions[2].binding = 0;
-    attributeDescriptions[2].location = 2;
-    attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-    attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
+    // attributeDescriptions[2].binding = 0;
+    // attributeDescriptions[2].location = 2;
+    // attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+    // attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
 
     return attributeDescriptions;
 }
@@ -60,9 +79,7 @@ void calculateIndices(Shape *vulkanShape, Shape shape) {
     for (uint32_t i = 0; i < shape.verticesCount; i++) {
         Vertex vert = shape.vertices[i];
 
-        bool inArray = isInVertexArray(vert, arr, vertIndex);
-
-        if (!inArray) {
+        if (!isInVertexArray(vert, arr, vertIndex)) {
             indis[indisIndex++] = vulkanShape->index++;
             arr[vertIndex++] = vert;
         }
@@ -78,6 +95,12 @@ void calculateIndices(Shape *vulkanShape, Shape shape) {
     memcpy(vulkanShape->indices + vulkanShape->indicesCount, indis,
            indisIndex * sizeof(*indis));
 
+    // printf("%u\n", vulkanShape->indicesCount);
+    for (uint32_t i = 0; i < indisIndex; i++) {
+        printf("%u ", indis[i]);
+    }
+    printf("\n");
+
     freeMem(1, indis);
 }
 
@@ -90,6 +113,8 @@ void combineVerticesAndIndices(Vulkan *vulkan, uint32_t count, ...) {
         malloc(count * 4 * sizeof(*vulkan->shapes.vertices));
     vulkan->shapes.indices =
         malloc(count * 6 * sizeof(*vulkan->shapes.indices));
+
+    // printf("%u %u\n", count * 4, count * 6);
 
     for (uint32_t i = 0; i < count; i++) {
         Shape shape = va_arg(valist, Shape);

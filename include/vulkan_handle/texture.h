@@ -11,10 +11,10 @@ typedef struct VkSampler_T *VkSampler;
 typedef struct Texture {
     uint32_t mipLevels;
 
-    VkImage textureImage;
-    VkDeviceMemory textureImageMemory;
-    VkImageView textureImageView;
-    VkSampler textureSampler;
+    // VkImage textureImage;
+    // VkDeviceMemory textureImageMemory;
+    // VkImageView textureImageView;
+    // VkSampler textureSampler;
 
     VkImage colorImage;
     VkDeviceMemory colorImageMemory;

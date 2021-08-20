@@ -1,6 +1,7 @@
 #include "vulkan_handle/swapchain.h"
 #include "error_handle.h"
 #include "vulkan_handle/memory.h"
+#include "vulkan_handle/texture.h"
 #include "vulkan_handle/vulkan_handle.h"
 #include "window/window.h"
 #include <SDL_events.h>

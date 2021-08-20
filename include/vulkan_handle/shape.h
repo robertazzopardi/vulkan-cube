@@ -7,7 +7,7 @@ typedef float vec3[3];
 typedef struct Vertex {
     vec3 pos;
     vec3 colour;
-    vec2 texCoord;
+    // vec2 texCoord;
 } Vertex;
 
 typedef struct VkImage_T *VkImage;

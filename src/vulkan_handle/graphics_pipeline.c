@@ -55,7 +55,7 @@ void createGraphicsPipeline(Vulkan *vulkan) {
         getAttributeDescriptions();
 
     vertexInputInfo.vertexBindingDescriptionCount = 1;
-    vertexInputInfo.vertexAttributeDescriptionCount = 3;
+    vertexInputInfo.vertexAttributeDescriptionCount = 2;
     vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
     vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions;
 

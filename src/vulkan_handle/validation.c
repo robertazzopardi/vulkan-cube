@@ -37,13 +37,13 @@ debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity __unused,
               VkDebugUtilsMessageTypeFlagsEXT messageType __unused,
               const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
               void *pUserData __unused) {
-    // if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
-    //     printf("\n");
-    // }
+    if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
+        printf("\n");
+    }
     printf("validation layer: %s\n", pCallbackData->pMessage);
-    // if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
-    //     printf("\n");
-    // }
+    if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
+        printf("\n");
+    }
     return VK_FALSE;
 }
 

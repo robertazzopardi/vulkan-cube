@@ -172,85 +172,92 @@ void initVulkan(Window *window, Vulkan *vulkan) {
 
     createCommandPool(window, vulkan);
 
-    createTextureImage(vulkan);
+    // createTextureImage(vulkan);
 
-    createTextureImageView(vulkan);
+    // createTextureImageView(vulkan);
 
-    createTextureSampler(vulkan);
+    // createTextureSampler(vulkan);
 
-    // Vertex shape1[] = {
-    //     {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-    //     {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-    //     {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-    //     {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-    // };
-
-    // Vertex shape2[] = {
-    //     {{-0.5f, -0.5f, -1.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-    //     {{0.5f, -0.5f, -1.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-    //     {{0.5f, 0.5f, -1.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-    //     {{-0.5f, 0.5f, -1.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-    // };
-
-    // Vertex shape3[] = {
-    //     {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-    //     {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-    //     {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-    //     {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-    // };
-
-    // Vertex shape4[] = {
-    //     {{-0.5f, -0.5f, -1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-    //     {{0.5f, -0.5f, -1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-    //     {{0.5f, 0.5f, -1.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-    //     {{-0.5f, 0.5f, -1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-    // };
+    //
 
     Vertex top[] = {
-        {{0.5f, 0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}}, // Top
-        {{-0.5f, 0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-        {{0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
-        {{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
+        {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}},
+        {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
+        {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}},
+        {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}},
     };
     Vertex bottom[] = {
-        {{0.5f, -0.5f, 0.5f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}}, // Bottom
-        {{-0.5f, -0.5f, 0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f}},
-        {{0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 1.0f}},
-        {{-0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}, {0.0f, 1.0f}},
+        {{-0.5f, 0.5f, -1.0f}, {1.0f, 0.0f, 0.0f}},
+        {{0.5f, 0.5f, -1.0f}, {0.0f, 1.0f, 0.0f}},
+        {{0.5f, -0.5f, -1.0f}, {0.0f, 0.0f, 1.0f}},
+        {{-0.5f, -0.5f, -1.0f}, {1.0f, 1.0f, 1.0f}},
     };
     Vertex right[] = {
-        {{0.5f, 0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // Right
-        {{0.5f, 0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-        {{0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
-        {{0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
+        {{0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}}, // Right
+        {{0.5f, -0.5f, -1.0f}, {0.0f, 1.0f, 0.0f}},
+        {{0.5f, 0.5f, -1.0f}, {0.0f, 0.0f, 1.0f}},
+        {{0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}},
     };
     Vertex left[] = {
-        {{-0.5f, 0.5f, 0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // left
-        {{-0.5f, 0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-        {{-0.5f, -0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
-        {{-0.5f, -0.5f, 0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
+        {{-0.5f, 0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}}, // left
+        {{-0.5f, 0.5f, -1.0f}, {0.0f, 1.0f, 0.0f}},
+        {{-0.5f, -0.5f, -1.0f}, {0.0f, 0.0f, 1.0f}},
+        {{-0.5f, -0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}},
     };
     Vertex front[] = {
-        {{-0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}}, // front
-        {{0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
-        {{0.5f, -0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-        {{-0.5f, -0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+        {{0.5f, 0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}}, // front
+        {{0.5f, 0.5f, -1.0f}, {0.0f, 1.0f, 0.0f}},
+        {{-0.5f, 0.5f, -1.0f}, {0.0f, 0.0f, 1.0f}},
+        {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}},
     };
     Vertex back[] = {
-        {{-0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}}, // back
-        {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f}},
-        {{0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 1.0f}},
-        {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f}},
+        {{0.5f, -0.5f, -1.0f}, {1.0f, 0.0f, 0.0f}}, // back
+        {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
+        {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}},
+        {{-0.5f, -0.5f, -1.0f}, {1.0f, 1.0f, 1.0f}},
     };
 
-    // combineVerticesAndIndices(vulkan, 4, (Shape){shape1, 4, NULL, 6, 0},
-    //                           (Shape){shape2, 4, NULL, 6, 0},
-    //                           (Shape){shape3, 4, NULL, 6, 0},
-    //                           (Shape){shape4, 4, NULL, 6, 0});
+    // combineVerticesAndIndices(vulkan, 2, (Shape){shape1, 4, NULL, 6, 0},
+    //                           (Shape){shape2, 4, NULL, 6, 0});
     combineVerticesAndIndices(
         vulkan, 6, (Shape){top, 4, NULL, 6, 0}, (Shape){bottom, 4, NULL, 6, 0},
         (Shape){right, 4, NULL, 6, 0}, (Shape){left, 4, NULL, 6, 0},
         (Shape){front, 4, NULL, 6, 0}, (Shape){back, 4, NULL, 6, 0});
+
+    // Vertex vertices[] = {
+    //     {{+0.5f, +0.5f, +0.5f}, {+0.f, +1.f, +0.f}}, // Top
+    //     {{-0.5f, +0.5f, +0.5f}, {+0.f, +1.f, +0.f}},
+    //     {{+0.5f, +0.5f, -0.5f}, {+0.f, +1.f, +0.f}},
+    //     {{-0.5f, +0.5f, -0.5f}, {+0.f, +1.f, +0.f}},
+    //     {{+0.5f, -0.5f, +0.5f}, {+0.f, -1.f, +0.f}}, // Bottom
+    //     {{-0.5f, -0.5f, +0.5f}, {+0.f, -1.f, +0.f}},
+    //     {{+0.5f, -0.5f, -0.5f}, {+0.f, -1.f, +0.f}},
+    //     {{-0.5f, -0.5f, -0.5f}, {+0.f, -1.f, +0.f}},
+    //     {{+0.5f, +0.5f, +0.5f}, {+1.f, +0.f, +0.f}}, // Right
+    //     {{+0.5f, +0.5f, -0.5f}, {+1.f, +0.f, +0.f}},
+    //     {{+0.5f, -0.5f, -0.5f}, {+1.f, +0.f, +0.f}},
+    //     {{+0.5f, -0.5f, +0.5f}, {+1.f, +0.f, +0.f}},
+    //     {{-0.5f, +0.5f, +0.5f}, {-1.f, +0.f, +0.f}}, // left
+    //     {{-0.5f, +0.5f, -0.5f}, {-1.f, +0.f, +0.f}},
+    //     {{-0.5f, -0.5f, -0.5f}, {-1.f, +0.f, +0.f}},
+    //     {{-0.5f, -0.5f, +0.5f}, {-1.f, +0.f, +0.f}},
+    //     {{-0.5f, +0.5f, +0.5f}, {+0.f, +0.f, +1.f}}, // front
+    //     {{+0.5f, +0.5f, +0.5f}, {+0.f, +0.f, +1.f}},
+    //     {{+0.5f, -0.5f, +0.5f}, {+0.f, +0.f, +1.f}},
+    //     {{-0.5f, -0.5f, +0.5f}, {+0.f, +0.f, +1.f}},
+    //     {{-0.5f, +0.5f, -0.5f}, {+0.f, +0.f, -1.f}}, // back
+    //     {{+0.5f, +0.5f, -0.5f}, {+0.f, +0.f, -1.f}},
+    //     {{+0.5f, -0.5f, -0.5f}, {+0.f, +0.f, -1.f}},
+    //     {{-0.5f, -0.5f, -0.5f}, {+0.f, +0.f, -1.f}},
+    // };
+    // uint32_t indices[] = {
+    //     0,  1,  2,  1,  2,  3,  /*top*/
+    //     4,  5,  6,  5,  6,  7,  /*bottom*/
+    //     8,  9,  10, 8,  10, 11, /*right*/
+    //     12, 13, 14, 12, 14, 15, /*left*/
+    //     16, 17, 18, 16, 18, 19, /*front*/
+    //     20, 21, 22, 20, 22, 23, /*back*/
+    // };
     createVertexBuffer(vulkan);
     createIndexBuffer(vulkan);
 
@@ -268,14 +275,16 @@ void initVulkan(Window *window, Vulkan *vulkan) {
 void cleanUpVulkan(Window *window, Vulkan *vulkan) {
     cleanupSwapChain(vulkan);
 
-    vkDestroySampler(vulkan->device.device, vulkan->texture.textureSampler,
-                     NULL);
-    vkDestroyImageView(vulkan->device.device, vulkan->texture.textureImageView,
-                       NULL);
+    // vkDestroySampler(vulkan->device.device, vulkan->texture.textureSampler,
+    //                  NULL);
+    // vkDestroyImageView(vulkan->device.device,
+    // vulkan->texture.textureImageView,
+    //                    NULL);
 
-    vkDestroyImage(vulkan->device.device, vulkan->texture.textureImage, NULL);
-    vkFreeMemory(vulkan->device.device, vulkan->texture.textureImageMemory,
-                 NULL);
+    // vkDestroyImage(vulkan->device.device, vulkan->texture.textureImage,
+    // NULL); vkFreeMemory(vulkan->device.device,
+    // vulkan->texture.textureImageMemory,
+    //              NULL);
 
     vkDestroyDescriptorSetLayout(vulkan->device.device,
                                  vulkan->ubo.descriptorSetLayout, NULL);
