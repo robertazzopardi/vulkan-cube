@@ -67,12 +67,10 @@ VkResult CreateDebugUtilsMessengerEXT(
     PFN_vkCreateDebugUtilsMessengerEXT func =
         (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
             instance, "vkCreateDebugUtilsMessengerEXT");
-    // printf("%d\n", func == NULL);
     if (func != NULL) {
         return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-    } else {
-        return VK_ERROR_EXTENSION_NOT_PRESENT;
     }
+    return VK_ERROR_EXTENSION_NOT_PRESENT;
 }
 
 void DestroyDebugUtilsMessengerEXT(VkInstance instance,
@@ -94,7 +92,7 @@ void setupDebugMessenger(Vulkan *vulkan) {
     populateDebugMessengerCreateInfo(&createInfo);
 
     if (CreateDebugUtilsMessengerEXT(vulkan->instance, &createInfo, NULL,
-                                     &vulkan->validation->debugMessenger) !=
+                                     &vulkan->validation.debugMessenger) !=
         VK_SUCCESS) {
         THROW_ERROR("failed to set up debug messenger!\n");
     }

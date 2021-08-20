@@ -7,7 +7,7 @@
 
 #define APP_NAME "Vulkan App"
 
-static const int MAX_FRAMES_IN_FLIGHT = 2;
+#define MAX_FRAMES_IN_FLIGHT 2
 
 typedef struct SDL_Window SDL_Window;
 typedef union SDL_Event SDL_Event;

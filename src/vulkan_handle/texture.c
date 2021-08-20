@@ -4,7 +4,7 @@
 #include "vulkan_handle/vulkan_handle.h"
 #include <SDL.h>
 #include <SDL_image.h>
-#include <cglm/cglm.h>
+#include <cglm/util.h>
 #include <vulkan/vulkan.h>
 
 void copyBufferToImage(Vulkan *vulkan, VkBuffer buffer, VkImage image,

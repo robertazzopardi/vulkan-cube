@@ -1,7 +1,6 @@
 #ifndef INCLUDE_VULKAN_HANDLE_SHAPE
 #define INCLUDE_VULKAN_HANDLE_SHAPE
 
-// cglm types
 typedef float vec2[2];
 typedef float vec3[3];
 
@@ -33,7 +32,6 @@ typedef struct Shape {
     uint16_t indicesCount;
 
     uint32_t index;
-    // uint32_t shapeCount;
 } Shape;
 
 typedef struct VkBuffer_T *VkBuffer;

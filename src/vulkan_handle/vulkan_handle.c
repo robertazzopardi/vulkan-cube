@@ -1,23 +1,16 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_FORCE_LEFT_HANDED
+
 #include "vulkan_handle/vulkan_handle.h"
 #include "error_handle.h"
-#include "memory.h"
-#include "swapchain.h"
 #include "vulkan_handle/device.h"
+#include "vulkan_handle/memory.h"
+#include "vulkan_handle/swapchain.h"
 #include "vulkan_handle/texture.h"
-#include "vulkan_handle/uniforms.h"
 #include "vulkan_handle/validation.h"
 #include "window/window.h"
 #include <SDL_vulkan.h>
-#include <cglm/affine.h>
-#include <cglm/cglm.h>
-#include <cglm/io.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
 #include <vulkan/vulkan.h>
 
 VkCommandBuffer beginSingleTimeCommands(Vulkan *vulkan) {
@@ -185,22 +178,79 @@ void initVulkan(Window *window, Vulkan *vulkan) {
 
     createTextureSampler(vulkan);
 
-    Vertex shape1[] = {
-        {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-        {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-        {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-        {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+    // Vertex shape1[] = {
+    //     {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+    //     {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+    //     {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+    //     {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+    // };
+
+    // Vertex shape2[] = {
+    //     {{-0.5f, -0.5f, -1.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+    //     {{0.5f, -0.5f, -1.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+    //     {{0.5f, 0.5f, -1.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+    //     {{-0.5f, 0.5f, -1.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+    // };
+
+    // Vertex shape3[] = {
+    //     {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+    //     {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+    //     {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+    //     {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+    // };
+
+    // Vertex shape4[] = {
+    //     {{-0.5f, -0.5f, -1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+    //     {{0.5f, -0.5f, -1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+    //     {{0.5f, 0.5f, -1.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+    //     {{-0.5f, 0.5f, -1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+    // };
+
+    Vertex top[] = {
+        {{0.5f, 0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}}, // Top
+        {{-0.5f, 0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+        {{0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
+        {{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
+    };
+    Vertex bottom[] = {
+        {{0.5f, -0.5f, 0.5f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}}, // Bottom
+        {{-0.5f, -0.5f, 0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f}},
+        {{0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 1.0f}},
+        {{-0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}, {0.0f, 1.0f}},
+    };
+    Vertex right[] = {
+        {{0.5f, 0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // Right
+        {{0.5f, 0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+        {{0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
+        {{0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
+    };
+    Vertex left[] = {
+        {{-0.5f, 0.5f, 0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // left
+        {{-0.5f, 0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+        {{-0.5f, -0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
+        {{-0.5f, -0.5f, 0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
+    };
+    Vertex front[] = {
+        {{-0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}}, // front
+        {{0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
+        {{0.5f, -0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+        {{-0.5f, -0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+    };
+    Vertex back[] = {
+        {{-0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}}, // back
+        {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f}},
+        {{0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 1.0f}},
+        {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f}},
     };
 
-    Vertex shape2[] = {
-        {{-0.5f, -0.5f, -1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-        {{0.5f, -0.5f, -1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-        {{0.5f, 0.5f, -1.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-        {{-0.5f, 0.5f, -1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-    };
-
-    combineVerticesAndIndices(vulkan, 2, (Shape){shape1, 4, NULL, 6, 0},
-                              (Shape){shape2, 4, NULL, 6, 0});
+    // combineVerticesAndIndices(vulkan, 4, (Shape){shape1, 4, NULL, 6, 0},
+    //                           (Shape){shape2, 4, NULL, 6, 0},
+    //                           (Shape){shape3, 4, NULL, 6, 0},
+    //                           (Shape){shape4, 4, NULL, 6, 0});
+    combineVerticesAndIndices(
+        vulkan, 6, (Shape){top, 4, NULL, 6, 0}, (Shape){bottom, 4, NULL, 6, 0},
+        (Shape){right, 4, NULL, 6, 0}, (Shape){left, 4, NULL, 6, 0},
+        (Shape){front, 4, NULL, 6, 0}, (Shape){back, 4, NULL, 6, 0});
     createVertexBuffer(vulkan);
     createIndexBuffer(vulkan);
 
@@ -274,7 +324,7 @@ void cleanUpVulkan(Window *window, Vulkan *vulkan) {
 
     if (enableValidationLayers) {
         DestroyDebugUtilsMessengerEXT(vulkan->instance,
-                                      vulkan->validation->debugMessenger, NULL);
+                                      vulkan->validation.debugMessenger, NULL);
     }
 
     vkDestroySurfaceKHR(vulkan->instance, window->surface, NULL);

@@ -8,4 +8,6 @@
     printf("%s\n", errorMsg);                                                  \
     exit(EXIT_FAILURE);
 
+// #define WHERE fprintf(stderr, "[LOG]%s:%d\n", __FILE__, __LINE__);
+
 #endif /* INCLUDE_UTILITY_ERROR_HANDLE */

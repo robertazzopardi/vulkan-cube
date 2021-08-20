@@ -8,7 +8,7 @@
 CC = clang
 
 # define any compile-time flags
-CFLAGS	:= -Wall -Wextra -Werror -W -flto -ffast-math -Oz -D_THREAD_SAFE `sdl2-config --cflags`
+CFLAGS	:= -Wall -Wextra -Werror -W -flto -ffast-math -Oz `sdl2-config --cflags`
 CFLAGS  += -fsanitize=address -fno-omit-frame-pointer -ffunction-sections -fdata-sections
 # CFLAGS  += --analyze
 # CFLAGS  += -g
@@ -16,7 +16,7 @@ CFLAGS  += -fsanitize=address -fno-omit-frame-pointer -ffunction-sections -fdata
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
 #   their path using -Lpath, something like:
-LFLAGS = -lvulkan `sdl2-config --libs` -lSDL2_image
+LFLAGS := -lvulkan -lSDL2 -lSDL2_image
 
 # scan-build
 SCAN =		scan-build
@@ -75,6 +75,7 @@ OBJECTS		:= $(SOURCES:.c=.o)
 OUTPUTMAIN	:= $(call FIXPATH,$(OUTPUT)/$(MAIN))
 
 all: compile_shaders $(OUTPUT) $(MAIN)
+# $(RM) $(OBJECTS)
 	@echo Executing 'all' complete!
 
 $(OUTPUT):
@@ -82,6 +83,8 @@ $(OUTPUT):
 
 $(MAIN): $(OBJECTS)
 	$(CC) $(CFLAGS) $(INCLUDES) -o $(OUTPUTMAIN) $(OBJECTS) $(LFLAGS) $(LIBS)
+# $(CC) $(CFLAGS) $(INCLUDES) -c $(SOURCES)
+# $(CC) $(CFLAGS) $(INCLUDES) -o $(OUTPUTMAIN) $(OBJECTS) $(LFLAGS)
 
 # this is a suffix replacement rule for building .o's from .c's
 # it uses automatic variables $<: the name of the prerequisite of
@@ -95,7 +98,6 @@ clean_shaders:
 
 .PHONY: clean
 clean: clean_shaders
-	clear
 	$(RM) $(OUTPUTMAIN)
 	$(RM) $(call FIXPATH,$(OBJECTS))
 	@echo Cleanup complete!
@@ -117,8 +119,8 @@ compile_shaders: clean_shaders
 	GLSLC=$(VULKAN_SDK)/macOS/bin/glslc
 
 # Compile the shaders to .spv files
-	GLSLC $(SRC)/shaders/shader.vert -o $(SRC)/shaders/vert.spv
-	GLSLC $(SRC)/shaders/shader.frag -o $(SRC)/shaders/frag.spv
+	GLSLC $(SRC)/shaders/texture_shaders/shader.vert -o $(SRC)/shaders/vert.spv
+	GLSLC $(SRC)/shaders/texture_shaders/shader.frag -o $(SRC)/shaders/frag.spv
 
 	$(MD) $(INCLUDE)/shaders
 	xxd -i $(SRC)/shaders/frag.spv > $(INCLUDE)/shaders/frag_shader.h

@@ -53,7 +53,6 @@ void createCommandBuffers(Vulkan *vulkan, Window *window) {
 
     VkRect2D scissor;
     scissor.offset = (VkOffset2D){0, 0};
-    // scissor.extent = (VkExtent2D){window.width, window.height};
     scissor.extent = (VkExtent2D){width, height};
 
     for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
@@ -104,8 +103,8 @@ void createCommandBuffers(Vulkan *vulkan, Window *window) {
 
         vkCmdBindDescriptorSets(vulkan->renderBuffers.commandBuffers[i],
                                 VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                vulkan->graphicsPipeline.pipelineLayout, 0, 1,
-                                &vulkan->ubo.descriptorSets[i], 0, NULL);
+                                vulkan->graphicsPipeline.pipelineLayout, 0,
+                                1, &vulkan->ubo.descriptorSets[i], 0, NULL);
 
         vkCmdDrawIndexed(vulkan->renderBuffers.commandBuffers[i],
                          vulkan->shapes.indicesCount, 1, 0, 0, 0);

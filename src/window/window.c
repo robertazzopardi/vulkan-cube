@@ -81,12 +81,6 @@ static inline Window createWindow() {
     return window;
 }
 
-static inline void calculateDeltaTime(Time *time) {
-    time->last = time->now;
-    time->now = SDL_GetPerformanceCounter();
-    time->dt = (time->now - time->last) / (double)SDL_GetPerformanceFrequency();
-}
-
 static inline void handleUserInput(Window *window) {
     while (SDL_PollEvent(window->event)) {
         switch (window->event->type) {
@@ -110,7 +104,7 @@ void initialise() {
     // Main Loop
     while (window.running) {
         // Calculate frame delay
-        calculateDeltaTime(&window.time);
+        window.time.now = SDL_GetPerformanceCounter();
 
         // Frame rate limiting
         uint32_t timeout = SDL_GetTicks() + FRAME_DELAY;
@@ -119,11 +113,15 @@ void initialise() {
             handleUserInput(&window);
 
             // Update
-            printf("%.f\n", 1.0f / window.time.dt);
+            // printf("%.f\n", 1.0f / window.time.dt);
 
             // Rendering
             drawFrame(&window, &vulkan);
         }
+
+        window.time.last = SDL_GetPerformanceCounter();
+        window.time.dt = (window.time.last - window.time.now) /
+                         (float)SDL_GetPerformanceFrequency();
     }
 
     vkDeviceWaitIdle(vulkan.device.device);

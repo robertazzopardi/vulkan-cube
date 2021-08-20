@@ -8,14 +8,12 @@
 #include "swapchain.h"
 #include "texture.h"
 #include "uniforms.h"
+#include <validation.h>
 #include <vulkan/vulkan.h>
-
-typedef struct Validation Validation;
-typedef struct Window Window;
 
 typedef struct Vulkan {
     VkInstance instance;
-    Validation *validation;
+    Validation validation;
     Device device;
     VkSampleCountFlagBits msaaSamples;
     SwapChain swapchain;
@@ -28,6 +26,8 @@ typedef struct Vulkan {
     UniformBufferObject ubo;
     Texture texture;
 } Vulkan;
+
+typedef struct Window Window;
 
 void initVulkan(Window *, Vulkan *);
 

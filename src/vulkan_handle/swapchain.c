@@ -5,7 +5,7 @@
 #include "window/window.h"
 #include <SDL_events.h>
 #include <SDL_vulkan.h>
-#include <cglm/cglm.h>
+#include <cglm/util.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <vulkan/vulkan.h>

@@ -2,7 +2,7 @@
 #include "error_handle.h"
 #include "vulkan_handle/memory.h"
 #include "vulkan_handle/vulkan_handle.h"
-#include <cglm/cglm.h>
+#include <cglm/vec3.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdlib.h>
