@@ -2,6 +2,8 @@
 
 Somewhat modularised version of the [vulkan-tutorial](https://vulkan-tutorial.com/) in C and SDL. The origional tutorial code can be found [here](https://github.com/Overv/VulkanTutorial).
 
+![alt text](assets/runtime_cube.png "Title")
+
 ## Requirements
 
 - Vulkan SDK
