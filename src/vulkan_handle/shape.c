@@ -95,11 +95,10 @@ void calculateIndices(Shape *vulkanShape, Shape shape) {
     memcpy(vulkanShape->indices + vulkanShape->indicesCount, indis,
            indisIndex * sizeof(*indis));
 
-    // printf("%u\n", vulkanShape->indicesCount);
-    for (uint32_t i = 0; i < indisIndex; i++) {
-        printf("%u ", indis[i]);
-    }
-    printf("\n");
+    // for (uint32_t i = 0; i < indisIndex; i++) {
+    //     printf("%u ", indis[i]);
+    // }
+    // printf("\n");
 
     freeMem(1, indis);
 }

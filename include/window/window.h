@@ -14,20 +14,13 @@ typedef union SDL_Event SDL_Event;
 typedef struct Vulkan Vulkan;
 typedef struct VkSurfaceKHR_T *VkSurfaceKHR;
 
-typedef struct Time {
-    uint64_t now;
-    uint64_t last;
-    double dt;
-} Time;
-
 typedef struct Window {
     SDL_Window *win;
     SDL_Event *event;
-    Time time;
-    size_t currentFrame;
     bool windowResized;
     bool running;
     VkSurfaceKHR surface;
+    float dt;
 } Window;
 
 void initialise();

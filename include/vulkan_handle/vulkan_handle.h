@@ -18,6 +18,7 @@ typedef struct Vulkan {
     VkSampleCountFlagBits msaaSamples;
     SwapChain swapchain;
     GraphicsPipeline graphicsPipeline;
+    size_t currentFrame;
     RenderBuffers renderBuffers;
     Semaphores semaphores;
     ShapeBuffers shapeBuffers;

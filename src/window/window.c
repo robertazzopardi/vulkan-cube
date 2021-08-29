@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <vulkan/vulkan.h>
 
-const float FRAME_DELAY = 1000.0f / 60.0f;
+// static const float FRAME_DELAY = 1000.0f / 60.0f;
 #define WIDTH_INIT 1280
 #define HEIGHT_INIT 720
 
@@ -73,7 +73,6 @@ static inline Window createWindow() {
         HEIGHT_INIT, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
     window.running = true;
     window.event = malloc(1 * sizeof(*window.event));
-    window.time.now = SDL_GetPerformanceCounter();
 
     // Add Window resize callback
     SDL_AddEventWatch(resizingEventCallback, &window);
@@ -91,6 +90,7 @@ static inline void handleUserInput(Window *window) {
     }
 }
 
+#define FPS_INTERVAL 1000.0
 void initialise() {
     initSDL();
 
@@ -101,30 +101,42 @@ void initialise() {
     Vulkan vulkan = {0};
     initVulkan(&window, &vulkan);
 
+    // uint32_t fps_lasttime = SDL_GetTicks(); // the last recorded time.
+    // uint32_t fps_current;                   // the current FPS.
+    // uint32_t fps_frames = 0; // frames passed since the last recorded fps.
+
+    uint32_t lastUpdate = SDL_GetTicks();
+
     // Main Loop
     while (window.running) {
         // Calculate frame delay
-        window.time.now = SDL_GetPerformanceCounter();
+        // uint64_t start = SDL_GetPerformanceCounter();
 
-        // Frame rate limiting
-        uint32_t timeout = SDL_GetTicks() + FRAME_DELAY;
-        while (!SDL_TICKS_PASSED(SDL_GetTicks(), timeout)) {
-            // Handle Input
-            handleUserInput(&window);
+        // Do event loop
+        handleUserInput(&window);
 
-            // Update
-            // printf("%.f\n", 1.0f / window.time.dt);
+        // Physics loop
+        uint32_t current = SDL_GetTicks();
+        window.dt = (current - lastUpdate) / 1000.0f;
+        // Update
+        lastUpdate = current;
 
-            // Rendering
-            drawFrame(&window, &vulkan);
-        }
+        // Do rendering loop
+        drawFrame(&window, &vulkan);
 
-        window.time.last = SDL_GetPerformanceCounter();
-        window.time.dt = (window.time.last - window.time.now) /
-                         (float)SDL_GetPerformanceFrequency();
+        // uint64_t end = SDL_GetPerformanceCounter();
+        // float dt = (end - start) / (float)SDL_GetPerformanceFrequency();
+
+        // printf("%.f\n", 1.0f / dt);
+
+        // fps_frames++;
+        // if (fps_lasttime < SDL_GetTicks() - FPS_INTERVAL) {
+        //     fps_lasttime = SDL_GetTicks();
+        //     fps_current = fps_frames;
+        //     fps_frames = 0;
+        //     printf("%u\n", fps_current);
+        // }
     }
-
-    vkDeviceWaitIdle(vulkan.device.device);
 
     // Clean Up
     cleanUpVulkan(&window, &vulkan);

@@ -181,40 +181,40 @@ void initVulkan(Window *window, Vulkan *vulkan) {
     //
 
     Vertex top[] = {
-        {{-0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}},
-        {{0.5f, -0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-        {{0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-        {{-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}},
+        {{-0.5f, -0.5f, 0.5f}, RED},
+        {{0.5f, -0.5f, 0.5f}, GREEN},
+        {{0.5f, 0.5f, 0.5f}, BLUE},
+        {{-0.5f, 0.5f, 0.5f}, WHITE},
     };
     Vertex bottom[] = {
-        {{-0.5f, 0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-        {{0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-        {{0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
-        {{-0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}},
+        {{-0.5f, 0.5f, -0.5f}, RED},
+        {{0.5f, 0.5f, -0.5f}, GREEN},
+        {{0.5f, -0.5f, -0.5f}, BLUE},
+        {{-0.5f, -0.5f, -0.5f}, WHITE},
     };
     Vertex right[] = {
-        {{0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}}, // Right
-        {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-        {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
-        {{0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}},
+        {{0.5f, -0.5f, 0.5f}, GREEN}, // Right
+        {{0.5f, -0.5f, -0.5f}, WHITE},
+        {{0.5f, 0.5f, -0.5f}, RED},
+        {{0.5f, 0.5f, 0.5f}, BLUE},
     };
     Vertex left[] = {
-        {{-0.5f, 0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}}, // left
-        {{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-        {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
-        {{-0.5f, -0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}},
+        {{-0.5f, 0.5f, 0.5f}, RED}, // left
+        {{-0.5f, 0.5f, -0.5f}, GREEN},
+        {{-0.5f, -0.5f, -0.5f}, BLUE},
+        {{-0.5f, -0.5f, 0.5f}, WHITE},
     };
     Vertex front[] = {
-        {{0.5f, 0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}}, // front
-        {{0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-        {{-0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
-        {{-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}},
+        {{0.5f, 0.5f, 0.5f}, BLUE}, // front
+        {{0.5f, 0.5f, -0.5f}, RED},
+        {{-0.5f, 0.5f, -0.5f}, GREEN},
+        {{-0.5f, 0.5f, 0.5f}, WHITE},
     };
     Vertex back[] = {
-        {{0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}}, // back
-        {{0.5f, -0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-        {{-0.5f, -0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-        {{-0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}},
+        {{0.5f, -0.5f, -0.5f}, RED}, // back
+        {{0.5f, -0.5f, 0.5f}, GREEN},
+        {{-0.5f, -0.5f, 0.5f}, BLUE},
+        {{-0.5f, -0.5f, -0.5f}, WHITE},
     };
 
     // combineVerticesAndIndices(vulkan, 2, (Shape){shape1, 4, NULL, 6, 0},
@@ -273,6 +273,8 @@ void initVulkan(Window *window, Vulkan *vulkan) {
 }
 
 void cleanUpVulkan(Window *window, Vulkan *vulkan) {
+    vkDeviceWaitIdle(vulkan->device.device);
+
     cleanupSwapChain(vulkan);
 
     // vkDestroySampler(vulkan->device.device, vulkan->texture.textureSampler,

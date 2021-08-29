@@ -103,8 +103,8 @@ void createCommandBuffers(Vulkan *vulkan, Window *window) {
 
         vkCmdBindDescriptorSets(vulkan->renderBuffers.commandBuffers[i],
                                 VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                vulkan->graphicsPipeline.pipelineLayout, 0,
-                                1, &vulkan->ubo.descriptorSets[i], 0, NULL);
+                                vulkan->graphicsPipeline.pipelineLayout, 0, 1,
+                                &vulkan->ubo.descriptorSets[i], 0, NULL);
 
         vkCmdDrawIndexed(vulkan->renderBuffers.commandBuffers[i],
                          vulkan->shapes.indicesCount, 1, 0, 0, 0);
@@ -154,13 +154,13 @@ void createSyncObjects(Vulkan *vulkan) {
 
 void drawFrame(Window *window, Vulkan *vulkan) {
     vkWaitForFences(vulkan->device.device, 1,
-                    &vulkan->semaphores.inFlightFences[window->currentFrame],
+                    &vulkan->semaphores.inFlightFences[vulkan->currentFrame],
                     VK_TRUE, UINT64_MAX);
 
     uint32_t imageIndex;
     VkResult result = vkAcquireNextImageKHR(
         vulkan->device.device, vulkan->swapchain.swapChain, UINT64_MAX,
-        vulkan->semaphores.imageAvailableSemaphores[window->currentFrame],
+        vulkan->semaphores.imageAvailableSemaphores[vulkan->currentFrame],
         VK_NULL_HANDLE, &imageIndex);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR) {
@@ -170,7 +170,7 @@ void drawFrame(Window *window, Vulkan *vulkan) {
         THROW_ERROR("failed to acquire swap chain image!\n");
     }
 
-    updateUniformBuffer(vulkan, imageIndex, window->time.dt);
+    updateUniformBuffer(vulkan, imageIndex, window->dt);
 
     if (vulkan->semaphores.imagesInFlight[imageIndex] != VK_NULL_HANDLE) {
         vkWaitForFences(vulkan->device.device, 1,
@@ -178,34 +178,34 @@ void drawFrame(Window *window, Vulkan *vulkan) {
                         UINT64_MAX);
     }
     vulkan->semaphores.imagesInFlight[imageIndex] =
-        vulkan->semaphores.inFlightFences[window->currentFrame];
+        vulkan->semaphores.inFlightFences[vulkan->currentFrame];
 
     VkSubmitInfo submitInfo = {};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
     VkSemaphore waitSemaphores[] = {
-        vulkan->semaphores.imageAvailableSemaphores[window->currentFrame]};
+        vulkan->semaphores.imageAvailableSemaphores[vulkan->currentFrame]};
     VkPipelineStageFlags waitStages[] = {
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+
     submitInfo.waitSemaphoreCount = 1;
     submitInfo.pWaitSemaphores = waitSemaphores;
     submitInfo.pWaitDstStageMask = waitStages;
-
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers =
         &vulkan->renderBuffers.commandBuffers[imageIndex];
 
     VkSemaphore signalSemaphores[] = {
-        vulkan->semaphores.renderFinishedSemaphores[window->currentFrame]};
+        vulkan->semaphores.renderFinishedSemaphores[vulkan->currentFrame]};
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
     vkResetFences(vulkan->device.device, 1,
-                  &vulkan->semaphores.inFlightFences[window->currentFrame]);
+                  &vulkan->semaphores.inFlightFences[vulkan->currentFrame]);
 
     if (vkQueueSubmit(
             vulkan->device.graphicsQueue, 1, &submitInfo,
-            vulkan->semaphores.inFlightFences[window->currentFrame]) !=
+            vulkan->semaphores.inFlightFences[vulkan->currentFrame]) !=
         VK_SUCCESS) {
         THROW_ERROR("failed to submit draw command buffer!\n");
     }
@@ -230,5 +230,5 @@ void drawFrame(Window *window, Vulkan *vulkan) {
         THROW_ERROR("failed to present swap chain image!\n");
     }
 
-    window->currentFrame = (window->currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+    vulkan->currentFrame = (vulkan->currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }

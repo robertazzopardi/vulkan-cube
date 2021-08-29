@@ -1,6 +1,17 @@
 #ifndef INCLUDE_VULKAN_HANDLE_SHAPE
 #define INCLUDE_VULKAN_HANDLE_SHAPE
 
+#define RED                                                                    \
+    { 1.f, 0.f, 0.f }
+#define GREEN                                                                  \
+    { 0.f, 1.f, 0.f }
+#define BLUE                                                                   \
+    { 0.f, 0.f, 1.f }
+#define WHITE                                                                  \
+    { 1.f, 1.f, 1.f }
+#define BLACK                                                                  \
+    { 0.f, 0.f, 0.f }
+
 typedef float vec2[2];
 typedef float vec3[3];
 
