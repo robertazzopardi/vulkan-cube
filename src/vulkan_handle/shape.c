@@ -137,9 +137,12 @@ void createDepthResources(Vulkan *vulkan) {
     createImage(vulkan->swapchain.swapChainExtent->width,
                 vulkan->swapchain.swapChainExtent->height, 1,
                 vulkan->msaaSamples, depthFormat, VK_IMAGE_TILING_OPTIMAL,
-                VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vulkan,
-                &vulkan->depth.depthImage, &vulkan->depth.depthImageMemory);
+                VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT |
+                    VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+                VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT,
+                // VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                vulkan, &vulkan->depth.depthImage,
+                &vulkan->depth.depthImageMemory);
 
     vulkan->depth.depthImageView =
         createImageView(vulkan->device.device, vulkan->depth.depthImage,
@@ -177,7 +180,7 @@ void createFramebuffers(Vulkan *vulkan) {
 void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
                   VkMemoryPropertyFlags properties, Vulkan *vulkan,
                   VkBuffer *buffer, VkDeviceMemory *bufferMemory) {
-    VkBufferCreateInfo bufferInfo = {};
+    VkBufferCreateInfo bufferInfo = {0};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = size;
     bufferInfo.usage = usage;
@@ -192,7 +195,7 @@ void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
     vkGetBufferMemoryRequirements(vulkan->device.device, *buffer,
                                   &memRequirements);
 
-    VkMemoryAllocateInfo allocInfo = {};
+    VkMemoryAllocateInfo allocInfo = {0};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
     allocInfo.memoryTypeIndex =

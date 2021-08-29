@@ -11,7 +11,7 @@ void copyBufferToImage(Vulkan *vulkan, VkBuffer buffer, VkImage image,
                        uint32_t width, uint32_t height) {
     VkCommandBuffer commandBuffer = beginSingleTimeCommands(vulkan);
 
-    VkBufferImageCopy region = {};
+    VkBufferImageCopy region = {0};
     region.bufferOffset = 0;
     region.bufferRowLength = 0;
     region.bufferImageHeight = 0;
@@ -257,7 +257,7 @@ void createImage(uint32_t width, uint32_t height, uint32_t mipLevels,
                  VkImageTiling tiling, VkImageUsageFlags usage,
                  VkMemoryPropertyFlags properties, Vulkan *vulkan,
                  VkImage *image, VkDeviceMemory *imageMemory) {
-    VkImageCreateInfo imageInfo = {};
+    VkImageCreateInfo imageInfo = {0};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     imageInfo.imageType = VK_IMAGE_TYPE_2D;
     imageInfo.extent.width = width;
@@ -281,7 +281,7 @@ void createImage(uint32_t width, uint32_t height, uint32_t mipLevels,
     vkGetImageMemoryRequirements(vulkan->device.device, *image,
                                  &memRequirements);
 
-    VkMemoryAllocateInfo allocInfo = {};
+    VkMemoryAllocateInfo allocInfo = {0};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
     allocInfo.memoryTypeIndex =
@@ -339,8 +339,10 @@ void createColorResources(Vulkan *vulkan) {
                 vulkan->msaaSamples, colorFormat, VK_IMAGE_TILING_OPTIMAL,
                 VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT |
                     VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vulkan,
-                &vulkan->texture.colorImage, &vulkan->texture.colorImageMemory);
+                VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT,
+                // VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                vulkan, &vulkan->texture.colorImage,
+                &vulkan->texture.colorImageMemory);
 
     vulkan->texture.colorImageView =
         createImageView(vulkan->device.device, vulkan->texture.colorImage,

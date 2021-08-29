@@ -199,7 +199,6 @@ void createLogicalDevice(Window *window, Vulkan *vulkan) {
     createInfo.pQueueCreateInfos = queueCreateInfos;
     createInfo.enabledExtensionCount = SIZEOF(deviceExtensions);
     createInfo.ppEnabledExtensionNames = deviceExtensions;
-
     createInfo.pEnabledFeatures = &deviceFeatures;
 
     if (enableValidationLayers) {
