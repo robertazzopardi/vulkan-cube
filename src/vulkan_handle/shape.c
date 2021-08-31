@@ -10,6 +10,117 @@
 #include <string.h>
 #include <vulkan/vulkan.h>
 
+// Vertex vertices[] = {
+//     {{+0.5f, +0.5f, +0.5f}, {+0.f, +1.f, +0.f}}, // Top
+//     {{-0.5f, +0.5f, +0.5f}, {+0.f, +1.f, +0.f}},
+//     {{+0.5f, +0.5f, -0.5f}, {+0.f, +1.f, +0.f}},
+//     {{-0.5f, +0.5f, -0.5f}, {+0.f, +1.f, +0.f}},
+//     {{+0.5f, -0.5f, +0.5f}, {+0.f, -1.f, +0.f}}, // Bottom
+//     {{-0.5f, -0.5f, +0.5f}, {+0.f, -1.f, +0.f}},
+//     {{+0.5f, -0.5f, -0.5f}, {+0.f, -1.f, +0.f}},
+//     {{-0.5f, -0.5f, -0.5f}, {+0.f, -1.f, +0.f}},
+//     {{+0.5f, +0.5f, +0.5f}, {+1.f, +0.f, +0.f}}, // Right
+//     {{+0.5f, +0.5f, -0.5f}, {+1.f, +0.f, +0.f}},
+//     {{+0.5f, -0.5f, -0.5f}, {+1.f, +0.f, +0.f}},
+//     {{+0.5f, -0.5f, +0.5f}, {+1.f, +0.f, +0.f}},
+//     {{-0.5f, +0.5f, +0.5f}, {-1.f, +0.f, +0.f}}, // left
+//     {{-0.5f, +0.5f, -0.5f}, {-1.f, +0.f, +0.f}},
+//     {{-0.5f, -0.5f, -0.5f}, {-1.f, +0.f, +0.f}},
+//     {{-0.5f, -0.5f, +0.5f}, {-1.f, +0.f, +0.f}},
+//     {{-0.5f, +0.5f, +0.5f}, {+0.f, +0.f, +1.f}}, // front
+//     {{+0.5f, +0.5f, +0.5f}, {+0.f, +0.f, +1.f}},
+//     {{+0.5f, -0.5f, +0.5f}, {+0.f, +0.f, +1.f}},
+//     {{-0.5f, -0.5f, +0.5f}, {+0.f, +0.f, +1.f}},
+//     {{-0.5f, +0.5f, -0.5f}, {+0.f, +0.f, -1.f}}, // back
+//     {{+0.5f, +0.5f, -0.5f}, {+0.f, +0.f, -1.f}},
+//     {{+0.5f, -0.5f, -0.5f}, {+0.f, +0.f, -1.f}},
+//     {{-0.5f, -0.5f, -0.5f}, {+0.f, +0.f, -1.f}},
+// };
+// uint32_t indices[] = {
+//     0,  1,  2,  1,  2,  3,  /*top*/
+//     4,  5,  6,  5,  6,  7,  /*bottom*/
+//     8,  9,  10, 8,  10, 11, /*right*/
+//     12, 13, 14, 12, 14, 15, /*left*/
+//     16, 17, 18, 16, 18, 19, /*front*/
+//     20, 21, 22, 20, 22, 23, /*back*/
+// };
+
+Vertex top[] = {
+    {{-0.5f, -0.5f, 0.5f}, WHITE},
+    {{0.5f, -0.5f, 0.5f}, GREEN},
+    {{0.5f, 0.5f, 0.5f}, BLUE},
+    {{-0.5f, 0.5f, 0.5f}, RED},
+};
+Vertex bottom[] = {
+    {{-0.5f, 0.5f, -0.5f}, GREEN},
+    {{0.5f, 0.5f, -0.5f}, WHITE},
+    {{0.5f, -0.5f, -0.5f}, RED},
+    {{-0.5f, -0.5f, -0.5f}, BLUE},
+};
+Vertex right[] = {
+    {{0.5f, -0.5f, 0.5f}, GREEN}, // Right
+    {{0.5f, -0.5f, -0.5f}, RED},
+    {{0.5f, 0.5f, -0.5f}, WHITE},
+    {{0.5f, 0.5f, 0.5f}, BLUE},
+};
+Vertex left[] = {
+    {{-0.5f, 0.5f, 0.5f}, RED}, // left
+    {{-0.5f, 0.5f, -0.5f}, GREEN},
+    {{-0.5f, -0.5f, -0.5f}, BLUE},
+    {{-0.5f, -0.5f, 0.5f}, WHITE},
+};
+Vertex front[] = {
+    {{0.5f, 0.5f, 0.5f}, BLUE}, // front
+    {{0.5f, 0.5f, -0.5f}, WHITE},
+    {{-0.5f, 0.5f, -0.5f}, GREEN},
+    {{-0.5f, 0.5f, 0.5f}, RED},
+};
+Vertex back[] = {
+    {{0.5f, -0.5f, -0.5f}, RED}, // back
+    {{0.5f, -0.5f, 0.5f}, GREEN},
+    {{-0.5f, -0.5f, 0.5f}, WHITE},
+    {{-0.5f, -0.5f, -0.5f}, BLUE},
+};
+
+// Vertex vertices[] = {
+//     {{-0.5f, -0.5f, 0.5f}, RED}, // top
+//     {{0.5f, -0.5f, 0.5f}, RED},     {{0.5f, 0.5f, 0.5f}, RED},
+//     {{-0.5f, 0.5f, 0.5f}, RED},
+
+//     {{-0.5f, 0.5f, -0.5f}, RED}, // bottom
+//     {{0.5f, 0.5f, -0.5f}, GREEN},   {{0.5f, -0.5f, -0.5f}, BLUE},
+//     {{-0.5f, -0.5f, -0.5f}, WHITE},
+
+//     {{0.5f, -0.5f, 0.5f}, GREEN}, // right
+//     {{0.5f, -0.5f, -0.5f}, WHITE},  {{0.5f, 0.5f, -0.5f}, RED},
+//     {{0.5f, 0.5f, 0.5f}, BLUE},
+
+//     {{-0.5f, 0.5f, 0.5f}, RED}, // left
+//     {{-0.5f, 0.5f, -0.5f}, GREEN},  {{-0.5f, -0.5f, -0.5f}, BLUE},
+//     {{-0.5f, -0.5f, 0.5f}, WHITE},
+
+//     {{0.5f, 0.5f, 0.5f}, BLUE}, // front
+//     {{0.5f, 0.5f, -0.5f}, RED},     {{-0.5f, 0.5f, -0.5f}, GREEN},
+//     {{-0.5f, 0.5f, 0.5f}, WHITE},
+
+//     {{0.5f, -0.5f, -0.5f}, RED}, // back
+//     {{0.5f, -0.5f, 0.5f}, GREEN},   {{-0.5f, -0.5f, 0.5f}, BLUE},
+//     {{-0.5f, -0.5f, -0.5f}, WHITE},
+// };
+
+// uint16_t indices[] = {
+//     0,  1,  2,  1,  2,  3,  /*top*/
+//     4,  5,  6,  5,  6,  7,  /*bottom*/
+//     8,  9,  10, 8,  10, 11, /*right*/
+//     12, 13, 14, 12, 14, 15, /*left*/
+//     16, 17, 18, 16, 18, 19, /*front*/
+//     20, 21, 22, 20, 22, 23, /*back*/
+
+//     // 0,  1,  2,  2,  3,  0,  4,  5,  6,  6,  7,  4,  8,  9,  10, 10, 11, 8,
+//     // 12, 13, 14, 14, 15, 12, 16, 17, 18, 18, 19, 16, 20, 21, 22, 22, 23,
+//     20,
+// };
+
 VkVertexInputBindingDescription getBindingDescription() {
     VkVertexInputBindingDescription bindingDescription = {};
     bindingDescription.binding = 0;
@@ -210,6 +321,20 @@ void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
 }
 
 void createVertexBuffer(Vulkan *vulkan) {
+    combineVerticesAndIndices(
+        vulkan, 6, (Shape){top, 4, NULL, 6, 0}, (Shape){bottom, 4, NULL, 6, 0},
+        (Shape){right, 4, NULL, 6, 0}, (Shape){left, 4, NULL, 6, 0},
+        (Shape){front, 4, NULL, 6, 0}, (Shape){back, 4, NULL, 6, 0});
+
+    // vulkan->shapes.verticesCount = 24;
+    // vulkan->shapes.indicesCount = 36;
+
+    // vulkan->shapes.vertices = malloc(24 * sizeof(*vulkan->shapes.vertices));
+    // vulkan->shapes.indices = malloc(36 * sizeof(*vulkan->shapes.indices));
+
+    // vulkan->shapes.vertices = vertices;
+    // vulkan->shapes.indices = indices;
+
     VkDeviceSize bufferSize =
         sizeof(*vulkan->shapes.vertices) * vulkan->shapes.verticesCount;
 

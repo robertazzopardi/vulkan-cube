@@ -180,84 +180,6 @@ void initVulkan(Window *window, Vulkan *vulkan) {
 
     //
 
-    Vertex top[] = {
-        {{-0.5f, -0.5f, 0.5f}, RED},
-        {{0.5f, -0.5f, 0.5f}, GREEN},
-        {{0.5f, 0.5f, 0.5f}, BLUE},
-        {{-0.5f, 0.5f, 0.5f}, WHITE},
-    };
-    Vertex bottom[] = {
-        {{-0.5f, 0.5f, -0.5f}, RED},
-        {{0.5f, 0.5f, -0.5f}, GREEN},
-        {{0.5f, -0.5f, -0.5f}, BLUE},
-        {{-0.5f, -0.5f, -0.5f}, WHITE},
-    };
-    Vertex right[] = {
-        {{0.5f, -0.5f, 0.5f}, GREEN}, // Right
-        {{0.5f, -0.5f, -0.5f}, WHITE},
-        {{0.5f, 0.5f, -0.5f}, RED},
-        {{0.5f, 0.5f, 0.5f}, BLUE},
-    };
-    Vertex left[] = {
-        {{-0.5f, 0.5f, 0.5f}, RED}, // left
-        {{-0.5f, 0.5f, -0.5f}, GREEN},
-        {{-0.5f, -0.5f, -0.5f}, BLUE},
-        {{-0.5f, -0.5f, 0.5f}, WHITE},
-    };
-    Vertex front[] = {
-        {{0.5f, 0.5f, 0.5f}, BLUE}, // front
-        {{0.5f, 0.5f, -0.5f}, RED},
-        {{-0.5f, 0.5f, -0.5f}, GREEN},
-        {{-0.5f, 0.5f, 0.5f}, WHITE},
-    };
-    Vertex back[] = {
-        {{0.5f, -0.5f, -0.5f}, RED}, // back
-        {{0.5f, -0.5f, 0.5f}, GREEN},
-        {{-0.5f, -0.5f, 0.5f}, BLUE},
-        {{-0.5f, -0.5f, -0.5f}, WHITE},
-    };
-
-    // combineVerticesAndIndices(vulkan, 2, (Shape){shape1, 4, NULL, 6, 0},
-    //                           (Shape){shape2, 4, NULL, 6, 0});
-    combineVerticesAndIndices(
-        vulkan, 6, (Shape){top, 4, NULL, 6, 0}, (Shape){bottom, 4, NULL, 6, 0},
-        (Shape){right, 4, NULL, 6, 0}, (Shape){left, 4, NULL, 6, 0},
-        (Shape){front, 4, NULL, 6, 0}, (Shape){back, 4, NULL, 6, 0});
-
-    // Vertex vertices[] = {
-    //     {{+0.5f, +0.5f, +0.5f}, {+0.f, +1.f, +0.f}}, // Top
-    //     {{-0.5f, +0.5f, +0.5f}, {+0.f, +1.f, +0.f}},
-    //     {{+0.5f, +0.5f, -0.5f}, {+0.f, +1.f, +0.f}},
-    //     {{-0.5f, +0.5f, -0.5f}, {+0.f, +1.f, +0.f}},
-    //     {{+0.5f, -0.5f, +0.5f}, {+0.f, -1.f, +0.f}}, // Bottom
-    //     {{-0.5f, -0.5f, +0.5f}, {+0.f, -1.f, +0.f}},
-    //     {{+0.5f, -0.5f, -0.5f}, {+0.f, -1.f, +0.f}},
-    //     {{-0.5f, -0.5f, -0.5f}, {+0.f, -1.f, +0.f}},
-    //     {{+0.5f, +0.5f, +0.5f}, {+1.f, +0.f, +0.f}}, // Right
-    //     {{+0.5f, +0.5f, -0.5f}, {+1.f, +0.f, +0.f}},
-    //     {{+0.5f, -0.5f, -0.5f}, {+1.f, +0.f, +0.f}},
-    //     {{+0.5f, -0.5f, +0.5f}, {+1.f, +0.f, +0.f}},
-    //     {{-0.5f, +0.5f, +0.5f}, {-1.f, +0.f, +0.f}}, // left
-    //     {{-0.5f, +0.5f, -0.5f}, {-1.f, +0.f, +0.f}},
-    //     {{-0.5f, -0.5f, -0.5f}, {-1.f, +0.f, +0.f}},
-    //     {{-0.5f, -0.5f, +0.5f}, {-1.f, +0.f, +0.f}},
-    //     {{-0.5f, +0.5f, +0.5f}, {+0.f, +0.f, +1.f}}, // front
-    //     {{+0.5f, +0.5f, +0.5f}, {+0.f, +0.f, +1.f}},
-    //     {{+0.5f, -0.5f, +0.5f}, {+0.f, +0.f, +1.f}},
-    //     {{-0.5f, -0.5f, +0.5f}, {+0.f, +0.f, +1.f}},
-    //     {{-0.5f, +0.5f, -0.5f}, {+0.f, +0.f, -1.f}}, // back
-    //     {{+0.5f, +0.5f, -0.5f}, {+0.f, +0.f, -1.f}},
-    //     {{+0.5f, -0.5f, -0.5f}, {+0.f, +0.f, -1.f}},
-    //     {{-0.5f, -0.5f, -0.5f}, {+0.f, +0.f, -1.f}},
-    // };
-    // uint32_t indices[] = {
-    //     0,  1,  2,  1,  2,  3,  /*top*/
-    //     4,  5,  6,  5,  6,  7,  /*bottom*/
-    //     8,  9,  10, 8,  10, 11, /*right*/
-    //     12, 13, 14, 12, 14, 15, /*left*/
-    //     16, 17, 18, 16, 18, 19, /*front*/
-    //     20, 21, 22, 20, 22, 23, /*back*/
-    // };
     createVertexBuffer(vulkan);
     createIndexBuffer(vulkan);
 
@@ -321,8 +243,10 @@ void cleanUpVulkan(Window *window, Vulkan *vulkan) {
                        vulkan->semaphores.inFlightFences[i], NULL);
     }
 
-    freeMem(8, vulkan->ubo.descriptorSets, vulkan->shapes.vertices,
-            vulkan->shapes.indices, vulkan->semaphores.renderFinishedSemaphores,
+    freeMem(6, vulkan->ubo.descriptorSets,
+            // vulkan->shapes.vertices,
+            // vulkan->shapes.indices,
+            vulkan->semaphores.renderFinishedSemaphores,
             vulkan->semaphores.imageAvailableSemaphores,
             vulkan->semaphores.inFlightFences,
             vulkan->semaphores.imagesInFlight,
