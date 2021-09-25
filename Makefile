@@ -109,7 +109,7 @@ run: all
 check: clean all
 	cppcheck -f --enable=all --inconclusive --check-library --debug-warnings --suppress=missingIncludeSystem --check-config $(INCLUDES) ./$(SRC)
 
-analyse: clean
+scan-build: clean
 	scan-build make
 	$(RM) *.plist
 
