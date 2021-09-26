@@ -4,122 +4,150 @@
 #include "vulkan_handle/texture.h"
 #include "vulkan_handle/vulkan_handle.h"
 #include <cglm/vec3.h>
+#include <math.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <vulkan/vulkan.h>
 
-// Vertex vertices[] = {
-//     {{+0.5f, +0.5f, +0.5f}, {+0.f, +1.f, +0.f}}, // Top
-//     {{-0.5f, +0.5f, +0.5f}, {+0.f, +1.f, +0.f}},
-//     {{+0.5f, +0.5f, -0.5f}, {+0.f, +1.f, +0.f}},
-//     {{-0.5f, +0.5f, -0.5f}, {+0.f, +1.f, +0.f}},
-//     {{+0.5f, -0.5f, +0.5f}, {+0.f, -1.f, +0.f}}, // Bottom
-//     {{-0.5f, -0.5f, +0.5f}, {+0.f, -1.f, +0.f}},
-//     {{+0.5f, -0.5f, -0.5f}, {+0.f, -1.f, +0.f}},
-//     {{-0.5f, -0.5f, -0.5f}, {+0.f, -1.f, +0.f}},
-//     {{+0.5f, +0.5f, +0.5f}, {+1.f, +0.f, +0.f}}, // Right
-//     {{+0.5f, +0.5f, -0.5f}, {+1.f, +0.f, +0.f}},
-//     {{+0.5f, -0.5f, -0.5f}, {+1.f, +0.f, +0.f}},
-//     {{+0.5f, -0.5f, +0.5f}, {+1.f, +0.f, +0.f}},
-//     {{-0.5f, +0.5f, +0.5f}, {-1.f, +0.f, +0.f}}, // left
-//     {{-0.5f, +0.5f, -0.5f}, {-1.f, +0.f, +0.f}},
-//     {{-0.5f, -0.5f, -0.5f}, {-1.f, +0.f, +0.f}},
-//     {{-0.5f, -0.5f, +0.5f}, {-1.f, +0.f, +0.f}},
-//     {{-0.5f, +0.5f, +0.5f}, {+0.f, +0.f, +1.f}}, // front
-//     {{+0.5f, +0.5f, +0.5f}, {+0.f, +0.f, +1.f}},
-//     {{+0.5f, -0.5f, +0.5f}, {+0.f, +0.f, +1.f}},
-//     {{-0.5f, -0.5f, +0.5f}, {+0.f, +0.f, +1.f}},
-//     {{-0.5f, +0.5f, -0.5f}, {+0.f, +0.f, -1.f}}, // back
-//     {{+0.5f, +0.5f, -0.5f}, {+0.f, +0.f, -1.f}},
-//     {{+0.5f, -0.5f, -0.5f}, {+0.f, +0.f, -1.f}},
-//     {{-0.5f, -0.5f, -0.5f}, {+0.f, +0.f, -1.f}},
-// };
-// uint32_t indices[] = {
-//     0,  1,  2,  1,  2,  3,  /*top*/
-//     4,  5,  6,  5,  6,  7,  /*bottom*/
-//     8,  9,  10, 8,  10, 11, /*right*/
-//     12, 13, 14, 12, 14, 15, /*left*/
-//     16, 17, 18, 16, 18, 19, /*front*/
-//     20, 21, 22, 20, 22, 23, /*back*/
-// };
+typedef Vertex Square[4];
+typedef Square Cube[6];
+typedef Vertex Triangle[3];
+typedef Triangle Octahedron[8];
+typedef Triangle **Sphere;
 
-Vertex top[] = {
-    {{-0.5f, -0.5f, 0.5f}, WHITE},
-    {{0.5f, -0.5f, 0.5f}, GREEN},
-    {{0.5f, 0.5f, 0.5f}, BLUE},
-    {{-0.5f, 0.5f, 0.5f}, RED},
-};
-Vertex bottom[] = {
-    {{-0.5f, 0.5f, -0.5f}, GREEN},
-    {{0.5f, 0.5f, -0.5f}, WHITE},
-    {{0.5f, -0.5f, -0.5f}, RED},
-    {{-0.5f, -0.5f, -0.5f}, BLUE},
-};
-Vertex right[] = {
-    {{0.5f, -0.5f, 0.5f}, GREEN}, // Right
-    {{0.5f, -0.5f, -0.5f}, RED},
-    {{0.5f, 0.5f, -0.5f}, WHITE},
-    {{0.5f, 0.5f, 0.5f}, BLUE},
-};
-Vertex left[] = {
-    {{-0.5f, 0.5f, 0.5f}, RED}, // left
-    {{-0.5f, 0.5f, -0.5f}, GREEN},
-    {{-0.5f, -0.5f, -0.5f}, BLUE},
-    {{-0.5f, -0.5f, 0.5f}, WHITE},
-};
-Vertex front[] = {
-    {{0.5f, 0.5f, 0.5f}, BLUE}, // front
-    {{0.5f, 0.5f, -0.5f}, WHITE},
-    {{-0.5f, 0.5f, -0.5f}, GREEN},
-    {{-0.5f, 0.5f, 0.5f}, RED},
-};
-Vertex back[] = {
-    {{0.5f, -0.5f, -0.5f}, RED}, // back
-    {{0.5f, -0.5f, 0.5f}, GREEN},
-    {{-0.5f, -0.5f, 0.5f}, WHITE},
-    {{-0.5f, -0.5f, -0.5f}, BLUE},
+#define Y (1.0 / M_SQRT2)
+
+Octahedron octahedron1 = {
+    {
+        {{0.0f, Y, 0.0f}, RED},
+        {{0.0f, 0.0f, Y}, RED},
+        {{Y, 0.0f, 0.0f}, RED},
+    },
+    {
+        {{0.0f, -Y, 0.0f}, BLUE},
+        {{Y, 0.0f, 0.0f}, BLUE},
+        {{0.0f, 0.0f, Y}, BLUE},
+    },
+    {
+        {{0.0f, -Y, 0.0f}, GREEN},
+        {{0.0f, 0.0f, Y}, GREEN},
+        {{-Y, 0.0f, 0.0f}, GREEN},
+    },
+    {
+        {{0.0f, Y, 0.0f}, WHITE},
+        {{-Y, 0.0f, 0.0f}, WHITE},
+        {{0.0f, 0.0f, Y}, WHITE},
+    },
+
+    {
+        {{0.0f, -Y, 0.0f}, WHITE},
+        {{0.0f, 0.0f, -Y}, WHITE},
+        {{Y, 0.0f, 0.0f}, WHITE},
+    },
+    {
+        {{Y, 0.0f, 0.0f}, GREEN},
+        {{0.0f, 0.0f, -Y}, GREEN},
+        {{0.0f, Y, 0.0f}, GREEN},
+    },
+    {
+        {{0.0f, -Y, 0.0f}, RED},
+        {{-Y, 0.0f, 0.0f}, RED},
+        {{0.0f, 0.0f, -Y}, RED},
+    },
+    {
+        {{0.0f, Y, 0.0f}, BLUE},
+        {{0.0f, 0.0f, -Y}, BLUE},
+        {{-Y, 0.0f, 0.0f}, BLUE},
+    },
 };
 
-// Vertex vertices[] = {
-//     {{-0.5f, -0.5f, 0.5f}, RED}, // top
-//     {{0.5f, -0.5f, 0.5f}, RED},     {{0.5f, 0.5f, 0.5f}, RED},
-//     {{-0.5f, 0.5f, 0.5f}, RED},
+Cube cube1 = {
+    {
+        {{-0.5f, -0.5f, 0.5f}, WHITE}, // top
+        {{0.5f, -0.5f, 0.5f}, WHITE},
+        {{0.5f, 0.5f, 0.5f}, WHITE},
+        {{-0.5f, 0.5f, 0.5f}, WHITE},
+    },
+    {
+        {{-0.5f, 0.5f, -0.5f}, GREEN}, // bottom
+        {{0.5f, 0.5f, -0.5f}, GREEN},
+        {{0.5f, -0.5f, -0.5f}, GREEN},
+        {{-0.5f, -0.5f, -0.5f}, GREEN},
+    },
+    {
+        {{0.5f, -0.5f, 0.5f}, BLUE}, // Right
+        {{0.5f, -0.5f, -0.5f}, BLUE},
+        {{0.5f, 0.5f, -0.5f}, BLUE},
+        {{0.5f, 0.5f, 0.5f}, BLUE},
+    },
+    {
+        {{-0.5f, 0.5f, 0.5f}, RED}, // left
+        {{-0.5f, 0.5f, -0.5f}, RED},
+        {{-0.5f, -0.5f, -0.5f}, RED},
+        {{-0.5f, -0.5f, 0.5f}, RED},
+    },
+    {
+        {{0.5f, 0.5f, 0.5f}, RED}, // front
+        {{0.5f, 0.5f, -0.5f}, RED},
+        {{-0.5f, 0.5f, -0.5f}, RED},
+        {{-0.5f, 0.5f, 0.5f}, RED},
+    },
+    {
+        {{0.5f, -0.5f, -0.5f}, BLUE}, // back
+        {{0.5f, -0.5f, 0.5f}, BLUE},
+        {{-0.5f, -0.5f, 0.5f}, BLUE},
+        {{-0.5f, -0.5f, -0.5f}, BLUE},
+    },
+};
 
-//     {{-0.5f, 0.5f, -0.5f}, RED}, // bottom
-//     {{0.5f, 0.5f, -0.5f}, GREEN},   {{0.5f, -0.5f, -0.5f}, BLUE},
-//     {{-0.5f, -0.5f, -0.5f}, WHITE},
+void normalize(vec3 a, Vertex *b, float length) {
+    //    #get the distance between a and b along the x and y axes
+    float dx = (*b).pos[0] - a[0];
+    float dy = (*b).pos[1] - a[1];
+    float dz = (*b).pos[2] - a[2];
+    // #right now, sqrt(dx^2 + dy^2) = distance(a,b).
+    // #we want to modify them so that sqrt(dx^2 + dy^2) = the given length.
+    dx = dx * length / glm_vec3_distance(a, (*b).pos);
+    dy = dy * length / glm_vec3_distance(a, (*b).pos);
+    dz = dz * length / glm_vec3_distance(a, (*b).pos);
 
-//     {{0.5f, -0.5f, 0.5f}, GREEN}, // right
-//     {{0.5f, -0.5f, -0.5f}, WHITE},  {{0.5f, 0.5f, -0.5f}, RED},
-//     {{0.5f, 0.5f, 0.5f}, BLUE},
+    vec3 c = {a[0] + dx, a[1] + dy, a[2] + dz};
+    // return c;
+    memcpy((*b).pos, c, 3 * sizeof(*c));
+}
 
-//     {{-0.5f, 0.5f, 0.5f}, RED}, // left
-//     {{-0.5f, 0.5f, -0.5f}, GREEN},  {{-0.5f, -0.5f, -0.5f}, BLUE},
-//     {{-0.5f, -0.5f, 0.5f}, WHITE},
+void getMiddlePoint(vec3 point1, vec3 point2, vec3 res) {
+    res[0] = (point1[0] + point2[0]) / 2.0f;
+    res[1] = (point1[1] + point2[1]) / 2.0f;
+    res[2] = (point1[2] + point2[2]) / 2.0f;
+}
 
-//     {{0.5f, 0.5f, 0.5f}, BLUE}, // front
-//     {{0.5f, 0.5f, -0.5f}, RED},     {{-0.5f, 0.5f, -0.5f}, GREEN},
-//     {{-0.5f, 0.5f, 0.5f}, WHITE},
+void SplitTriangle(Triangle tri, Triangle *split) {
+    vec3 a;
+    getMiddlePoint(tri[0].pos, tri[1].pos, a);
+    vec3 b;
+    getMiddlePoint(tri[1].pos, tri[2].pos, b);
+    vec3 c;
+    getMiddlePoint(tri[2].pos, tri[0].pos, c);
 
-//     {{0.5f, -0.5f, -0.5f}, RED}, // back
-//     {{0.5f, -0.5f, 0.5f}, GREEN},   {{-0.5f, -0.5f, 0.5f}, BLUE},
-//     {{-0.5f, -0.5f, -0.5f}, WHITE},
-// };
+    glm_vec3_copy(tri[0].pos, split[0][0].pos);
+    glm_vec3_copy(a, split[0][1].pos);
+    glm_vec3_copy(c, split[0][2].pos);
 
-// uint16_t indices[] = {
-//     0,  1,  2,  1,  2,  3,  /*top*/
-//     4,  5,  6,  5,  6,  7,  /*bottom*/
-//     8,  9,  10, 8,  10, 11, /*right*/
-//     12, 13, 14, 12, 14, 15, /*left*/
-//     16, 17, 18, 16, 18, 19, /*front*/
-//     20, 21, 22, 20, 22, 23, /*back*/
+    glm_vec3_copy(tri[1].pos, split[1][0].pos);
+    glm_vec3_copy(b, split[1][1].pos);
+    glm_vec3_copy(a, split[1][2].pos);
 
-//     // 0,  1,  2,  2,  3,  0,  4,  5,  6,  6,  7,  4,  8,  9,  10, 10, 11, 8,
-//     // 12, 13, 14, 14, 15, 12, 16, 17, 18, 18, 19, 16, 20, 21, 22, 22, 23,
-//     20,
-// };
+    glm_vec3_copy(tri[2].pos, split[2][0].pos);
+    glm_vec3_copy(c, split[2][1].pos);
+    glm_vec3_copy(b, split[2][2].pos);
+
+    glm_vec3_copy(a, split[3][0].pos);
+    glm_vec3_copy(b, split[3][1].pos);
+    glm_vec3_copy(c, split[3][2].pos);
+}
 
 VkVertexInputBindingDescription getBindingDescription() {
     VkVertexInputBindingDescription bindingDescription = {};
@@ -180,15 +208,30 @@ bool isInVertexArray(Vertex vert, Vertex *arr, uint32_t vertIndex) {
     return false;
 }
 
-void calculateIndices(Shape *vulkanShape, Shape shape) {
-    Vertex arr[shape.verticesCount];
+void calculateIndicesForSphere(Shape *vulkanShape, size_t indices) {
+    for (size_t i = vulkanShape->index; i < vulkanShape->index + indices; i++) {
+        vulkanShape->indices[i] = i;
+    }
+    vulkanShape->index += indices;
+}
+
+void calculateIndicesForOctahedron(Shape *vulkanShape) {
+    for (size_t i = vulkanShape->index; i < vulkanShape->index + 3; i++) {
+        vulkanShape->indices[i] = i;
+    }
+    vulkanShape->index += 3;
+}
+
+void calculateIndicesForSquare(Shape *vulkanShape, Vertex *shape,
+                               size_t length) {
+    Vertex arr[length];
     uint32_t vertIndex = 0;
 
-    uint16_t *indis = malloc((shape.verticesCount + 2) * sizeof(*indis));
+    uint16_t *indis = malloc((length + 2) * sizeof(*indis));
     uint32_t indisIndex = 0;
 
-    for (uint32_t i = 0; i < shape.verticesCount; i++) {
-        Vertex vert = shape.vertices[i];
+    for (uint32_t i = 0; i < length; i++) {
+        Vertex vert = shape[i];
 
         if (!isInVertexArray(vert, arr, vertIndex)) {
             indis[indisIndex++] = vulkanShape->index++;
@@ -206,40 +249,163 @@ void calculateIndices(Shape *vulkanShape, Shape shape) {
     memcpy(vulkanShape->indices + vulkanShape->indicesCount, indis,
            indisIndex * sizeof(*indis));
 
-    // for (uint32_t i = 0; i < indisIndex; i++) {
-    //     printf("%u ", indis[i]);
-    // }
-    // printf("\n");
+    for (uint32_t i = 0; i < indisIndex; i++) {
+        printf("%u ", indis[i]);
+    }
+    printf("\n");
 
     freeMem(1, indis);
 }
 
-void combineVerticesAndIndices(Vulkan *vulkan, uint32_t count, ...) {
-    va_list valist;
+void findTriangles(Triangle triangle, int currentDepth, int depth,
+                   Triangle *storage, size_t *index) {
+    // Depth is reached.
+    if (currentDepth == depth) {
 
-    va_start(valist, count);
+        for (size_t i = 0; i < 3; i++) {
 
+            // glm_vec3_copy((vec3)WHITE, storage[*index][i].colour);
+            memset(storage[*index][i].colour, 1,
+                   3 * sizeof(*storage[*index][i].colour));
+
+            // memcpy(storage[(*index)++][i].pos, triangle[i].pos,
+            //        3 * sizeof(*triangle[i].pos));
+
+            // glm_vec3_copy(triangle[i].pos, storage[(*index)++][i].pos);
+            glm_vec3_copy(triangle[i].pos, storage[(*index)++]->pos);
+
+            // printf("%f %f %f\n", storage[(*index) - 1][i].pos[0],
+            //        storage[(*index) - 1][i].pos[1],
+            //        storage[(*index) - 1][i].pos[2]);
+        }
+
+        return;
+    }
+
+    Triangle split[4];
+    SplitTriangle(triangle, split);
+
+    findTriangles(split[0], currentDepth + 1, depth, storage, index);
+    findTriangles(split[1], currentDepth + 1, depth, storage, index);
+    findTriangles(split[2], currentDepth + 1, depth, storage, index);
+    findTriangles(split[3], currentDepth + 1, depth, storage, index);
+
+    // printf("\n");
+}
+
+void combineVerticesAndIndicesForOctahedron(Vulkan *, Octahedron, size_t);
+
+void combineVerticesAndIndicesForSphere(Vulkan *vulkan __unused,
+                                        Octahedron octahedron, size_t count,
+                                        size_t depth) {
+    printf("depth %zu\n", depth);
+
+    size_t perFace = pow(4, depth);
+    printf("perface %zu\n", perFace);
+    size_t verticesPerFace = perFace * 3;
+    printf("verticesPerFace %zu\n", verticesPerFace);
+
+    // if (perFace == 1) {
+    //     combineVerticesAndIndicesForOctahedron(vulkan, octahedron, count);
+    //     return;
+    // }
+
+    vulkan->shapes.vertices =
+        malloc(count * verticesPerFace * sizeof(*vulkan->shapes.vertices));
+    vulkan->shapes.indices =
+        malloc(count * verticesPerFace * sizeof(*vulkan->shapes.indices));
+
+    for (size_t j = 0; j < count; j++) {
+        Vertex *face = octahedron[j];
+
+        Triangle *faceTriangles =
+            malloc(verticesPerFace * sizeof(*faceTriangles));
+        memset(faceTriangles, 0, verticesPerFace * sizeof(*faceTriangles));
+        size_t index = 0;
+        findTriangles(face, 0, depth, faceTriangles, &index);
+
+        // printf("\n");
+
+        Vertex v[verticesPerFace];
+        for (size_t i = 0; i < verticesPerFace; i++) {
+
+            glm_vec3_copy(faceTriangles[i]->pos, v[i].pos);
+
+            vec3 a = {0.0f, 0.0f, 0.0f};
+            normalize(a, &v[i], 0.8);
+
+            glm_vec3_copy((vec3)WHITE, v[i].colour);
+        }
+
+        // for (size_t i = 0; i < 3; i++) {
+        //     printf("%f %f %f\n", face[i].pos[0], face[i].pos[1],
+        //            face[i].pos[2]);
+        // }
+
+        // memcpy(vulkan->shapes.vertices + vulkan->shapes.verticesCount, face,
+        //    verticesPerFace * sizeof(*face));
+        memcpy(vulkan->shapes.vertices + vulkan->shapes.verticesCount, v,
+               verticesPerFace * sizeof(*v));
+
+        vulkan->shapes.verticesCount += verticesPerFace;
+
+        // calculateIndicesForOctahedron(&vulkan->shapes);
+        calculateIndicesForSphere(&vulkan->shapes, verticesPerFace);
+
+        vulkan->shapes.indicesCount += verticesPerFace;
+    }
+
+    // for (size_t i = 0; i < vulkan->shapes.verticesCount; i++) {
+    //     if (i % 3 == 0) {
+    //         printf("\n");
+    //     }
+    //     printf("%f %f %f\n", vulkan->shapes.vertices[i].pos[0],
+    //            vulkan->shapes.vertices[i].pos[1],
+    //            vulkan->shapes.vertices[i].pos[2]);
+    // }
+}
+
+void combineVerticesAndIndicesForOctahedron(Vulkan *vulkan,
+                                            Octahedron octahedron,
+                                            size_t count) {
+    vulkan->shapes.vertices =
+        malloc(count * 3 * sizeof(*vulkan->shapes.vertices));
+    vulkan->shapes.indices =
+        malloc(count * 3 * sizeof(*vulkan->shapes.indices));
+
+    for (uint32_t i = 0; i < count; i++) {
+        Vertex *shape = octahedron[i];
+
+        memcpy(vulkan->shapes.vertices + vulkan->shapes.verticesCount, shape,
+               3 * sizeof(*shape));
+
+        vulkan->shapes.verticesCount += 3;
+
+        calculateIndicesForOctahedron(&vulkan->shapes);
+
+        vulkan->shapes.indicesCount += 3;
+    }
+}
+
+void combineVerticesAndIndicesForSquare(Vulkan *vulkan, Cube cube,
+                                        size_t count) {
     vulkan->shapes.vertices =
         malloc(count * 4 * sizeof(*vulkan->shapes.vertices));
     vulkan->shapes.indices =
         malloc(count * 6 * sizeof(*vulkan->shapes.indices));
 
-    // printf("%u %u\n", count * 4, count * 6);
-
     for (uint32_t i = 0; i < count; i++) {
-        Shape shape = va_arg(valist, Shape);
+        Vertex *shape = cube[i];
 
-        memcpy(vulkan->shapes.vertices + vulkan->shapes.verticesCount,
-               shape.vertices, shape.verticesCount * sizeof(*shape.vertices));
+        memcpy(vulkan->shapes.vertices + vulkan->shapes.verticesCount, shape,
+               4 * sizeof(*shape));
 
-        vulkan->shapes.verticesCount += shape.verticesCount;
+        vulkan->shapes.verticesCount += 4;
 
-        calculateIndices(&vulkan->shapes, shape);
+        calculateIndicesForSquare(&vulkan->shapes, shape, 4);
 
-        vulkan->shapes.indicesCount += shape.indicesCount;
+        vulkan->shapes.indicesCount += 6;
     }
-
-    va_end(valist);
 }
 
 void createDepthResources(Vulkan *vulkan) {
@@ -321,19 +487,9 @@ void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
 }
 
 void createVertexBuffer(Vulkan *vulkan) {
-    combineVerticesAndIndices(
-        vulkan, 6, (Shape){top, 4, NULL, 6, 0}, (Shape){bottom, 4, NULL, 6, 0},
-        (Shape){right, 4, NULL, 6, 0}, (Shape){left, 4, NULL, 6, 0},
-        (Shape){front, 4, NULL, 6, 0}, (Shape){back, 4, NULL, 6, 0});
-
-    // vulkan->shapes.verticesCount = 24;
-    // vulkan->shapes.indicesCount = 36;
-
-    // vulkan->shapes.vertices = malloc(24 * sizeof(*vulkan->shapes.vertices));
-    // vulkan->shapes.indices = malloc(36 * sizeof(*vulkan->shapes.indices));
-
-    // vulkan->shapes.vertices = vertices;
-    // vulkan->shapes.indices = indices;
+    // combineVerticesAndIndicesForSquare(vulkan, cube1, 6);
+    // combineVerticesAndIndicesForOctahedron(vulkan, octahedron1, 8);
+    combineVerticesAndIndicesForSphere(vulkan, octahedron1, 8, 5);
 
     VkDeviceSize bufferSize =
         sizeof(*vulkan->shapes.vertices) * vulkan->shapes.verticesCount;
