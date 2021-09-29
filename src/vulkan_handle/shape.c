@@ -11,8 +11,8 @@
 #include <string.h>
 #include <vulkan/vulkan.h>
 
-typedef Vertex Square[4];
-typedef Square Cube[6];
+typedef Vertex Plane[4];
+typedef Plane Cube[6];
 typedef Vertex Triangle[3];
 typedef Triangle Octahedron[8];
 typedef Triangle **Sphere;
