@@ -21,6 +21,16 @@ typedef struct Vertex {
     // vec2 texCoord;
 } Vertex;
 
+typedef Vertex Square[4];
+typedef Square Cube[6];
+typedef Vertex Triangle[3];
+typedef Triangle Octahedron[8];
+typedef Triangle **Sphere;
+
+#define Y (1.0 / M_SQRT2)
+
+extern Octahedron octahedron1;
+
 typedef struct VkImage_T *VkImage;
 typedef struct VkDeviceMemory_T *VkDeviceMemory;
 typedef struct VkImageView_T *VkImageView;
@@ -81,5 +91,8 @@ typedef struct VkVertexInputAttributeDescription
 VkVertexInputBindingDescription getBindingDescription();
 
 VkVertexInputAttributeDescription *getAttributeDescriptions();
+
+void createBufferAndMemory(Vulkan *, VkBuffer *, VkDeviceMemory *, Vertex *,
+                           uint16_t);
 
 #endif /* INCLUDE_VULKAN_HANDLE_SHAPE */

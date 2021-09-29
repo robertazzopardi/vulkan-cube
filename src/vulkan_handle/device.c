@@ -192,6 +192,7 @@ void createLogicalDevice(Window *window, Vulkan *vulkan) {
     deviceFeatures.samplerAnisotropy = VK_TRUE;
     // enable sample shading feature for the device
     deviceFeatures.sampleRateShading = VK_TRUE;
+    deviceFeatures.fillModeNonSolid = VK_TRUE;
 
     VkDeviceCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;

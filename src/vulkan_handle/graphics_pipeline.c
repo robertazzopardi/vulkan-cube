@@ -102,10 +102,10 @@ void createGraphicsPipeline(Vulkan *vulkan) {
         VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     multisampling.sampleShadingEnable = VK_FALSE;
     multisampling.rasterizationSamples = vulkan->msaaSamples;
-    // multisampling.sampleShadingEnable =
-    //     VK_TRUE; // enable sample shading in the pipeline
-    // multisampling.minSampleShading =
-    //     .2f; // min fraction for sample shading; closer to one is smoother
+    multisampling.sampleShadingEnable =
+        VK_TRUE; // enable sample shading in the pipeline
+    multisampling.minSampleShading =
+        .2f; // min fraction for sample shading; closer to one is smoother
 
     VkPipelineDepthStencilStateCreateInfo depthStencil = {};
     depthStencil.sType =
