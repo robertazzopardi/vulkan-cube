@@ -210,8 +210,8 @@ void cleanUpVulkan(Window *window, Vulkan *vulkan) {
     // vulkan->texture.textureImageMemory,
     //              NULL);
 
-    vkDestroyDescriptorSetLayout(vulkan->device.device,
-                                 vulkan->ubo.descriptorSetLayout, NULL);
+    vkDestroyDescriptorSetLayout(
+        vulkan->device.device, vulkan->descriptorSet.descriptorSetLayout, NULL);
 
     if (vulkan->graphicsPipeline.graphicsPipeline == VK_NULL_HANDLE) {
         vkDestroyPipeline(vulkan->device.device,
@@ -243,7 +243,7 @@ void cleanUpVulkan(Window *window, Vulkan *vulkan) {
                        vulkan->semaphores.inFlightFences[i], NULL);
     }
 
-    freeMem(6, vulkan->ubo.descriptorSets,
+    freeMem(6, vulkan->descriptorSet.descriptorSets,
             // vulkan->shapes.vertices,
             // vulkan->shapes.indices,
             vulkan->semaphores.renderFinishedSemaphores,

@@ -2,8 +2,6 @@
 #define INCLUDE_WINDOW_WINDOW
 
 #include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
 
 #define APP_NAME "Vulkan App"
 

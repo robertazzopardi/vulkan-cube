@@ -12,12 +12,28 @@
 #define BLACK                                                                  \
     { 0.f, 0.f, 0.f }
 
+#define CENTER                                                                 \
+    { 0.0f, 0.0f, 0.0f }
+#define X_AXIS                                                                 \
+    { 1.0f, 0.0f, 0.0f }
+#define Y_AXIS                                                                 \
+    { 0.0f, 1.0f, 0.0f }
+#define Z_AXIS                                                                 \
+    { 0.0f, 0.0f, 1.0f }
+#define VEC_2(num)                                                             \
+    { num, num }
+#define VEC_3(num)                                                             \
+    { num, num, num }
+#define VEC_4(num)                                                             \
+    { num, num, num, num }
+
 typedef float vec2[2];
 typedef float vec3[3];
 
 typedef struct Vertex {
     vec3 pos;
     vec3 colour;
+    vec3 normal;
     // vec2 texCoord;
 } Vertex;
 
@@ -28,8 +44,6 @@ typedef Triangle Octahedron[8];
 typedef Triangle **Sphere;
 
 #define Y (1.0 / M_SQRT2)
-
-extern Octahedron octahedron1;
 
 typedef struct VkImage_T *VkImage;
 typedef struct VkDeviceMemory_T *VkDeviceMemory;

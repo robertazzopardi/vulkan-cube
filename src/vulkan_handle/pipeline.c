@@ -1,4 +1,4 @@
-#include "vulkan_handle/graphics_pipeline.h"
+#include "vulkan_handle/pipeline.h"
 #include "error_handle.h"
 #include "shaders/frag_shader.h"
 #include "shaders/vert_shader.h"
@@ -55,7 +55,7 @@ void createGraphicsPipeline(Vulkan *vulkan) {
         getAttributeDescriptions();
 
     vertexInputInfo.vertexBindingDescriptionCount = 1;
-    vertexInputInfo.vertexAttributeDescriptionCount = 2;
+    vertexInputInfo.vertexAttributeDescriptionCount = 3;
     vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
     vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions;
 
@@ -138,7 +138,7 @@ void createGraphicsPipeline(Vulkan *vulkan) {
     pipelineLayoutInfo.pushConstantRangeCount = 0;
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = 1;
-    pipelineLayoutInfo.pSetLayouts = &vulkan->ubo.descriptorSetLayout;
+    pipelineLayoutInfo.pSetLayouts = &vulkan->descriptorSet.descriptorSetLayout;
 
     if (vkCreatePipelineLayout(vulkan->device.device, &pipelineLayoutInfo, NULL,
                                &vulkan->graphicsPipeline.pipelineLayout) !=

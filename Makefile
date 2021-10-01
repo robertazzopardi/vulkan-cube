@@ -103,7 +103,7 @@ clean: clean_shaders
 	@echo Cleanup complete!
 
 run: all
-	./$(OUTPUTMAIN)
+	$(OUTPUTMAIN)
 	@echo Executing 'run: all' complete!
 
 check: clean all
@@ -119,8 +119,8 @@ compile_shaders: clean_shaders
 	GLSLC=$(VULKAN_SDK)/macOS/bin/glslc
 
 # Compile the shaders to .spv files
-	GLSLC $(SRC)/shaders/vertex_shaders/shader.vert -o $(SRC)/shaders/vert.spv
-	GLSLC $(SRC)/shaders/vertex_shaders/shader.frag -o $(SRC)/shaders/frag.spv
+	GLSLC $(SRC)/shaders/light_shaders/shader.vert -o $(SRC)/shaders/vert.spv
+	GLSLC $(SRC)/shaders/light_shaders/shader.frag -o $(SRC)/shaders/frag.spv
 
 	$(MD) $(INCLUDE)/shaders
 	xxd -i $(SRC)/shaders/frag.spv > $(INCLUDE)/shaders/frag_shader.h

@@ -104,7 +104,8 @@ void createCommandBuffers(Vulkan *vulkan, Window *window) {
         vkCmdBindDescriptorSets(vulkan->renderBuffers.commandBuffers[i],
                                 VK_PIPELINE_BIND_POINT_GRAPHICS,
                                 vulkan->graphicsPipeline.pipelineLayout, 0, 1,
-                                &vulkan->ubo.descriptorSets[i], 0, NULL);
+                                &vulkan->descriptorSet.descriptorSets[i], 0,
+                                NULL);
 
         vkCmdDrawIndexed(vulkan->renderBuffers.commandBuffers[i],
                          vulkan->shapes.indicesCount, 1, 0, 0, 0);

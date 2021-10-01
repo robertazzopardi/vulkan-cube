@@ -33,7 +33,7 @@ bool checkValidationLayerSupport() {
 }
 
 VkBool32
-debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity __unused,
+debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
               VkDebugUtilsMessageTypeFlagsEXT messageType __unused,
               const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
               void *pUserData __unused) {

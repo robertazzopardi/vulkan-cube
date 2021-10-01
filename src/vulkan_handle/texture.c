@@ -226,6 +226,8 @@ void generateMipmaps(Vulkan *vulkan, VkImage image, VkFormat imageFormat,
 //                 &data);
 //     memcpy(data, image->pixels, (size_t)imageSize);
 //     vkUnmapMemory(vulkan->device.device, stagingBufferMemory);
+//     mapMemory(vulkan->device.device, stagingBufferMemory, imageSize,
+//     image->pixels);
 
 //     createImage(
 //         image->w, image->h, vulkan->texture.mipLevels, VK_SAMPLE_COUNT_1_BIT,

@@ -1,6 +1,7 @@
 #ifndef INCLUDE_VULKAN_HANDLE_UNIFORMS
 #define INCLUDE_VULKAN_HANDLE_UNIFORMS
 
+typedef float vec3[3];
 typedef float vec4[4];
 typedef vec4 mat4[4];
 
@@ -14,15 +15,15 @@ typedef struct UniformBufferObject {
     mat4 model;
     mat4 view;
     mat4 proj;
+} UniformBufferObject;
 
-    VkDescriptorSetLayout descriptorSetLayout;
-
-    VkBuffer *uniformBuffers;
-    VkDeviceMemory *uniformBuffersMemory;
-
+typedef struct DescriptorSet {
     VkDescriptorPool descriptorPool;
     VkDescriptorSet *descriptorSets;
-} UniformBufferObject;
+    VkDescriptorSetLayout descriptorSetLayout;
+    VkBuffer *uniformBuffers;
+    VkDeviceMemory *uniformBuffersMemory;
+} DescriptorSet;
 
 typedef struct Vulkan Vulkan;
 
