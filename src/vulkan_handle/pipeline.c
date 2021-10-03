@@ -1,9 +1,9 @@
 #include "vulkan_handle/pipeline.h"
 #include "error_handle.h"
+#include "geometry/geometry.h"
 #include "shaders/frag_shader.h"
 #include "shaders/vert_shader.h"
 #include "vulkan_handle/memory.h"
-#include "vulkan_handle/shape.h"
 #include "vulkan_handle/vulkan_handle.h"
 #include <vulkan/vulkan.h>
 
@@ -89,8 +89,8 @@ void createGraphicsPipeline(Vulkan *vulkan) {
         VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizer.depthClampEnable = VK_FALSE;
     rasterizer.rasterizerDiscardEnable = VK_FALSE;
-    // rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-    rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
+    rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+    // rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
     // rasterizer.polygonMode = VK_POLYGON_MODE_POINT;
     rasterizer.lineWidth = 1.0f;
     rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;

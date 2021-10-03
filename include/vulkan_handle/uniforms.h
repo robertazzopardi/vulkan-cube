@@ -11,10 +11,20 @@ typedef struct VkDeviceMemory_T *VkDeviceMemory;
 typedef struct VkDescriptorPool_T *VkDescriptorPool;
 typedef struct VkDescriptorSet_T *VkDescriptorSet;
 
-typedef struct UniformBufferObject {
+typedef struct UniformMVP {
     mat4 model;
     mat4 view;
     mat4 proj;
+} UniformMVP;
+
+typedef struct UniformLight {
+    vec3 pos;
+    vec3 colour;
+} UniformLight;
+
+typedef struct UniformBufferObject {
+    UniformMVP mvp;
+    UniformLight light;
 } UniformBufferObject;
 
 typedef struct DescriptorSet {
@@ -26,10 +36,14 @@ typedef struct DescriptorSet {
 } DescriptorSet;
 
 typedef struct Vulkan Vulkan;
+typedef struct Window Window;
 
 typedef unsigned int uint32_t;
+typedef unsigned long long uint64_t;
 
-void updateUniformBuffer(Vulkan *, uint32_t, float);
+typedef uint64_t VkDeviceSize;
+
+void updateUniformBuffer(Vulkan *, Window *, uint32_t, float);
 
 void createDescriptorSetLayout(Vulkan *);
 

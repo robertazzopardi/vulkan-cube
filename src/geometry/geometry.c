@@ -1,4 +1,4 @@
-#include "vulkan_handle/shape.h"
+#include "geometry/geometry.h"
 #include "error_handle.h"
 #include "vulkan_handle/memory.h"
 #include "vulkan_handle/texture.h"
@@ -12,13 +12,118 @@
 #include <vulkan/vulkan.h>
 
 typedef Vertex Plane[4];
-typedef Plane Cube[6];
 typedef Vertex Triangle[3];
-typedef Triangle Octahedron[8];
 typedef Triangle **Sphere;
 
 #define Y (1.0 / M_SQRT2)
+#define X .525731112119133606
+#define Z .850650808352039932
 
+typedef Triangle Icosahedron[20];
+Icosahedron icosahedron1 = {
+    {
+        {{-X, 0.0, Z}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{0.0, -Z, X}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{X, 0.0, Z}, WHITE, GLM_VEC3_ZERO_INIT},
+    },
+    {
+        {{X, 0.0, Z}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{0.0, Z, X}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{-X, 0.0, Z}, WHITE, GLM_VEC3_ZERO_INIT},
+    },
+    {
+        {{X, 0.0, -Z}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{-X, 0.0, -Z}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{0.0, Z, -X}, WHITE, GLM_VEC3_ZERO_INIT},
+    },
+    {
+        {{X, 0.0, Z}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{Z, X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{0.0, Z, X}, WHITE, GLM_VEC3_ZERO_INIT},
+    },
+    {
+        {{X, 0.0, -Z}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{Z, X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{Z, -X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
+    },
+    {
+        {{X, 0.0, -Z}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{0.0, Z, -X}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{Z, X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
+    },
+    {
+        {{0.0, Z, X}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{-Z, X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{-X, 0.0, Z}, WHITE, GLM_VEC3_ZERO_INIT},
+    },
+    {
+        {{0.0, Z, X}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{Z, X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{0.0, Z, -X}, WHITE, GLM_VEC3_ZERO_INIT},
+    },
+    {
+        {{-Z, X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{0.0, Z, -X}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{-X, 0.0, -Z}, WHITE, GLM_VEC3_ZERO_INIT},
+    },
+    {
+        {{0.0, -Z, X}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{-X, 0.0, Z}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{-Z, -X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
+    },
+    {
+        {{0.0, -Z, -X}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{X, 0.0, -Z}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{Z, -X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
+    },
+    {
+        {{0.0, -Z, -X}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{Z, -X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{0.0, -Z, X}, WHITE, GLM_VEC3_ZERO_INIT},
+    },
+    {
+        {{Z, X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{X, 0.0, Z}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{Z, -X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
+    },
+    {
+        {{-Z, -X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{-Z, X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{-X, 0.0, -Z}, WHITE, GLM_VEC3_ZERO_INIT},
+    },
+    {
+        {{-Z, X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{-Z, -X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{-X, 0.0, Z}, WHITE, GLM_VEC3_ZERO_INIT},
+    },
+    {
+        {{-Z, -X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{0.0, -Z, -X}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{0.0, -Z, X}, WHITE, GLM_VEC3_ZERO_INIT},
+    },
+    {
+        {{-Z, -X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{-X, 0.0, -Z}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{0.0, -Z, -X}, WHITE, GLM_VEC3_ZERO_INIT},
+    },
+    {
+        {{-Z, X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{0.0, Z, X}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{0.0, Z, -X}, WHITE, GLM_VEC3_ZERO_INIT},
+    },
+    {
+        {{0.0, -Z, -X}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{-X, 0.0, -Z}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{X, 0.0, -Z}, WHITE, GLM_VEC3_ZERO_INIT},
+    },
+    {
+        {{X, 0.0, Z}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{0.0, -Z, X}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{Z, -X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
+    },
+};
+
+typedef Triangle Octahedron[8];
 Octahedron octahedron1 = {
     {
         {{0.0f, Y, 0.0f}, RED, GLM_VEC3_ZERO_INIT},
@@ -40,7 +145,6 @@ Octahedron octahedron1 = {
         {{-Y, 0.0f, 0.0f}, WHITE, GLM_VEC3_ZERO_INIT},
         {{0.0f, 0.0f, Y}, WHITE, GLM_VEC3_ZERO_INIT},
     },
-
     {
         {{0.0f, -Y, 0.0f}, WHITE, GLM_VEC3_ZERO_INIT},
         {{0.0f, 0.0f, -Y}, WHITE, GLM_VEC3_ZERO_INIT},
@@ -63,6 +167,7 @@ Octahedron octahedron1 = {
     },
 };
 
+typedef Plane Cube[6];
 Cube cube1 = {
     {
         {{-0.5f, -0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT}, // top
@@ -125,7 +230,7 @@ void normalize(vec3 a, Vertex *b, float length) {
     glm_vec3_add(a, d, (*b).pos);
 }
 
-void getMiddlePoint(vec3 point1, vec3 point2, vec3 res) {
+static inline void getMiddlePoint(vec3 point1, vec3 point2, vec3 res) {
     res[0] = (point1[0] + point2[0]) / 2.0f;
     res[1] = (point1[1] + point2[1]) / 2.0f;
     res[2] = (point1[2] + point2[2]) / 2.0f;
@@ -208,8 +313,7 @@ void calculateIndicesForSphere(Shape *vulkanShape, size_t indices) {
     vulkanShape->index += indices;
 }
 
-void calculateIndicesForSquare(Shape *vulkanShape, Vertex *shape,
-                               size_t length) {
+void calculateIndicesForCube(Shape *vulkanShape, Vertex *shape, size_t length) {
     Vertex arr[length];
     uint32_t vertIndex = 0;
 
@@ -242,11 +346,11 @@ void findTriangles(Triangle triangle, int currentDepth, int depth,
                    Triangle *storage, size_t *index) {
     // Depth is reached.
     if (currentDepth == depth) {
-        // vec3 normal;
-        // getNormal(triangle[0].pos, triangle[1].pos, triangle[2].pos, normal);
+        vec3 normal;
+        getNormal(triangle[0].pos, triangle[1].pos, triangle[2].pos, normal);
 
         for (size_t i = 0; i < 3; i++) {
-            // glm_vec3_copy(normal, storage[(*index)]->normal);
+            glm_vec3_copy(normal, storage[(*index)]->normal);
             glm_vec3_copy(triangle[i].pos, storage[(*index)++]->pos);
         }
         return;
@@ -293,7 +397,9 @@ void combineVerticesAndIndicesForSphere(Vulkan *vulkan, Octahedron octahedron,
             vec3 a = {0.0f, 0.0f, 0.0f};
             normalize(a, &quadrant[i], 0.8);
 
-            glm_vec3_copy((vec3)WHITE, quadrant[i].colour);
+            // glm_vec3_copy((vec3)WHITE, quadrant[i].colour);
+            glm_vec3_copy(face->colour, quadrant[i].colour);
+            // glm_vec3_copy(face[i].colour, quadrant[i].colour);
         }
 
         memcpy(vulkan->shapes.vertices + vulkan->shapes.verticesCount, quadrant,
@@ -307,8 +413,7 @@ void combineVerticesAndIndicesForSphere(Vulkan *vulkan, Octahedron octahedron,
     }
 }
 
-void combineVerticesAndIndicesForSquare(Vulkan *vulkan, Cube cube,
-                                        size_t count) {
+void combineVerticesAndIndicesForCube(Vulkan *vulkan, Cube cube, size_t count) {
     allocateVerticesAndIndices(vulkan, count * 4, count * 6);
 
     for (uint32_t i = 0; i < count; i++) {
@@ -325,14 +430,14 @@ void combineVerticesAndIndicesForSquare(Vulkan *vulkan, Cube cube,
 
         vulkan->shapes.verticesCount += 4;
 
-        calculateIndicesForSquare(&vulkan->shapes, shape, 4);
+        calculateIndicesForCube(&vulkan->shapes, shape, 4);
 
         vulkan->shapes.indicesCount += 6;
     }
 }
 
 void createDepthResources(Vulkan *vulkan) {
-    VkFormat depthFormat = findDepthFormat(vulkan);
+    const VkFormat depthFormat = findDepthFormat(vulkan);
 
     createImage(vulkan->swapchain.swapChainExtent->width,
                 vulkan->swapchain.swapChainExtent->height, 1,
@@ -421,8 +526,10 @@ void createVertexBuffer(Vulkan *vulkan) {
     //     }
     // }
 
-    // combineVerticesAndIndicesForSquare(vulkan, cube1, 6);
-    combineVerticesAndIndicesForSphere(vulkan, octahedron1, 8, 3);
+    combineVerticesAndIndicesForCube(vulkan, cube1, SIZEOF(cube1));
+    // combineVerticesAndIndicesForSphere(vulkan, octahedron1, 8, 0);
+    // combineVerticesAndIndicesForSphere(vulkan, icosahedron1,
+    //    SIZEOF(icosahedron1), 4);
 
     VkDeviceSize bufferSize =
         sizeof(*vulkan->shapes.vertices) * vulkan->shapes.verticesCount;

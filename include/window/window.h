@@ -19,6 +19,10 @@ typedef struct Window {
     bool running;
     VkSurfaceKHR surface;
     float dt;
+    int mX;
+    int mY;
+    int wW;
+    int wH;
 } Window;
 
 void initialise();

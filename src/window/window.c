@@ -86,11 +86,28 @@ static inline void handleUserInput(Window *window) {
         case SDL_QUIT:
             window->running = false;
             break;
+        case SDL_MOUSEMOTION | SDL_MOUSEBUTTONDOWN: {
+            int wx, wy;
+            SDL_GetWindowSize(window->win, &wx, &wy);
+            int x, y;
+            SDL_GetMouseState(&x, &y);
+
+            window->mX = x;
+            window->mY = y;
+            window->mX -= wx / 2;
+            window->mY -= wy / 2;
+
+            // printf("%d %d\n", window->mX, window->mY);
+            break;
+        }
+        case SDL_MOUSEBUTTONUP:
+            window->mX = 0;
+            window->mY = 0;
+            break;
         }
     }
 }
 
-#define FPS_INTERVAL 1000.0
 void initialise() {
     initSDL();
 
@@ -101,17 +118,10 @@ void initialise() {
     Vulkan vulkan = {0};
     initVulkan(&window, &vulkan);
 
-    // uint32_t fps_lasttime = SDL_GetTicks(); // the last recorded time.
-    // uint32_t fps_current;                   // the current FPS.
-    // uint32_t fps_frames = 0; // frames passed since the last recorded fps.
-
     uint32_t lastUpdate = SDL_GetTicks();
 
     // Main Loop
     while (window.running) {
-        // Calculate frame delay
-        // uint64_t start = SDL_GetPerformanceCounter();
-
         // Do event loop
         handleUserInput(&window);
 
@@ -123,19 +133,6 @@ void initialise() {
 
         // Do rendering loop
         drawFrame(&window, &vulkan);
-
-        // uint64_t end = SDL_GetPerformanceCounter();
-        // float dt = (end - start) / (float)SDL_GetPerformanceFrequency();
-
-        // printf("%.f\n", 1.0f / dt);
-
-        // fps_frames++;
-        // if (fps_lasttime < SDL_GetTicks() - FPS_INTERVAL) {
-        //     fps_lasttime = SDL_GetTicks();
-        //     fps_current = fps_frames;
-        //     fps_frames = 0;
-        //     printf("%u\n", fps_current);
-        // }
     }
 
     // Clean Up

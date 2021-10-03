@@ -2,9 +2,9 @@
 #define INCLUDE_VULKAN_HANDLE_VULKAN_HANDLE
 
 #include "device.h"
+#include "geometry/geometry.h"
 #include "pipeline.h"
 #include "render.h"
-#include "shape.h"
 #include "swapchain.h"
 #include "texture.h"
 #include "uniforms.h"
@@ -24,7 +24,7 @@ typedef struct Vulkan {
     ShapeBuffers shapeBuffers;
     Shape shapes;
     Depth depth;
-    UniformBufferObject ubo;
+    UniformBufferObject uniforms;
     DescriptorSet descriptorSet;
     Texture texture;
 } Vulkan;

@@ -62,7 +62,6 @@ VkFormat findSupportedFormat(const VkFormat *candidates, size_t length,
                              VkImageTiling tiling,
                              VkFormatFeatureFlags features,
                              VkPhysicalDevice physicalDevice) {
-    // for (VkFormat format : candidates) {
     for (size_t i = 0; i < length; i++) {
         VkFormatProperties props;
         vkGetPhysicalDeviceFormatProperties(physicalDevice, candidates[i],
@@ -178,8 +177,6 @@ void initVulkan(Window *window, Vulkan *vulkan) {
 
     // createTextureSampler(vulkan);
 
-    //
-
     createVertexBuffer(vulkan);
     createIndexBuffer(vulkan);
 
@@ -244,8 +241,6 @@ void cleanUpVulkan(Window *window, Vulkan *vulkan) {
     }
 
     freeMem(6, vulkan->descriptorSet.descriptorSets,
-            // vulkan->shapes.vertices,
-            // vulkan->shapes.indices,
             vulkan->semaphores.renderFinishedSemaphores,
             vulkan->semaphores.imageAvailableSemaphores,
             vulkan->semaphores.inFlightFences,

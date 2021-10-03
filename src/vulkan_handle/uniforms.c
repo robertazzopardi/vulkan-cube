@@ -8,14 +8,20 @@
 #include <cglm/util.h>
 #include <string.h>
 #include <vulkan/vulkan.h>
+#include <window/window.h>
+
+static inline VkDescriptorPoolSize createDescriptorPoolSize(uint32_t count) {
+    VkDescriptorPoolSize poolSize;
+    poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    poolSize.descriptorCount = count;
+    return poolSize;
+}
 
 void createDescriptorPool(Vulkan *vulkan) {
-    VkDescriptorPoolSize poolSizes[2];
-    poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSizes[0].descriptorCount = vulkan->swapchain.swapChainImagesCount;
-    // poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    poolSizes[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSizes[1].descriptorCount = vulkan->swapchain.swapChainImagesCount;
+    VkDescriptorPoolSize poolSizes[] = {
+        createDescriptorPoolSize(vulkan->swapchain.swapChainImagesCount),
+        createDescriptorPoolSize(vulkan->swapchain.swapChainImagesCount),
+    };
 
     VkDescriptorPoolCreateInfo poolInfo = {};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -28,6 +34,20 @@ void createDescriptorPool(Vulkan *vulkan) {
         VK_SUCCESS) {
         THROW_ERROR("failed to create descriptor pool!\n");
     }
+}
+
+static inline VkWriteDescriptorSet
+createWriteDescriptorSet(VkDescriptorBufferInfo *bufferInfo,
+                         VkDescriptorSet descriptorSet, uint32_t binding) {
+    VkWriteDescriptorSet descriptorWrite = {};
+    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrite.dstSet = descriptorSet;
+    descriptorWrite.dstBinding = binding;
+    descriptorWrite.dstArrayElement = 0;
+    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    descriptorWrite.descriptorCount = 1;
+    descriptorWrite.pBufferInfo = bufferInfo;
+    return descriptorWrite;
 }
 
 void createDescriptorSets(Vulkan *vulkan) {
@@ -53,49 +73,50 @@ void createDescriptorSets(Vulkan *vulkan) {
     }
 
     for (size_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
-        VkDescriptorBufferInfo bufferInfo = {};
-        bufferInfo.buffer = vulkan->descriptorSet.uniformBuffers[i];
-        bufferInfo.offset = 0;
-        bufferInfo.range = sizeof(UniformBufferObject);
+        VkDescriptorBufferInfo mvpBufferInfo = {};
+        mvpBufferInfo.buffer = vulkan->descriptorSet.uniformBuffers[i];
+        mvpBufferInfo.offset = 0;
+        mvpBufferInfo.range = sizeof(UniformMVP);
 
-        VkWriteDescriptorSet descriptorWrites = {};
+        VkDescriptorBufferInfo lightBufferInfo = {};
+        lightBufferInfo.buffer = vulkan->descriptorSet.uniformBuffers[i];
+        lightBufferInfo.offset = 0;
+        lightBufferInfo.range = sizeof(UniformLight);
 
-        descriptorWrites.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites.dstSet = vulkan->descriptorSet.descriptorSets[i];
-        descriptorWrites.dstBinding = 0;
-        descriptorWrites.dstArrayElement = 0;
-        descriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        descriptorWrites.descriptorCount = 1;
-        descriptorWrites.pBufferInfo = &bufferInfo;
+        VkWriteDescriptorSet descriptorWrites[] = {
+            createWriteDescriptorSet(
+                &mvpBufferInfo, vulkan->descriptorSet.descriptorSets[i], 0),
+            createWriteDescriptorSet(
+                &lightBufferInfo, vulkan->descriptorSet.descriptorSets[i], 1),
+        };
 
-        vkUpdateDescriptorSets(vulkan->device.device, 1, &descriptorWrites, 0,
-                               NULL);
+        vkUpdateDescriptorSets(vulkan->device.device, SIZEOF(descriptorWrites),
+                               descriptorWrites, 0, NULL);
     }
 
     freeMem(1, layouts);
 }
 
+static inline VkDescriptorSetLayoutBinding
+createDescriptorSetLayoutBinding(VkDescriptorType dType,
+                                 VkShaderStageFlags sFlags, uint32_t binding) {
+    VkDescriptorSetLayoutBinding layoutBinding = {};
+    layoutBinding.binding = binding;
+    layoutBinding.descriptorCount = 1;
+    layoutBinding.descriptorType = dType;
+    layoutBinding.pImmutableSamplers = NULL; // Optional
+    layoutBinding.stageFlags = sFlags;
+    return layoutBinding;
+}
+
 void createDescriptorSetLayout(Vulkan *vulkan) {
-    VkDescriptorSetLayoutBinding uboLayoutBinding = {};
-    uboLayoutBinding.binding = 0;
-    uboLayoutBinding.descriptorCount = 1;
-    uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    uboLayoutBinding.pImmutableSamplers = NULL; // Optional
-    uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-
-    VkDescriptorSetLayoutBinding samplerLayoutBinding = {};
-    samplerLayoutBinding.binding = 1;
-    samplerLayoutBinding.descriptorCount = 1;
-    // samplerLayoutBinding.descriptorType =
-    // VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    samplerLayoutBinding.pImmutableSamplers = NULL;
-    samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
     VkDescriptorSetLayoutBinding bindings[] = {
-        uboLayoutBinding,
-        samplerLayoutBinding,
+        createDescriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                                         VK_SHADER_STAGE_VERTEX_BIT, 0),
+        createDescriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                                         VK_SHADER_STAGE_FRAGMENT_BIT, 1),
     };
+
     VkDescriptorSetLayoutCreateInfo layoutInfo = {};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     layoutInfo.bindingCount = SIZEOF(bindings);
@@ -125,24 +146,37 @@ void createUniformBuffers(Vulkan *vulkan) {
                      &vulkan->descriptorSet.uniformBuffersMemory[i]);
     }
 
-    glm_mat4_identity(vulkan->ubo.model);
+    glm_mat4_identity(vulkan->uniforms.mvp.model);
+
+    glm_vec3_copy((vec3)WHITE, vulkan->uniforms.light.colour);
+    glm_vec3_copy((vec3){2.0f, 2.0f, 0.0f}, vulkan->uniforms.light.pos);
 }
 
-void updateUniformBuffer(Vulkan *vulkan, uint32_t currentImage,
+void updateUniformBuffer(Vulkan *vulkan, Window *window, uint32_t currentImage,
                          float dt __unused) {
 
-    glm_rotate(vulkan->ubo.model, dt * glm_rad(25.0f), (vec3)Z_AXIS);
+    glm_vec3_rotate(vulkan->uniforms.light.pos, dt * glm_rad(25.0f),
+                    (vec3)Z_AXIS);
 
-    glm_lookat((vec3)VEC_3(2.0f), (vec3)CENTER, (vec3)Z_AXIS, vulkan->ubo.view);
+    // glm_rotate(vulkan->ubo.model, dt * glm_rad(25.0f), (vec3)Z_AXIS);
+    // transform.RotateAround(player.transform.position, -Vector3.up,
+    //                        rotateHorizontal * sensitivity);
+    // transform.RotateAround(Vector3.zero, transform.right,
+    //                        rotateVertical * sensitivity);
+    glm_rotate(vulkan->uniforms.mvp.model, window->mX * 0.00005, (vec3)Y_AXIS);
+    glm_rotate(vulkan->uniforms.mvp.model, window->mY * 0.00005, (vec3)X_AXIS);
+
+    glm_lookat((vec3)VEC_3(2.0f), (vec3)CENTER, (vec3)Z_AXIS,
+               vulkan->uniforms.mvp.view);
 
     glm_perspective(glm_rad(45.0f),
                     vulkan->swapchain.swapChainExtent->width /
                         (float)vulkan->swapchain.swapChainExtent->height,
-                    0.1f, 10.0f, vulkan->ubo.proj);
+                    0.1f, 10.0f, vulkan->uniforms.mvp.proj);
 
-    vulkan->ubo.proj[1][1] *= -1;
+    vulkan->uniforms.mvp.proj[1][1] *= -1;
 
     mapMemory(vulkan->device.device,
               vulkan->descriptorSet.uniformBuffersMemory[currentImage],
-              sizeof(vulkan->ubo), &vulkan->ubo);
+              sizeof(vulkan->uniforms.mvp), &vulkan->uniforms.mvp);
 }

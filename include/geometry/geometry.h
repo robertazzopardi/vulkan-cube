@@ -1,5 +1,5 @@
-#ifndef INCLUDE_VULKAN_HANDLE_SHAPE
-#define INCLUDE_VULKAN_HANDLE_SHAPE
+#ifndef INCLUDE_GEOMETRY_GEOMETRY
+#define INCLUDE_GEOMETRY_GEOMETRY
 
 #define RED                                                                    \
     { 1.f, 0.f, 0.f }
@@ -37,11 +37,11 @@ typedef struct Vertex {
     // vec2 texCoord;
 } Vertex;
 
-typedef Vertex Square[4];
-typedef Square Cube[6];
-typedef Vertex Triangle[3];
-typedef Triangle Octahedron[8];
-typedef Triangle **Sphere;
+// typedef Vertex Square[4];
+// typedef Square Cube[6];
+// typedef Vertex Triangle[3];
+// typedef Triangle Octahedron[8];
+// typedef Triangle **Sphere;
 
 #define Y (1.0 / M_SQRT2)
 
@@ -109,4 +109,4 @@ VkVertexInputAttributeDescription *getAttributeDescriptions();
 void createBufferAndMemory(Vulkan *, VkBuffer *, VkDeviceMemory *, Vertex *,
                            uint16_t);
 
-#endif /* INCLUDE_VULKAN_HANDLE_SHAPE */
+#endif /* INCLUDE_GEOMETRY_GEOMETRY */
