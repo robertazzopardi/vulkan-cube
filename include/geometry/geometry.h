@@ -13,13 +13,14 @@
     { 0.f, 0.f, 0.f }
 
 #define CENTER                                                                 \
-    { 0.0f, 0.0f, 0.0f }
+    { 0.f, 0.f, 0.f }
 #define X_AXIS                                                                 \
-    { 1.0f, 0.0f, 0.0f }
+    { 1.f, 0.f, 0.f }
 #define Y_AXIS                                                                 \
-    { 0.0f, 1.0f, 0.0f }
+    { 0.f, 1.f, 0.f }
 #define Z_AXIS                                                                 \
-    { 0.0f, 0.0f, 1.0f }
+    { 0.f, 0.f, 1.f }
+
 #define VEC_2(num)                                                             \
     { num, num }
 #define VEC_3(num)                                                             \
@@ -36,14 +37,6 @@ typedef struct Vertex {
     vec3 normal;
     // vec2 texCoord;
 } Vertex;
-
-// typedef Vertex Square[4];
-// typedef Square Cube[6];
-// typedef Vertex Triangle[3];
-// typedef Triangle Octahedron[8];
-// typedef Triangle **Sphere;
-
-#define Y (1.0 / M_SQRT2)
 
 typedef struct VkImage_T *VkImage;
 typedef struct VkDeviceMemory_T *VkDeviceMemory;
@@ -108,5 +101,7 @@ VkVertexInputAttributeDescription *getAttributeDescriptions();
 
 void createBufferAndMemory(Vulkan *, VkBuffer *, VkDeviceMemory *, Vertex *,
                            uint16_t);
+
+void calculateNormals(Vertex *);
 
 #endif /* INCLUDE_GEOMETRY_GEOMETRY */

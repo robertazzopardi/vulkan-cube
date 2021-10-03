@@ -43,7 +43,7 @@ typedef unsigned long long uint64_t;
 
 typedef uint64_t VkDeviceSize;
 
-void updateUniformBuffer(Vulkan *, Window *, uint32_t, float);
+void updateUniformBuffer(Vulkan *, Window *, uint32_t);
 
 void createDescriptorSetLayout(Vulkan *);
 

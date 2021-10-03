@@ -111,31 +111,27 @@ static inline void handleUserInput(Window *window) {
 void initialise() {
     initSDL();
 
-    // Set Up Window
     Window window = createWindow();
 
-    // Init Vulkan
     Vulkan vulkan = {0};
     initVulkan(&window, &vulkan);
 
     uint32_t lastUpdate = SDL_GetTicks();
 
-    // Main Loop
     while (window.running) {
-        // Do event loop
+        // Handle Events
         handleUserInput(&window);
 
-        // Physics loop
+        // Physics
         uint32_t current = SDL_GetTicks();
         window.dt = (current - lastUpdate) / 1000.0f;
         // Update
         lastUpdate = current;
 
-        // Do rendering loop
+        // Rendering
         drawFrame(&window, &vulkan);
     }
 
-    // Clean Up
     cleanUpVulkan(&window, &vulkan);
     cleanup(&window);
 }

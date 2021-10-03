@@ -171,7 +171,7 @@ void drawFrame(Window *window, Vulkan *vulkan) {
         THROW_ERROR("failed to acquire swap chain image!\n");
     }
 
-    updateUniformBuffer(vulkan, window, imageIndex, window->dt);
+    updateUniformBuffer(vulkan, window, imageIndex);
 
     if (vulkan->semaphores.imagesInFlight[imageIndex] != VK_NULL_HANDLE) {
         vkWaitForFences(vulkan->device.device, 1,

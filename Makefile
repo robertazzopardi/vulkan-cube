@@ -110,7 +110,7 @@ run: all
 check: clean all
 	cppcheck -f --enable=all --inconclusive --check-library --debug-warnings --suppress=missingIncludeSystem --check-config $(INCLUDES) ./$(SRC)
 
-scan-build: clean
+scan_build: clean
 	scan-build make
 	$(RM) *.plist
 
@@ -123,6 +123,7 @@ compile_shaders: clean_shaders
 	GLSLC $(SRC)/shaders/light/shader.vert -o $(SRC)/shaders/vert.spv
 	GLSLC $(SRC)/shaders/light/shader.frag -o $(SRC)/shaders/frag.spv
 
+# Dump the .spv files to a header file
 	$(MD) $(INCLUDE)/shaders
 	xxd -i $(SRC)/shaders/frag.spv > $(INCLUDE)/shaders/frag_shader.h
 	xxd -i $(SRC)/shaders/vert.spv > $(INCLUDE)/shaders/vert_shader.h

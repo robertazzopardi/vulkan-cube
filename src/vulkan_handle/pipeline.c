@@ -20,6 +20,16 @@ void createShaderModule(unsigned char *code, uint32_t length, VkDevice device,
     }
 }
 
+static inline VkPipelineShaderStageCreateInfo
+createPipelineShaderInfo(VkShaderStageFlagBits stage, VkShaderModule module) {
+    VkPipelineShaderStageCreateInfo shaderInfo = {};
+    shaderInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    shaderInfo.stage = stage;
+    shaderInfo.module = module;
+    shaderInfo.pName = "main";
+    return shaderInfo;
+}
+
 void createGraphicsPipeline(Vulkan *vulkan) {
     VkShaderModule vertShaderModule;
     createShaderModule(src_shaders_vert_spv, src_shaders_vert_spv_len,
@@ -28,22 +38,11 @@ void createGraphicsPipeline(Vulkan *vulkan) {
     createShaderModule(src_shaders_frag_spv, src_shaders_frag_spv_len,
                        vulkan->device.device, &fragShaderModule);
 
-    VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
-    vertShaderStageInfo.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-    vertShaderStageInfo.module = vertShaderModule;
-    vertShaderStageInfo.pName = "main";
-
-    VkPipelineShaderStageCreateInfo fragShaderStageInfo = {};
-    fragShaderStageInfo.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    fragShaderStageInfo.module = fragShaderModule;
-    fragShaderStageInfo.pName = "main";
-
-    VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo,
-                                                      fragShaderStageInfo};
+    VkPipelineShaderStageCreateInfo shaderStages[] = {
+        createPipelineShaderInfo(VK_SHADER_STAGE_VERTEX_BIT, vertShaderModule),
+        createPipelineShaderInfo(VK_SHADER_STAGE_FRAGMENT_BIT,
+                                 fragShaderModule),
+    };
 
     VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
     vertexInputInfo.sType =
@@ -195,9 +194,8 @@ void createRenderPass(Vulkan *vulkan) {
     colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-    colorAttachment.samples = vulkan->msaaSamples;
     colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    colorAttachment.samples = vulkan->msaaSamples;
 
     VkAttachmentDescription depthAttachment = {};
     depthAttachment.format = findDepthFormat(vulkan);

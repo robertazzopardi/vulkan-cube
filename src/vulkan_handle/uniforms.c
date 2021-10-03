@@ -1,5 +1,6 @@
 #include "vulkan_handle/uniforms.h"
 #include "error_handle.h"
+#include "geometry/geometry.h"
 #include "vulkan_handle/memory.h"
 #include "vulkan_handle/vulkan_handle.h"
 #include <cglm/affine.h>
@@ -72,7 +73,7 @@ void createDescriptorSets(Vulkan *vulkan) {
         THROW_ERROR("failed to allocate descriptor sets!\n");
     }
 
-    for (size_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
+    for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
         VkDescriptorBufferInfo mvpBufferInfo = {};
         mvpBufferInfo.buffer = vulkan->descriptorSet.uniformBuffers[i];
         mvpBufferInfo.offset = 0;
@@ -137,7 +138,7 @@ void createUniformBuffers(Vulkan *vulkan) {
         malloc(vulkan->swapchain.swapChainImagesCount *
                sizeof(*vulkan->descriptorSet.uniformBuffersMemory));
 
-    for (size_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
+    for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
         createBuffer(sizeof(UniformBufferObject),
                      VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
@@ -149,34 +150,32 @@ void createUniformBuffers(Vulkan *vulkan) {
     glm_mat4_identity(vulkan->uniforms.mvp.model);
 
     glm_vec3_copy((vec3)WHITE, vulkan->uniforms.light.colour);
-    glm_vec3_copy((vec3){2.0f, 2.0f, 0.0f}, vulkan->uniforms.light.pos);
+    glm_vec3_copy((vec3){1.0f, -5.0f, 1.0f}, vulkan->uniforms.light.pos);
 }
 
-void updateUniformBuffer(Vulkan *vulkan, Window *window, uint32_t currentImage,
-                         float dt __unused) {
+void updateUniformBuffer(Vulkan *vulkan, Window *window,
+                         uint32_t currentImage) {
 
-    glm_vec3_rotate(vulkan->uniforms.light.pos, dt * glm_rad(25.0f),
-                    (vec3)Z_AXIS);
+    // glm_vec3_rotate(vulkan->uniforms.light.pos, window->dt * glm_rad(25.0f),
+    //                 (vec3)Z_AXIS);
 
-    // glm_rotate(vulkan->ubo.model, dt * glm_rad(25.0f), (vec3)Z_AXIS);
-    // transform.RotateAround(player.transform.position, -Vector3.up,
-    //                        rotateHorizontal * sensitivity);
-    // transform.RotateAround(Vector3.zero, transform.right,
-    //                        rotateVertical * sensitivity);
+    glm_rotate(vulkan->uniforms.mvp.model, window->dt * glm_rad(25.0f),
+               (vec3)Z_AXIS);
+
     glm_rotate(vulkan->uniforms.mvp.model, window->mX * 0.00005, (vec3)Y_AXIS);
     glm_rotate(vulkan->uniforms.mvp.model, window->mY * 0.00005, (vec3)X_AXIS);
 
     glm_lookat((vec3)VEC_3(2.0f), (vec3)CENTER, (vec3)Z_AXIS,
                vulkan->uniforms.mvp.view);
 
-    glm_perspective(glm_rad(45.0f),
-                    vulkan->swapchain.swapChainExtent->width /
-                        (float)vulkan->swapchain.swapChainExtent->height,
-                    0.1f, 10.0f, vulkan->uniforms.mvp.proj);
+    float aspectRatio = vulkan->swapchain.swapChainExtent->width /
+                        (float)vulkan->swapchain.swapChainExtent->height;
+    glm_perspective(glm_rad(45.0f), aspectRatio, 0.1f, 10.0f,
+                    vulkan->uniforms.mvp.proj);
 
     vulkan->uniforms.mvp.proj[1][1] *= -1;
 
     mapMemory(vulkan->device.device,
               vulkan->descriptorSet.uniformBuffersMemory[currentImage],
-              sizeof(vulkan->uniforms.mvp), &vulkan->uniforms.mvp);
+              sizeof(vulkan->uniforms), &vulkan->uniforms);
 }

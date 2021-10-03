@@ -188,16 +188,16 @@ Cube cube1 = {
         {{-0.5f, -0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT},
     },
     {
-        {{0.5f, -0.5f, 0.5f}, GREEN, GLM_VEC3_ZERO_INIT}, // Right
-        {{0.5f, -0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT},
-        {{0.5f, 0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT},
-        {{0.5f, 0.5f, 0.5f}, GREEN, GLM_VEC3_ZERO_INIT},
+        {{0.5f, -0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT}, // Right
+        {{0.5f, -0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT},
+        {{0.5f, 0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT},
+        {{0.5f, 0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT},
     },
     {
-        {{0.5f, 0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT}, // front
-        {{0.5f, 0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT},
-        {{-0.5f, 0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT},
-        {{-0.5f, 0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT},
+        {{0.5f, 0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT}, // front
+        {{0.5f, 0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT},
+        {{-0.5f, 0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT},
+        {{-0.5f, 0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT},
     },
     {
         {{0.5f, -0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT}, // back
@@ -207,7 +207,16 @@ Cube cube1 = {
     },
 };
 
-void getNormal(vec3 p1, vec3 p2, vec3 p3, vec3 normal) {
+uint16_t indices[] = {
+    0,  1,  2,  2,  3,  0,  // top
+    4,  5,  6,  6,  7,  4,  // bottom
+    8,  9,  10, 8,  10, 11, // right
+    12, 13, 14, 12, 14, 15, // left
+    16, 17, 18, 16, 18, 19, // front
+    20, 21, 22, 20, 22, 23, // back
+};
+
+static inline void getNormal(vec3 p1, vec3 p2, vec3 p3, vec3 normal) {
     vec3 a;
     glm_vec3_sub(p3, p2, a);
     vec3 b;
@@ -313,34 +322,35 @@ void calculateIndicesForSphere(Shape *vulkanShape, size_t indices) {
     vulkanShape->index += indices;
 }
 
-void calculateIndicesForCube(Shape *vulkanShape, Vertex *shape, size_t length) {
-    Vertex arr[length];
-    uint32_t vertIndex = 0;
+// void calculateIndicesForCube(Shape *vulkanShape, Vertex *shape, size_t
+// length) {
+//     Vertex arr[length];
+//     uint32_t vertIndex = 0;
 
-    uint16_t *indis = malloc((length + 2) * sizeof(*indis));
-    uint32_t indisIndex = 0;
+//     uint16_t *indis = malloc((length + 2) * sizeof(*indis));
+//     uint32_t indisIndex = 0;
 
-    for (uint32_t i = 0; i < length; i++) {
-        Vertex vert = shape[i];
+//     for (uint32_t i = 0; i < length; i++) {
+//         Vertex vert = shape[i];
 
-        if (!isInVertexArray(vert, arr, vertIndex)) {
-            indis[indisIndex++] = vulkanShape->index++;
-            arr[vertIndex++] = vert;
-        }
+//         if (!isInVertexArray(vert, arr, vertIndex)) {
+//             indis[indisIndex++] = vulkanShape->index++;
+//             arr[vertIndex++] = vert;
+//         }
 
-        if (vertIndex % 3 == 0) {
-            indis[indisIndex] = vulkanShape->index - 1;
-            indisIndex++;
-        }
-    }
+//         if (vertIndex % 3 == 0) {
+//             indis[indisIndex] = vulkanShape->index - 1;
+//             indisIndex++;
+//         }
+//     }
 
-    indis[indisIndex++] = indis[0];
+//     indis[indisIndex++] = indis[0];
 
-    memcpy(vulkanShape->indices + vulkanShape->indicesCount, indis,
-           indisIndex * sizeof(*indis));
+//     memcpy(vulkanShape->indices + vulkanShape->indicesCount, indis,
+//            indisIndex * sizeof(*indis));
 
-    freeMem(1, indis);
-}
+//     freeMem(1, indis);
+// }
 
 void findTriangles(Triangle triangle, int currentDepth, int depth,
                    Triangle *storage, size_t *index) {
@@ -413,24 +423,32 @@ void combineVerticesAndIndicesForSphere(Vulkan *vulkan, Octahedron octahedron,
     }
 }
 
+void calculateNormals(Vertex *shape) {
+    vec3 normal;
+    getNormal(shape[0].pos, shape[1].pos, shape[2].pos, normal);
+    for (size_t j = 0; j < 4; j++) {
+        glm_vec3_copy(normal, shape[j].normal);
+    }
+}
+
 void combineVerticesAndIndicesForCube(Vulkan *vulkan, Cube cube, size_t count) {
     allocateVerticesAndIndices(vulkan, count * 4, count * 6);
+
+    // TODO clean up
 
     for (uint32_t i = 0; i < count; i++) {
         Vertex *shape = cube[i];
 
-        vec3 normal;
-        getNormal(shape[0].pos, shape[1].pos, shape[2].pos, normal);
-        for (size_t j = 0; j < 4; j++) {
-            glm_vec3_copy(normal, shape[j].normal);
-        }
+        calculateNormals(shape);
 
         memcpy(vulkan->shapes.vertices + vulkan->shapes.verticesCount, shape,
                4 * sizeof(*shape));
 
         vulkan->shapes.verticesCount += 4;
 
-        calculateIndicesForCube(&vulkan->shapes, shape, 4);
+        // calculateIndicesForCube(&vulkan->shapes, shape, 4);
+        memcpy(vulkan->shapes.indices + vulkan->shapes.indicesCount,
+               indices + vulkan->shapes.indicesCount, 6 * sizeof(*indices));
 
         vulkan->shapes.indicesCount += 6;
     }

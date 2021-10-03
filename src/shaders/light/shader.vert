@@ -1,6 +1,6 @@
 #version 450
 
-layout(set = 0, binding = 0) uniform ModelViewProjection {
+layout(binding = 0) uniform ModelViewProjection {
     mat4 model;
     mat4 view;
     mat4 proj;
@@ -17,7 +17,7 @@ layout(location = 2) out vec3 outPosition;
 void main() {
     outPosition = vec3(mvp.model * vec4(inPosition, 1.0));
     outColor = inColor;
-    outNormal = inNormal;
+    outNormal = mat3(mvp.model) * inNormal;
 
     gl_Position = mvp.proj * mvp.view * vec4(outPosition, 1.0);
 }
