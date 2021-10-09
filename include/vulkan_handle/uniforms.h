@@ -1,9 +1,7 @@
 #ifndef INCLUDE_VULKAN_HANDLE_UNIFORMS
 #define INCLUDE_VULKAN_HANDLE_UNIFORMS
 
-typedef float vec3[3];
-typedef float vec4[4];
-typedef vec4 mat4[4];
+#include <cglm/types.h>
 
 typedef struct VkDescriptorSetLayout_T *VkDescriptorSetLayout;
 typedef struct VkBuffer_T *VkBuffer;
@@ -17,14 +15,14 @@ typedef struct UniformMVP {
     mat4 proj;
 } UniformMVP;
 
-typedef struct UniformLight {
-    vec3 pos;
-    vec3 colour;
-} UniformLight;
+// typedef struct UniformLight {
+//     vec3 pos;
+//     vec3 colour;
+// } UniformLight;
 
 typedef struct UniformBufferObject {
     UniformMVP mvp;
-    UniformLight light;
+    // UniformLight light;
 } UniformBufferObject;
 
 typedef struct DescriptorSet {

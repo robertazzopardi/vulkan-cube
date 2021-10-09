@@ -8,7 +8,7 @@
 CC = clang
 
 # define any compile-time flags
-CFLAGS	:= -Wall -Wextra -Werror -W -flto -ffast-math -Oz `sdl2-config --cflags`
+CFLAGS	:= -Wall -Wextra -W -flto -ffast-math -Oz `sdl2-config --cflags`
 CFLAGS  += -fsanitize=address -fno-omit-frame-pointer -ffunction-sections -fdata-sections
 # CFLAGS  += --analyze
 # CFLAGS  += -g

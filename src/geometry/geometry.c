@@ -15,7 +15,6 @@ typedef Vertex Plane[4];
 typedef Vertex Triangle[3];
 typedef Triangle **Sphere;
 
-#define Y (1.0 / M_SQRT2)
 #define X .525731112119133606
 #define Z .850650808352039932
 
@@ -27,19 +26,19 @@ Icosahedron icosahedron1 = {
         {{X, 0.0, Z}, WHITE, GLM_VEC3_ZERO_INIT},
     },
     {
-        {{X, 0.0, Z}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{0.0, Z, X}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{-X, 0.0, Z}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{X, 0.0, Z}, RED, GLM_VEC3_ZERO_INIT},
+        {{0.0, Z, X}, RED, GLM_VEC3_ZERO_INIT},
+        {{-X, 0.0, Z}, RED, GLM_VEC3_ZERO_INIT},
     },
     {
-        {{X, 0.0, -Z}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{-X, 0.0, -Z}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{0.0, Z, -X}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{X, 0.0, -Z}, BLUE, GLM_VEC3_ZERO_INIT},
+        {{-X, 0.0, -Z}, BLUE, GLM_VEC3_ZERO_INIT},
+        {{0.0, Z, -X}, BLUE, GLM_VEC3_ZERO_INIT},
     },
     {
-        {{X, 0.0, Z}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{Z, X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{0.0, Z, X}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{X, 0.0, Z}, GREEN, GLM_VEC3_ZERO_INIT},
+        {{Z, X, 0.0}, GREEN, GLM_VEC3_ZERO_INIT},
+        {{0.0, Z, X}, GREEN, GLM_VEC3_ZERO_INIT},
     },
     {
         {{X, 0.0, -Z}, WHITE, GLM_VEC3_ZERO_INIT},
@@ -47,39 +46,39 @@ Icosahedron icosahedron1 = {
         {{Z, -X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
     },
     {
-        {{X, 0.0, -Z}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{0.0, Z, -X}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{Z, X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{X, 0.0, -Z}, RED, GLM_VEC3_ZERO_INIT},
+        {{0.0, Z, -X}, RED, GLM_VEC3_ZERO_INIT},
+        {{Z, X, 0.0}, RED, GLM_VEC3_ZERO_INIT},
     },
     {
-        {{0.0, Z, X}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{0.0, Z, X}, BLUE, GLM_VEC3_ZERO_INIT},
+        {{-Z, X, 0.0}, BLUE, GLM_VEC3_ZERO_INIT},
+        {{-X, 0.0, Z}, BLUE, GLM_VEC3_ZERO_INIT},
+    },
+    {
+        {{0.0, Z, X}, GREEN, GLM_VEC3_ZERO_INIT},
+        {{Z, X, 0.0}, GREEN, GLM_VEC3_ZERO_INIT},
+        {{0.0, Z, -X}, GREEN, GLM_VEC3_ZERO_INIT},
+    },
+    {
         {{-Z, X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{-X, 0.0, Z}, WHITE, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{0.0, Z, X}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{Z, X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{0.0, Z, -X}, WHITE, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{-Z, X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
         {{0.0, Z, -X}, WHITE, GLM_VEC3_ZERO_INIT},
         {{-X, 0.0, -Z}, WHITE, GLM_VEC3_ZERO_INIT},
     },
     {
-        {{0.0, -Z, X}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{-X, 0.0, Z}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{-Z, -X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{0.0, -Z, X}, RED, GLM_VEC3_ZERO_INIT},
+        {{-X, 0.0, Z}, RED, GLM_VEC3_ZERO_INIT},
+        {{-Z, -X, 0.0}, RED, GLM_VEC3_ZERO_INIT},
     },
     {
-        {{0.0, -Z, -X}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{X, 0.0, -Z}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{Z, -X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{0.0, -Z, -X}, BLUE, GLM_VEC3_ZERO_INIT},
+        {{X, 0.0, -Z}, BLUE, GLM_VEC3_ZERO_INIT},
+        {{Z, -X, 0.0}, BLUE, GLM_VEC3_ZERO_INIT},
     },
     {
-        {{0.0, -Z, -X}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{Z, -X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{0.0, -Z, X}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{0.0, -Z, -X}, GREEN, GLM_VEC3_ZERO_INIT},
+        {{Z, -X, 0.0}, GREEN, GLM_VEC3_ZERO_INIT},
+        {{0.0, -Z, X}, GREEN, GLM_VEC3_ZERO_INIT},
     },
     {
         {{Z, X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
@@ -126,48 +125,86 @@ Icosahedron icosahedron1 = {
 typedef Triangle Octahedron[8];
 Octahedron octahedron1 = {
     {
-        {{0.0f, Y, 0.0f}, RED, GLM_VEC3_ZERO_INIT},
-        {{0.0f, 0.0f, Y}, RED, GLM_VEC3_ZERO_INIT},
-        {{Y, 0.0f, 0.0f}, RED, GLM_VEC3_ZERO_INIT},
+        {{0.0f, GLM_SQRT1_2, 0.0f}, RED, GLM_VEC3_ZERO_INIT},
+        {{0.0f, 0.0f, GLM_SQRT1_2}, RED, GLM_VEC3_ZERO_INIT},
+        {{GLM_SQRT1_2, 0.0f, 0.0f}, RED, GLM_VEC3_ZERO_INIT},
     },
     {
-        {{0.0f, -Y, 0.0f}, BLUE, GLM_VEC3_ZERO_INIT},
-        {{Y, 0.0f, 0.0f}, BLUE, GLM_VEC3_ZERO_INIT},
-        {{0.0f, 0.0f, Y}, BLUE, GLM_VEC3_ZERO_INIT},
+        {{0.0f, -GLM_SQRT1_2, 0.0f}, BLUE, GLM_VEC3_ZERO_INIT},
+        {{GLM_SQRT1_2, 0.0f, 0.0f}, BLUE, GLM_VEC3_ZERO_INIT},
+        {{0.0f, 0.0f, GLM_SQRT1_2}, BLUE, GLM_VEC3_ZERO_INIT},
     },
     {
-        {{0.0f, -Y, 0.0f}, GREEN, GLM_VEC3_ZERO_INIT},
-        {{0.0f, 0.0f, Y}, GREEN, GLM_VEC3_ZERO_INIT},
-        {{-Y, 0.0f, 0.0f}, GREEN, GLM_VEC3_ZERO_INIT},
+        {{0.0f, -GLM_SQRT1_2, 0.0f}, GREEN, GLM_VEC3_ZERO_INIT},
+        {{0.0f, 0.0f, GLM_SQRT1_2}, GREEN, GLM_VEC3_ZERO_INIT},
+        {{-GLM_SQRT1_2, 0.0f, 0.0f}, GREEN, GLM_VEC3_ZERO_INIT},
     },
     {
-        {{0.0f, Y, 0.0f}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{-Y, 0.0f, 0.0f}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{0.0f, 0.0f, Y}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{0.0f, GLM_SQRT1_2, 0.0f}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{-GLM_SQRT1_2, 0.0f, 0.0f}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{0.0f, 0.0f, GLM_SQRT1_2}, WHITE, GLM_VEC3_ZERO_INIT},
     },
     {
-        {{0.0f, -Y, 0.0f}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{0.0f, 0.0f, -Y}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{Y, 0.0f, 0.0f}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{0.0f, -GLM_SQRT1_2, 0.0f}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{0.0f, 0.0f, -GLM_SQRT1_2}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{GLM_SQRT1_2, 0.0f, 0.0f}, WHITE, GLM_VEC3_ZERO_INIT},
     },
     {
-        {{Y, 0.0f, 0.0f}, GREEN, GLM_VEC3_ZERO_INIT},
-        {{0.0f, 0.0f, -Y}, GREEN, GLM_VEC3_ZERO_INIT},
-        {{0.0f, Y, 0.0f}, GREEN, GLM_VEC3_ZERO_INIT},
+        {{GLM_SQRT1_2, 0.0f, 0.0f}, GREEN, GLM_VEC3_ZERO_INIT},
+        {{0.0f, 0.0f, -GLM_SQRT1_2}, GREEN, GLM_VEC3_ZERO_INIT},
+        {{0.0f, GLM_SQRT1_2, 0.0f}, GREEN, GLM_VEC3_ZERO_INIT},
     },
     {
-        {{0.0f, -Y, 0.0f}, RED, GLM_VEC3_ZERO_INIT},
-        {{-Y, 0.0f, 0.0f}, RED, GLM_VEC3_ZERO_INIT},
-        {{0.0f, 0.0f, -Y}, RED, GLM_VEC3_ZERO_INIT},
+        {{0.0f, -GLM_SQRT1_2, 0.0f}, RED, GLM_VEC3_ZERO_INIT},
+        {{-GLM_SQRT1_2, 0.0f, 0.0f}, RED, GLM_VEC3_ZERO_INIT},
+        {{0.0f, 0.0f, -GLM_SQRT1_2}, RED, GLM_VEC3_ZERO_INIT},
     },
     {
-        {{0.0f, Y, 0.0f}, BLUE, GLM_VEC3_ZERO_INIT},
-        {{0.0f, 0.0f, -Y}, BLUE, GLM_VEC3_ZERO_INIT},
-        {{-Y, 0.0f, 0.0f}, BLUE, GLM_VEC3_ZERO_INIT},
+        {{0.0f, GLM_SQRT1_2, 0.0f}, BLUE, GLM_VEC3_ZERO_INIT},
+        {{0.0f, 0.0f, -GLM_SQRT1_2}, BLUE, GLM_VEC3_ZERO_INIT},
+        {{-GLM_SQRT1_2, 0.0f, 0.0f}, BLUE, GLM_VEC3_ZERO_INIT},
     },
 };
 
 typedef Plane Cube[6];
+// Cube cube1 = {
+//     {
+//         {{-0.5f, -0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT, {1.0f, 0.0f}}, // top
+//         {{0.5f, -0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT, {0.0f, 0.0f}},
+//         {{0.5f, 0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT, {0.0f, 1.0f}},
+//         {{-0.5f, 0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT, {1.0f, 1.0f}},
+//     },
+//     {
+//         {{-0.5f, 0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT, {1.0f, 0.0f}}, // bottom
+//         {{0.5f, 0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT, {0.0f, 0.0f}},
+//         {{0.5f, -0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT, {0.0f, 1.0f}},
+//         {{-0.5f, -0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT, {1.0f, 1.0f}},
+//     },
+//     {
+//         {{-0.5f, 0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT, {1.0f, 0.0f}}, // left
+//         {{-0.5f, 0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT, {0.0f, 0.0f}},
+//         {{-0.5f, -0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT, {0.0f, 1.0f}},
+//         {{-0.5f, -0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT, {1.0f, 1.0f}},
+//     },
+//     {
+//         {{0.5f, -0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT, {1.0f, 0.0f}}, // Right
+//         {{0.5f, -0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT, {0.0f, 0.0f}},
+//         {{0.5f, 0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT, {0.0f, 1.0f}},
+//         {{0.5f, 0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT, {1.0f, 1.0f}},
+//     },
+//     {
+//         {{0.5f, 0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {1.0f, 0.0f}}, // front
+//         {{0.5f, 0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {0.0f, 0.0f}},
+//         {{-0.5f, 0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {0.0f, 1.0f}},
+//         {{-0.5f, 0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {1.0f, 1.0f}},
+//     },
+//     {
+//         {{0.5f, -0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {1.0f, 0.0f}}, // back
+//         {{0.5f, -0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {0.0f, 0.0f}},
+//         {{-0.5f, -0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {0.0f, 1.0f}},
+//         {{-0.5f, -0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {1.0f, 1.0f}},
+//     },
+// };
 Cube cube1 = {
     {
         {{-0.5f, -0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT}, // top
@@ -215,15 +252,6 @@ uint16_t indices[] = {
     16, 17, 18, 16, 18, 19, // front
     20, 21, 22, 20, 22, 23, // back
 };
-
-static inline void getNormal(vec3 p1, vec3 p2, vec3 p3, vec3 normal) {
-    vec3 a;
-    glm_vec3_sub(p3, p2, a);
-    vec3 b;
-    glm_vec3_sub(p1, p2, b);
-
-    glm_vec3_cross(a, b, normal);
-}
 
 void normalize(vec3 a, Vertex *b, float length) {
     // get the distance between a and b along the x and y axes
@@ -297,10 +325,10 @@ VkVertexInputAttributeDescription *getAttributeDescriptions() {
     attributeDescriptions[2].format = VK_FORMAT_R32G32B32_SFLOAT;
     attributeDescriptions[2].offset = offsetof(Vertex, normal);
 
-    // attributeDescriptions[2].binding = 0;
-    // attributeDescriptions[2].location = 2;
-    // attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-    // attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
+    // attributeDescriptions[3].binding = 0;
+    // attributeDescriptions[3].location = 3;
+    // attributeDescriptions[3].format = VK_FORMAT_R32G32_SFLOAT;
+    // attributeDescriptions[3].offset = offsetof(Vertex, texCoord);
 
     return attributeDescriptions;
 }
@@ -356,11 +384,10 @@ void findTriangles(Triangle triangle, int currentDepth, int depth,
                    Triangle *storage, size_t *index) {
     // Depth is reached.
     if (currentDepth == depth) {
-        vec3 normal;
-        getNormal(triangle[0].pos, triangle[1].pos, triangle[2].pos, normal);
+        calculateNormals(triangle, 3);
 
         for (size_t i = 0; i < 3; i++) {
-            glm_vec3_copy(normal, storage[(*index)]->normal);
+            glm_vec3_copy(triangle[i].normal, storage[(*index)]->normal);
             glm_vec3_copy(triangle[i].pos, storage[(*index)++]->pos);
         }
         return;
@@ -384,36 +411,66 @@ static inline void allocateVerticesAndIndices(Vulkan *vulkan,
         malloc(numIndices * sizeof(*vulkan->shapes.indices));
 }
 
+static inline void getNormal(vec3 p1, vec3 p2, vec3 p3, vec3 normal) {
+    vec3 a, b;
+    glm_vec3_sub(p3, p2, a);
+    glm_vec3_sub(p1, p2, b);
+    glm_vec3_cross(a, b, normal);
+}
+
+void calculateNormals(Vertex *shape, uint32_t vertsToUpdate) {
+    vec3 normal;
+    getNormal(shape[0].pos, shape[1].pos, shape[2].pos, normal);
+
+    for (size_t i = 0; i < vertsToUpdate; i++) {
+        glm_vec3_copy(normal, shape[i].normal);
+    }
+}
+
 void combineVerticesAndIndicesForSphere(Vulkan *vulkan, Octahedron octahedron,
                                         size_t count, size_t depth) {
     size_t perFace = pow(4, depth);
     size_t verticesPerFace = perFace * 3;
-
     size_t numVertices = count * verticesPerFace;
+
+    // uint16_t m[] = {
+    //     0, 1, 2,
+    //     3, 2, 1,
+    //     3, 1, 8,
+    //     0, 8, 1,
+
+    //     3, 13, 2,
+    //     2, 13, 0,
+    //     3, 8, 13,
+    //     0, 13, 8,
+    // };
+    // allocateVerticesAndIndices(vulkan, numVertices, SIZEOF(m));
+
     allocateVerticesAndIndices(vulkan, numVertices, numVertices);
 
-    for (size_t j = 0; j < count; j++) {
-        Vertex *face = octahedron[j];
+    for (size_t i = 0; i < count; i++) {
+        Vertex *face = octahedron[i];
 
         Triangle faceTriangles[verticesPerFace];
 
         size_t index = 0;
         findTriangles(face, 0, depth, faceTriangles, &index);
 
-        Vertex quadrant[verticesPerFace];
-        for (size_t i = 0; i < verticesPerFace; i++) {
-            glm_vec3_copy(faceTriangles[i]->pos, quadrant[i].pos);
+        Vertex arc[verticesPerFace];
+        for (size_t j = 0; j < verticesPerFace; j++) {
+
+            glm_vec3_copy(faceTriangles[j]->pos, arc[j].pos);
 
             vec3 a = {0.0f, 0.0f, 0.0f};
-            normalize(a, &quadrant[i], 0.8);
+            normalize(a, &arc[j], 0.8);
 
-            // glm_vec3_copy((vec3)WHITE, quadrant[i].colour);
-            glm_vec3_copy(face->colour, quadrant[i].colour);
-            // glm_vec3_copy(face[i].colour, quadrant[i].colour);
+            glm_vec3_copy(arc[j].pos, arc[j].normal);
+
+            glm_vec3_copy(face->colour, arc[j].colour);
         }
 
-        memcpy(vulkan->shapes.vertices + vulkan->shapes.verticesCount, quadrant,
-               verticesPerFace * sizeof(*quadrant));
+        memcpy(vulkan->shapes.vertices + vulkan->shapes.verticesCount, arc,
+               verticesPerFace * sizeof(*arc));
 
         vulkan->shapes.verticesCount += verticesPerFace;
 
@@ -421,14 +478,9 @@ void combineVerticesAndIndicesForSphere(Vulkan *vulkan, Octahedron octahedron,
 
         vulkan->shapes.indicesCount += verticesPerFace;
     }
-}
 
-void calculateNormals(Vertex *shape) {
-    vec3 normal;
-    getNormal(shape[0].pos, shape[1].pos, shape[2].pos, normal);
-    for (size_t j = 0; j < 4; j++) {
-        glm_vec3_copy(normal, shape[j].normal);
-    }
+    // memcpy(vulkan->shapes.indices, m, SIZEOF(m) * sizeof(*m));
+    // vulkan->shapes.indicesCount = SIZEOF(m);
 }
 
 void combineVerticesAndIndicesForCube(Vulkan *vulkan, Cube cube, size_t count) {
@@ -439,19 +491,16 @@ void combineVerticesAndIndicesForCube(Vulkan *vulkan, Cube cube, size_t count) {
     for (uint32_t i = 0; i < count; i++) {
         Vertex *shape = cube[i];
 
-        calculateNormals(shape);
+        calculateNormals(shape, 4);
 
         memcpy(vulkan->shapes.vertices + vulkan->shapes.verticesCount, shape,
                4 * sizeof(*shape));
 
         vulkan->shapes.verticesCount += 4;
-
-        // calculateIndicesForCube(&vulkan->shapes, shape, 4);
-        memcpy(vulkan->shapes.indices + vulkan->shapes.indicesCount,
-               indices + vulkan->shapes.indicesCount, 6 * sizeof(*indices));
-
-        vulkan->shapes.indicesCount += 6;
     }
+
+    memcpy(vulkan->shapes.indices, indices, SIZEOF(indices) * sizeof(*indices));
+    vulkan->shapes.indicesCount = SIZEOF(indices);
 }
 
 void createDepthResources(Vulkan *vulkan) {
@@ -545,9 +594,9 @@ void createVertexBuffer(Vulkan *vulkan) {
     // }
 
     combineVerticesAndIndicesForCube(vulkan, cube1, SIZEOF(cube1));
-    // combineVerticesAndIndicesForSphere(vulkan, octahedron1, 8, 0);
+    // combineVerticesAndIndicesForSphere(vulkan, octahedron1, 8, 4);
     // combineVerticesAndIndicesForSphere(vulkan, icosahedron1,
-    //    SIZEOF(icosahedron1), 4);
+    //    SIZEOF(icosahedron1), 3);
 
     VkDeviceSize bufferSize =
         sizeof(*vulkan->shapes.vertices) * vulkan->shapes.verticesCount;

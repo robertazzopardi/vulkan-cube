@@ -25,7 +25,7 @@ void main() {
     // vec3 result = (ambient + diffuse) * inColor;
     // outColor = vec4(result, 1.0);
 
-    vec3 lightPos = vec3(1.0f, 1.0f, 1.0f);
+    vec3 lightPos = vec3(1.0, 1.0, 1.0);
 
     vec3 N = normalize(inNormal);
 	vec3 L = normalize((lightPos.xyz - inPosition.xyz) - inPosition);

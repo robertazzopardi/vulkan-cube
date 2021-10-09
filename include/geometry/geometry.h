@@ -1,6 +1,8 @@
 #ifndef INCLUDE_GEOMETRY_GEOMETRY
 #define INCLUDE_GEOMETRY_GEOMETRY
 
+#include <cglm/types.h>
+
 #define RED                                                                    \
     { 1.f, 0.f, 0.f }
 #define GREEN                                                                  \
@@ -12,24 +14,12 @@
 #define BLACK                                                                  \
     { 0.f, 0.f, 0.f }
 
-#define CENTER                                                                 \
-    { 0.f, 0.f, 0.f }
-#define X_AXIS                                                                 \
-    { 1.f, 0.f, 0.f }
-#define Y_AXIS                                                                 \
-    { 0.f, 1.f, 0.f }
-#define Z_AXIS                                                                 \
-    { 0.f, 0.f, 1.f }
-
 #define VEC_2(num)                                                             \
     { num, num }
 #define VEC_3(num)                                                             \
     { num, num, num }
 #define VEC_4(num)                                                             \
     { num, num, num, num }
-
-typedef float vec2[2];
-typedef float vec3[3];
 
 typedef struct Vertex {
     vec3 pos;
@@ -102,6 +92,6 @@ VkVertexInputAttributeDescription *getAttributeDescriptions();
 void createBufferAndMemory(Vulkan *, VkBuffer *, VkDeviceMemory *, Vertex *,
                            uint16_t);
 
-void calculateNormals(Vertex *);
+void calculateNormals(Vertex *, uint32_t);
 
 #endif /* INCLUDE_GEOMETRY_GEOMETRY */

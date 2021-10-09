@@ -79,16 +79,16 @@ void createDescriptorSets(Vulkan *vulkan) {
         mvpBufferInfo.offset = 0;
         mvpBufferInfo.range = sizeof(UniformMVP);
 
-        VkDescriptorBufferInfo lightBufferInfo = {};
-        lightBufferInfo.buffer = vulkan->descriptorSet.uniformBuffers[i];
-        lightBufferInfo.offset = 0;
-        lightBufferInfo.range = sizeof(UniformLight);
+        // VkDescriptorBufferInfo lightBufferInfo = {};
+        // lightBufferInfo.buffer = vulkan->descriptorSet.uniformBuffers[i];
+        // lightBufferInfo.offset = 0;
+        // lightBufferInfo.range = sizeof(UniformLight);
 
         VkWriteDescriptorSet descriptorWrites[] = {
             createWriteDescriptorSet(
                 &mvpBufferInfo, vulkan->descriptorSet.descriptorSets[i], 0),
-            createWriteDescriptorSet(
-                &lightBufferInfo, vulkan->descriptorSet.descriptorSets[i], 1),
+            // createWriteDescriptorSet(
+            //     &lightBufferInfo, vulkan->descriptorSet.descriptorSets[i], 1),
         };
 
         vkUpdateDescriptorSets(vulkan->device.device, SIZEOF(descriptorWrites),
@@ -149,8 +149,8 @@ void createUniformBuffers(Vulkan *vulkan) {
 
     glm_mat4_identity(vulkan->uniforms.mvp.model);
 
-    glm_vec3_copy((vec3)WHITE, vulkan->uniforms.light.colour);
-    glm_vec3_copy((vec3){1.0f, -5.0f, 1.0f}, vulkan->uniforms.light.pos);
+    // glm_vec3_copy((vec3)WHITE, vulkan->uniforms.light.colour);
+    // glm_vec3_copy((vec3){1.0f, -5.0f, 1.0f}, vulkan->uniforms.light.pos);
 }
 
 void updateUniformBuffer(Vulkan *vulkan, Window *window,
@@ -160,12 +160,12 @@ void updateUniformBuffer(Vulkan *vulkan, Window *window,
     //                 (vec3)Z_AXIS);
 
     glm_rotate(vulkan->uniforms.mvp.model, window->dt * glm_rad(25.0f),
-               (vec3)Z_AXIS);
+               GLM_ZUP);
 
-    glm_rotate(vulkan->uniforms.mvp.model, window->mX * 0.00005, (vec3)Y_AXIS);
-    glm_rotate(vulkan->uniforms.mvp.model, window->mY * 0.00005, (vec3)X_AXIS);
+    glm_rotate(vulkan->uniforms.mvp.model, window->mX * 0.00005, GLM_YUP);
+    glm_rotate(vulkan->uniforms.mvp.model, window->mY * 0.00005, GLM_XUP);
 
-    glm_lookat((vec3)VEC_3(2.0f), (vec3)CENTER, (vec3)Z_AXIS,
+    glm_lookat((vec3)VEC_3(2.0f), GLM_VEC3_ZERO, GLM_ZUP,
                vulkan->uniforms.mvp.view);
 
     float aspectRatio = vulkan->swapchain.swapChainExtent->width /

@@ -171,11 +171,11 @@ void initVulkan(Window *window, Vulkan *vulkan) {
 
     createCommandPool(window, vulkan);
 
-    // createTextureImage(vulkan);
+    createTextureImage(vulkan);
 
-    // createTextureImageView(vulkan);
+    createTextureImageView(vulkan);
 
-    // createTextureSampler(vulkan);
+    createTextureSampler(vulkan);
 
     createVertexBuffer(vulkan);
     createIndexBuffer(vulkan);
@@ -196,16 +196,16 @@ void cleanUpVulkan(Window *window, Vulkan *vulkan) {
 
     cleanupSwapChain(vulkan);
 
-    // vkDestroySampler(vulkan->device.device, vulkan->texture.textureSampler,
-    //                  NULL);
-    // vkDestroyImageView(vulkan->device.device,
-    // vulkan->texture.textureImageView,
-    //                    NULL);
+    vkDestroySampler(vulkan->device.device, vulkan->texture.textureSampler,
+                     NULL);
+    vkDestroyImageView(vulkan->device.device,
+    vulkan->texture.textureImageView,
+                       NULL);
 
-    // vkDestroyImage(vulkan->device.device, vulkan->texture.textureImage,
-    // NULL); vkFreeMemory(vulkan->device.device,
-    // vulkan->texture.textureImageMemory,
-    //              NULL);
+    vkDestroyImage(vulkan->device.device, vulkan->texture.textureImage,
+    NULL); vkFreeMemory(vulkan->device.device,
+    vulkan->texture.textureImageMemory,
+                 NULL);
 
     vkDestroyDescriptorSetLayout(
         vulkan->device.device, vulkan->descriptorSet.descriptorSetLayout, NULL);
