@@ -11,17 +11,20 @@
 #include <vulkan/vulkan.h>
 #include <window/window.h>
 
-static inline VkDescriptorPoolSize createDescriptorPoolSize(uint32_t count) {
+static inline VkDescriptorPoolSize
+createDescriptorPoolSize(VkDescriptorType type, uint32_t count) {
     VkDescriptorPoolSize poolSize;
-    poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    poolSize.type = type;
     poolSize.descriptorCount = count;
     return poolSize;
 }
 
 void createDescriptorPool(Vulkan *vulkan) {
     VkDescriptorPoolSize poolSizes[] = {
-        createDescriptorPoolSize(vulkan->swapchain.swapChainImagesCount),
-        createDescriptorPoolSize(vulkan->swapchain.swapChainImagesCount),
+        createDescriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                                 vulkan->swapchain.swapChainImagesCount),
+        createDescriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                                 vulkan->swapchain.swapChainImagesCount),
     };
 
     VkDescriptorPoolCreateInfo poolInfo = {};
@@ -37,17 +40,19 @@ void createDescriptorPool(Vulkan *vulkan) {
     }
 }
 
-static inline VkWriteDescriptorSet
-createWriteDescriptorSet(VkDescriptorBufferInfo *bufferInfo,
-                         VkDescriptorSet descriptorSet, uint32_t binding) {
-    VkWriteDescriptorSet descriptorWrite = {};
-    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    descriptorWrite.dstSet = descriptorSet;
-    descriptorWrite.dstBinding = binding;
-    descriptorWrite.dstArrayElement = 0;
-    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    descriptorWrite.descriptorCount = 1;
-    descriptorWrite.pBufferInfo = bufferInfo;
+static inline VkWriteDescriptorSet createWriteDescriptorInfo(
+    VkDescriptorBufferInfo *bufferInfo, VkDescriptorImageInfo *imageInfo,
+    VkDescriptorSet descriptorSet, uint32_t binding, VkDescriptorType type) {
+    VkWriteDescriptorSet descriptorWrite = {
+        .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+        .dstSet = descriptorSet,
+        .dstBinding = binding,
+        .dstArrayElement = 0,
+        .descriptorType = type,
+        .descriptorCount = 1,
+        .pBufferInfo = bufferInfo,
+        .pImageInfo = imageInfo,
+    };
     return descriptorWrite;
 }
 
@@ -57,12 +62,15 @@ void createDescriptorSets(Vulkan *vulkan) {
     for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
         layouts[i] = vulkan->descriptorSet.descriptorSetLayout;
     }
+    // memset(layouts, &vulkan->descriptorSet.descriptorSetLayout,
+    //        vulkan->swapchain.swapChainImagesCount * sizeof(*layouts));
 
-    VkDescriptorSetAllocateInfo allocInfo = {};
-    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = vulkan->descriptorSet.descriptorPool;
-    allocInfo.descriptorSetCount = vulkan->swapchain.swapChainImagesCount;
-    allocInfo.pSetLayouts = layouts;
+    VkDescriptorSetAllocateInfo allocInfo = {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+        .descriptorPool = vulkan->descriptorSet.descriptorPool,
+        .descriptorSetCount = vulkan->swapchain.swapChainImagesCount,
+        .pSetLayouts = layouts,
+    };
 
     vulkan->descriptorSet.descriptorSets =
         malloc(vulkan->swapchain.swapChainImagesCount *
@@ -74,14 +82,25 @@ void createDescriptorSets(Vulkan *vulkan) {
     }
 
     for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
-        VkDescriptorBufferInfo bufferInfo = {};
-        bufferInfo.buffer = vulkan->descriptorSet.uniformBuffers[i];
-        bufferInfo.offset = 0;
-        bufferInfo.range = sizeof(UniformBufferObject);
+        VkDescriptorBufferInfo bufferInfo = {
+            .buffer = vulkan->descriptorSet.uniformBuffers[i],
+            .offset = 0,
+            .range = sizeof(UniformBufferObject),
+        };
+
+        VkDescriptorImageInfo imageInfo = {
+            .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            .imageView = vulkan->texture.textureImageView,
+            .sampler = vulkan->texture.textureSampler,
+        };
 
         VkWriteDescriptorSet descriptorWrites[] = {
-            createWriteDescriptorSet(
-                &bufferInfo, vulkan->descriptorSet.descriptorSets[i], 0),
+            createWriteDescriptorInfo(&bufferInfo, NULL,
+                                      vulkan->descriptorSet.descriptorSets[i],
+                                      0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER),
+            createWriteDescriptorInfo(
+                NULL, &imageInfo, vulkan->descriptorSet.descriptorSets[i], 1,
+                VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER),
         };
 
         vkUpdateDescriptorSets(vulkan->device.device, SIZEOF(descriptorWrites),
@@ -107,8 +126,9 @@ void createDescriptorSetLayout(Vulkan *vulkan) {
     VkDescriptorSetLayoutBinding bindings[] = {
         createDescriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                          VK_SHADER_STAGE_VERTEX_BIT, 0),
-        createDescriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                                         VK_SHADER_STAGE_FRAGMENT_BIT, 1),
+        createDescriptorSetLayoutBinding(
+            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            VK_SHADER_STAGE_FRAGMENT_BIT, 1),
     };
 
     VkDescriptorSetLayoutCreateInfo layoutInfo = {};
@@ -152,19 +172,16 @@ void updateUniformBuffer(Vulkan *vulkan, Window *window,
     // glm_vec3_rotate(vulkan->uniforms.light.pos, window->dt * glm_rad(25.0f),
     //                 (vec3)Z_AXIS);
 
-    glm_rotate(vulkan->ubo.model, window->dt * glm_rad(25.0f),
-               GLM_ZUP);
+    glm_rotate(vulkan->ubo.model, window->dt * glm_rad(25.0f), GLM_ZUP);
 
     glm_rotate(vulkan->ubo.model, window->mX * 0.00005, GLM_YUP);
     glm_rotate(vulkan->ubo.model, window->mY * 0.00005, GLM_XUP);
 
-    glm_lookat((vec3)VEC_3(2.0f), GLM_VEC3_ZERO, GLM_ZUP,
-               vulkan->ubo.view);
+    glm_lookat((vec3)VEC_3(2.0f), GLM_VEC3_ZERO, GLM_ZUP, vulkan->ubo.view);
 
     float aspectRatio = vulkan->swapchain.swapChainExtent->width /
                         (float)vulkan->swapchain.swapChainExtent->height;
-    glm_perspective(glm_rad(45.0f), aspectRatio, 0.1f, 10.0f,
-                    vulkan->ubo.proj);
+    glm_perspective(glm_rad(45.0f), aspectRatio, 0.1f, 10.0f, vulkan->ubo.proj);
 
     vulkan->ubo.proj[1][1] *= -1;
 

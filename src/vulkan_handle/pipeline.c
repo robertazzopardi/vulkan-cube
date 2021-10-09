@@ -54,7 +54,7 @@ void createGraphicsPipeline(Vulkan *vulkan) {
     VkPipelineVertexInputStateCreateInfo vertexInputInfo = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
         .vertexBindingDescriptionCount = 1,
-        .vertexAttributeDescriptionCount = 3,
+        .vertexAttributeDescriptionCount = 4,
         .pVertexBindingDescriptions = &bindingDescription,
         .pVertexAttributeDescriptions = attributeDescriptions,
     };
@@ -130,10 +130,11 @@ void createGraphicsPipeline(Vulkan *vulkan) {
         .logicOp = VK_LOGIC_OP_COPY,
         .attachmentCount = 1,
         .pAttachments = &colorBlendAttachment,
-        .blendConstants[0] = 0.0f,
-        .blendConstants[1] = 0.0f,
-        .blendConstants[2] = 0.0f,
-        .blendConstants[3] = 0.0f,
+        .blendConstants = {0.0f, 0.0f, 0.0f, 0.0f},
+        // .blendConstants[0] = 0.0f,
+        // .blendConstants[1] = 0.0f,
+        // .blendConstants[2] = 0.0f,
+        // .blendConstants[3] = 0.0f,
     };
 
     VkPipelineLayoutCreateInfo pipelineLayoutInfo = {

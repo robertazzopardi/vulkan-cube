@@ -167,82 +167,85 @@ Octahedron octahedron1 = {
 };
 
 typedef Plane Cube[6];
-// Cube cube1 = {
-//     {
-//         {{-0.5f, -0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT, {1.0f, 0.0f}}, // top
-//         {{0.5f, -0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT, {0.0f, 0.0f}},
-//         {{0.5f, 0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT, {0.0f, 1.0f}},
-//         {{-0.5f, 0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT, {1.0f, 1.0f}},
-//     },
-//     {
-//         {{-0.5f, 0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT, {1.0f, 0.0f}}, // bottom
-//         {{0.5f, 0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT, {0.0f, 0.0f}},
-//         {{0.5f, -0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT, {0.0f, 1.0f}},
-//         {{-0.5f, -0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT, {1.0f, 1.0f}},
-//     },
-//     {
-//         {{-0.5f, 0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT, {1.0f, 0.0f}}, // left
-//         {{-0.5f, 0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT, {0.0f, 0.0f}},
-//         {{-0.5f, -0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT, {0.0f, 1.0f}},
-//         {{-0.5f, -0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT, {1.0f, 1.0f}},
-//     },
-//     {
-//         {{0.5f, -0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT, {1.0f, 0.0f}}, // Right
-//         {{0.5f, -0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT, {0.0f, 0.0f}},
-//         {{0.5f, 0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT, {0.0f, 1.0f}},
-//         {{0.5f, 0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT, {1.0f, 1.0f}},
-//     },
-//     {
-//         {{0.5f, 0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {1.0f, 0.0f}}, // front
-//         {{0.5f, 0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {0.0f, 0.0f}},
-//         {{-0.5f, 0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {0.0f, 1.0f}},
-//         {{-0.5f, 0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {1.0f, 1.0f}},
-//     },
-//     {
-//         {{0.5f, -0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {1.0f, 0.0f}}, // back
-//         {{0.5f, -0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {0.0f, 0.0f}},
-//         {{-0.5f, -0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {0.0f, 1.0f}},
-//         {{-0.5f, -0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {1.0f, 1.0f}},
-//     },
-// };
 Cube cube1 = {
     {
-        {{-0.5f, -0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT}, // top
-        {{0.5f, -0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{0.5f, 0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{-0.5f, 0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT},
+        {{-0.5f, -0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT, {1.0f, 0.0f}}, // top
+        {{0.5f, -0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT, {0.0f, 0.0f}},
+        {{0.5f, 0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT, {0.0f, 1.0f}},
+        {{-0.5f, 0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT, {1.0f, 1.0f}},
     },
     {
-        {{-0.5f, 0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT}, // bottom
-        {{0.5f, 0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT},
-        {{0.5f, -0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT},
-        {{-0.5f, -0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT},
+        {{-0.5f, 0.5f, -0.5f},
+         GREEN,
+         GLM_VEC3_ZERO_INIT,
+         {1.0f, 0.0f}}, // bottom
+        {{0.5f, 0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT, {0.0f, 0.0f}},
+        {{0.5f, -0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT, {0.0f, 1.0f}},
+        {{-0.5f, -0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT, {1.0f, 1.0f}},
     },
     {
-        {{-0.5f, 0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT}, // left
-        {{-0.5f, 0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT},
-        {{-0.5f, -0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT},
-        {{-0.5f, -0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT},
+        {{-0.5f, 0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT, {1.0f, 0.0f}}, // left
+        {{-0.5f, 0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT, {0.0f, 0.0f}},
+        {{-0.5f, -0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT, {0.0f, 1.0f}},
+        {{-0.5f, -0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT, {1.0f, 1.0f}},
     },
     {
-        {{0.5f, -0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT}, // Right
-        {{0.5f, -0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT},
-        {{0.5f, 0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT},
-        {{0.5f, 0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT},
+        {{0.5f, -0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT, {1.0f, 0.0f}}, // Right
+        {{0.5f, -0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT, {0.0f, 0.0f}},
+        {{0.5f, 0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT, {0.0f, 1.0f}},
+        {{0.5f, 0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT, {1.0f, 1.0f}},
     },
     {
-        {{0.5f, 0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT}, // front
-        {{0.5f, 0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT},
-        {{-0.5f, 0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT},
-        {{-0.5f, 0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT},
+        {{0.5f, 0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {1.0f, 0.0f}}, // front
+        {{0.5f, 0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {0.0f, 0.0f}},
+        {{-0.5f, 0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {0.0f, 1.0f}},
+        {{-0.5f, 0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {1.0f, 1.0f}},
     },
     {
-        {{0.5f, -0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT}, // back
-        {{0.5f, -0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT},
-        {{-0.5f, -0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT},
-        {{-0.5f, -0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT},
+        {{0.5f, -0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {1.0f, 0.0f}}, // back
+        {{0.5f, -0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {0.0f, 0.0f}},
+        {{-0.5f, -0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {0.0f, 1.0f}},
+        {{-0.5f, -0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {1.0f, 1.0f}},
     },
 };
+// Cube cube1 = {
+//     {
+//         {{-0.5f, -0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT}, // top
+//         {{0.5f, -0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT},
+//         {{0.5f, 0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT},
+//         {{-0.5f, 0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT},
+//     },
+//     {
+//         {{-0.5f, 0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT}, // bottom
+//         {{0.5f, 0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT},
+//         {{0.5f, -0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT},
+//         {{-0.5f, -0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT},
+//     },
+//     {
+//         {{-0.5f, 0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT}, // left
+//         {{-0.5f, 0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT},
+//         {{-0.5f, -0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT},
+//         {{-0.5f, -0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT},
+//     },
+//     {
+//         {{0.5f, -0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT}, // Right
+//         {{0.5f, -0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT},
+//         {{0.5f, 0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT},
+//         {{0.5f, 0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT},
+//     },
+//     {
+//         {{0.5f, 0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT}, // front
+//         {{0.5f, 0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT},
+//         {{-0.5f, 0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT},
+//         {{-0.5f, 0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT},
+//     },
+//     {
+//         {{0.5f, -0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT}, // back
+//         {{0.5f, -0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT},
+//         {{-0.5f, -0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT},
+//         {{-0.5f, -0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT},
+//     },
+// };
 
 uint16_t indices[] = {
     0,  1,  2,  2,  3,  0,  // top
@@ -308,7 +311,7 @@ inline VkVertexInputBindingDescription getBindingDescription() {
 inline VkVertexInputAttributeDescription *getAttributeDescriptions() {
 
     VkVertexInputAttributeDescription *attributeDescriptions =
-        malloc(3 * sizeof(*attributeDescriptions));
+        malloc(4 * sizeof(*attributeDescriptions));
 
     attributeDescriptions[0].binding = 0;
     attributeDescriptions[0].location = 0;
@@ -325,25 +328,16 @@ inline VkVertexInputAttributeDescription *getAttributeDescriptions() {
     attributeDescriptions[2].format = VK_FORMAT_R32G32B32_SFLOAT;
     attributeDescriptions[2].offset = offsetof(Vertex, normal);
 
-    // attributeDescriptions[3].binding = 0;
-    // attributeDescriptions[3].location = 3;
-    // attributeDescriptions[3].format = VK_FORMAT_R32G32_SFLOAT;
-    // attributeDescriptions[3].offset = offsetof(Vertex, texCoord);
+    attributeDescriptions[3].binding = 0;
+    attributeDescriptions[3].location = 3;
+    attributeDescriptions[3].format = VK_FORMAT_R32G32_SFLOAT;
+    attributeDescriptions[3].offset = offsetof(Vertex, texCoord);
 
     return attributeDescriptions;
 }
 
-static inline bool isInVertexArray(Vertex vert, Vertex *arr, uint32_t vertIndex) {
-    for (uint32_t j = 0; j < vertIndex; j++) {
-        if (glm_vec3_eqv(vert.pos, arr[j].pos)) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-static inline void calculateIndicesForSphere(Shape *vulkanShape, size_t indices) {
+static inline void calculateIndicesForSphere(Shape *vulkanShape,
+                                             size_t indices) {
     for (size_t i = vulkanShape->index; i < vulkanShape->index + indices; i++) {
         vulkanShape->indices[i] = i;
     }
@@ -364,6 +358,17 @@ static inline void calculateNormals(Vertex *shape, uint32_t vertsToUpdate) {
     for (size_t i = 0; i < vertsToUpdate; i++) {
         glm_vec3_copy(normal, shape[i].normal);
     }
+}
+
+static inline bool isInVertexArray(Vertex vert, Vertex *arr,
+                                   uint32_t vertIndex) {
+    for (uint32_t j = 0; j < vertIndex; j++) {
+        if (glm_vec3_eqv(vert.pos, arr[j].pos)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 // void calculateIndicesForCube(Shape *vulkanShape, Vertex *shape, size_t
@@ -397,7 +402,7 @@ static inline void calculateNormals(Vertex *shape, uint32_t vertsToUpdate) {
 // }
 
 static inline void findTriangles(Triangle triangle, int currentDepth, int depth,
-                   Triangle *storage, size_t *index) {
+                                 Triangle *storage, size_t *index) {
     // Depth is reached.
     if (currentDepth == depth) {
         calculateNormals(triangle, 3);
@@ -426,8 +431,6 @@ static inline void allocateVerticesAndIndices(Vulkan *vulkan,
     vulkan->shapes.indices =
         malloc(numIndices * sizeof(*vulkan->shapes.indices));
 }
-
-
 
 void combineVerticesAndIndicesForSphere(Vulkan *vulkan, Octahedron octahedron,
                                         size_t count, size_t depth) {
