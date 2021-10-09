@@ -13,7 +13,7 @@ const uint32_t MAX_FAMILY = 1000;
 
 static const char *deviceExtensions[] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
-bool isComplete(QueueFamilyIndices queueFamilyIndices) {
+static inline bool isComplete(QueueFamilyIndices queueFamilyIndices) {
     return queueFamilyIndices.graphicsFamily != MAX_FAMILY &&
            queueFamilyIndices.presentFamily != MAX_FAMILY;
 }

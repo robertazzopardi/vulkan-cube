@@ -120,12 +120,14 @@ void createCommandBuffers(Vulkan *vulkan, Window *window) {
 }
 
 void createSyncObjects(Vulkan *vulkan) {
-    VkSemaphore *imageAvailableSemaphoresTemp =
-        malloc(MAX_FRAMES_IN_FLIGHT * sizeof(*imageAvailableSemaphoresTemp));
-    VkSemaphore *renderFinishedSemaphoresTemp =
-        malloc(MAX_FRAMES_IN_FLIGHT * sizeof(*renderFinishedSemaphoresTemp));
-    VkFence *inFlightFencesTemp =
-        malloc(MAX_FRAMES_IN_FLIGHT * sizeof(*inFlightFencesTemp));
+    vulkan->semaphores.imageAvailableSemaphores =
+        malloc(MAX_FRAMES_IN_FLIGHT *
+               sizeof(*vulkan->semaphores.imageAvailableSemaphores));
+    vulkan->semaphores.renderFinishedSemaphores =
+        malloc(MAX_FRAMES_IN_FLIGHT *
+               sizeof(*vulkan->semaphores.renderFinishedSemaphores));
+    vulkan->semaphores.inFlightFences = malloc(
+        MAX_FRAMES_IN_FLIGHT * sizeof(*vulkan->semaphores.inFlightFences));
     vulkan->semaphores.imagesInFlight =
         calloc(vulkan->swapchain.swapChainImagesCount,
                sizeof(*vulkan->semaphores.imagesInFlight));
@@ -138,19 +140,20 @@ void createSyncObjects(Vulkan *vulkan) {
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        if (vkCreateSemaphore(vulkan->device.device, &semaphoreInfo, NULL,
-                              &imageAvailableSemaphoresTemp[i]) != VK_SUCCESS ||
-            vkCreateSemaphore(vulkan->device.device, &semaphoreInfo, NULL,
-                              &renderFinishedSemaphoresTemp[i]) != VK_SUCCESS ||
+        if (vkCreateSemaphore(
+                vulkan->device.device, &semaphoreInfo, NULL,
+                &vulkan->semaphores.imageAvailableSemaphores[i]) !=
+                VK_SUCCESS ||
+            vkCreateSemaphore(
+                vulkan->device.device, &semaphoreInfo, NULL,
+                &vulkan->semaphores.renderFinishedSemaphores[i]) !=
+                VK_SUCCESS ||
             vkCreateFence(vulkan->device.device, &fenceInfo, NULL,
-                          &inFlightFencesTemp[i]) != VK_SUCCESS) {
+                          &vulkan->semaphores.inFlightFences[i]) !=
+                VK_SUCCESS) {
             printf("failed to create synchronization objects for a frame!\n");
         }
     }
-
-    vulkan->semaphores.imageAvailableSemaphores = imageAvailableSemaphoresTemp;
-    vulkan->semaphores.renderFinishedSemaphores = renderFinishedSemaphoresTemp;
-    vulkan->semaphores.inFlightFences = inFlightFencesTemp;
 }
 
 void drawFrame(Window *window, Vulkan *vulkan) {

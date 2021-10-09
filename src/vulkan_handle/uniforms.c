@@ -74,21 +74,14 @@ void createDescriptorSets(Vulkan *vulkan) {
     }
 
     for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
-        VkDescriptorBufferInfo mvpBufferInfo = {};
-        mvpBufferInfo.buffer = vulkan->descriptorSet.uniformBuffers[i];
-        mvpBufferInfo.offset = 0;
-        mvpBufferInfo.range = sizeof(UniformMVP);
-
-        // VkDescriptorBufferInfo lightBufferInfo = {};
-        // lightBufferInfo.buffer = vulkan->descriptorSet.uniformBuffers[i];
-        // lightBufferInfo.offset = 0;
-        // lightBufferInfo.range = sizeof(UniformLight);
+        VkDescriptorBufferInfo bufferInfo = {};
+        bufferInfo.buffer = vulkan->descriptorSet.uniformBuffers[i];
+        bufferInfo.offset = 0;
+        bufferInfo.range = sizeof(UniformBufferObject);
 
         VkWriteDescriptorSet descriptorWrites[] = {
             createWriteDescriptorSet(
-                &mvpBufferInfo, vulkan->descriptorSet.descriptorSets[i], 0),
-            // createWriteDescriptorSet(
-            //     &lightBufferInfo, vulkan->descriptorSet.descriptorSets[i], 1),
+                &bufferInfo, vulkan->descriptorSet.descriptorSets[i], 0),
         };
 
         vkUpdateDescriptorSets(vulkan->device.device, SIZEOF(descriptorWrites),
@@ -147,7 +140,7 @@ void createUniformBuffers(Vulkan *vulkan) {
                      &vulkan->descriptorSet.uniformBuffersMemory[i]);
     }
 
-    glm_mat4_identity(vulkan->uniforms.mvp.model);
+    glm_mat4_identity(vulkan->ubo.model);
 
     // glm_vec3_copy((vec3)WHITE, vulkan->uniforms.light.colour);
     // glm_vec3_copy((vec3){1.0f, -5.0f, 1.0f}, vulkan->uniforms.light.pos);
@@ -159,23 +152,23 @@ void updateUniformBuffer(Vulkan *vulkan, Window *window,
     // glm_vec3_rotate(vulkan->uniforms.light.pos, window->dt * glm_rad(25.0f),
     //                 (vec3)Z_AXIS);
 
-    glm_rotate(vulkan->uniforms.mvp.model, window->dt * glm_rad(25.0f),
+    glm_rotate(vulkan->ubo.model, window->dt * glm_rad(25.0f),
                GLM_ZUP);
 
-    glm_rotate(vulkan->uniforms.mvp.model, window->mX * 0.00005, GLM_YUP);
-    glm_rotate(vulkan->uniforms.mvp.model, window->mY * 0.00005, GLM_XUP);
+    glm_rotate(vulkan->ubo.model, window->mX * 0.00005, GLM_YUP);
+    glm_rotate(vulkan->ubo.model, window->mY * 0.00005, GLM_XUP);
 
     glm_lookat((vec3)VEC_3(2.0f), GLM_VEC3_ZERO, GLM_ZUP,
-               vulkan->uniforms.mvp.view);
+               vulkan->ubo.view);
 
     float aspectRatio = vulkan->swapchain.swapChainExtent->width /
                         (float)vulkan->swapchain.swapChainExtent->height;
     glm_perspective(glm_rad(45.0f), aspectRatio, 0.1f, 10.0f,
-                    vulkan->uniforms.mvp.proj);
+                    vulkan->ubo.proj);
 
-    vulkan->uniforms.mvp.proj[1][1] *= -1;
+    vulkan->ubo.proj[1][1] *= -1;
 
     mapMemory(vulkan->device.device,
               vulkan->descriptorSet.uniformBuffersMemory[currentImage],
-              sizeof(vulkan->uniforms), &vulkan->uniforms);
+              sizeof(vulkan->ubo), &vulkan->ubo);
 }

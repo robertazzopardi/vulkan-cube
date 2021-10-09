@@ -191,7 +191,7 @@ void initVulkan(Window *window, Vulkan *vulkan) {
     createSyncObjects(vulkan);
 }
 
-void cleanUpVulkan(Window *window, Vulkan *vulkan) {
+void cleanUpVulkan(VkSurfaceKHR surface, Vulkan *vulkan) {
     vkDeviceWaitIdle(vulkan->device.device);
 
     cleanupSwapChain(vulkan);
@@ -257,6 +257,6 @@ void cleanUpVulkan(Window *window, Vulkan *vulkan) {
                                       vulkan->validation.debugMessenger, NULL);
     }
 
-    vkDestroySurfaceKHR(vulkan->instance, window->surface, NULL);
+    vkDestroySurfaceKHR(vulkan->instance, surface, NULL);
     vkDestroyInstance(vulkan->instance, NULL);
 }

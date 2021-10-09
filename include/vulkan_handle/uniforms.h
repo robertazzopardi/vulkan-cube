@@ -9,20 +9,10 @@ typedef struct VkDeviceMemory_T *VkDeviceMemory;
 typedef struct VkDescriptorPool_T *VkDescriptorPool;
 typedef struct VkDescriptorSet_T *VkDescriptorSet;
 
-typedef struct UniformMVP {
+typedef struct UniformBufferObject {
     mat4 model;
     mat4 view;
     mat4 proj;
-} UniformMVP;
-
-// typedef struct UniformLight {
-//     vec3 pos;
-//     vec3 colour;
-// } UniformLight;
-
-typedef struct UniformBufferObject {
-    UniformMVP mvp;
-    // UniformLight light;
 } UniformBufferObject;
 
 typedef struct DescriptorSet {

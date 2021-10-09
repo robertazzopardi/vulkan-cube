@@ -25,7 +25,7 @@ typedef struct Vertex {
     vec3 pos;
     vec3 colour;
     vec3 normal;
-    // vec2 texCoord;
+    vec2 texCoord;
 } Vertex;
 
 typedef struct VkImage_T *VkImage;
@@ -91,7 +91,5 @@ VkVertexInputAttributeDescription *getAttributeDescriptions();
 
 void createBufferAndMemory(Vulkan *, VkBuffer *, VkDeviceMemory *, Vertex *,
                            uint16_t);
-
-void calculateNormals(Vertex *, uint32_t);
 
 #endif /* INCLUDE_GEOMETRY_GEOMETRY */

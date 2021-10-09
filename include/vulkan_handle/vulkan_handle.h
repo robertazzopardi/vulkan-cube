@@ -24,7 +24,7 @@ typedef struct Vulkan {
     ShapeBuffers shapeBuffers;
     Shape shapes;
     Depth depth;
-    UniformBufferObject uniforms;
+    UniformBufferObject ubo;
     DescriptorSet descriptorSet;
     Texture texture;
 } Vulkan;
@@ -33,7 +33,7 @@ typedef struct Window Window;
 
 void initVulkan(Window *, Vulkan *);
 
-void cleanUpVulkan(Window *, Vulkan *);
+void cleanUpVulkan(VkSurfaceKHR, Vulkan *);
 
 VkFormat findDepthFormat(Vulkan *);
 

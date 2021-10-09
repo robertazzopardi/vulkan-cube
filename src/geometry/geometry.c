@@ -296,7 +296,7 @@ void SplitTriangle(Triangle tri, Triangle *split) {
     glm_vec3_copy(c, split[3][2].pos);
 }
 
-VkVertexInputBindingDescription getBindingDescription() {
+inline VkVertexInputBindingDescription getBindingDescription() {
     VkVertexInputBindingDescription bindingDescription = {};
     bindingDescription.binding = 0;
     bindingDescription.stride = sizeof(Vertex);
@@ -305,7 +305,7 @@ VkVertexInputBindingDescription getBindingDescription() {
     return bindingDescription;
 }
 
-VkVertexInputAttributeDescription *getAttributeDescriptions() {
+inline VkVertexInputAttributeDescription *getAttributeDescriptions() {
 
     VkVertexInputAttributeDescription *attributeDescriptions =
         malloc(3 * sizeof(*attributeDescriptions));
@@ -333,7 +333,7 @@ VkVertexInputAttributeDescription *getAttributeDescriptions() {
     return attributeDescriptions;
 }
 
-bool isInVertexArray(Vertex vert, Vertex *arr, uint32_t vertIndex) {
+static inline bool isInVertexArray(Vertex vert, Vertex *arr, uint32_t vertIndex) {
     for (uint32_t j = 0; j < vertIndex; j++) {
         if (glm_vec3_eqv(vert.pos, arr[j].pos)) {
             return true;
@@ -343,11 +343,27 @@ bool isInVertexArray(Vertex vert, Vertex *arr, uint32_t vertIndex) {
     return false;
 }
 
-void calculateIndicesForSphere(Shape *vulkanShape, size_t indices) {
+static inline void calculateIndicesForSphere(Shape *vulkanShape, size_t indices) {
     for (size_t i = vulkanShape->index; i < vulkanShape->index + indices; i++) {
         vulkanShape->indices[i] = i;
     }
     vulkanShape->index += indices;
+}
+
+static inline void getNormal(vec3 p1, vec3 p2, vec3 p3, vec3 normal) {
+    vec3 a, b;
+    glm_vec3_sub(p3, p2, a);
+    glm_vec3_sub(p1, p2, b);
+    glm_vec3_cross(a, b, normal);
+}
+
+static inline void calculateNormals(Vertex *shape, uint32_t vertsToUpdate) {
+    vec3 normal;
+    getNormal(shape[0].pos, shape[1].pos, shape[2].pos, normal);
+
+    for (size_t i = 0; i < vertsToUpdate; i++) {
+        glm_vec3_copy(normal, shape[i].normal);
+    }
 }
 
 // void calculateIndicesForCube(Shape *vulkanShape, Vertex *shape, size_t
@@ -380,7 +396,7 @@ void calculateIndicesForSphere(Shape *vulkanShape, size_t indices) {
 //     freeMem(1, indis);
 // }
 
-void findTriangles(Triangle triangle, int currentDepth, int depth,
+static inline void findTriangles(Triangle triangle, int currentDepth, int depth,
                    Triangle *storage, size_t *index) {
     // Depth is reached.
     if (currentDepth == depth) {
@@ -411,21 +427,7 @@ static inline void allocateVerticesAndIndices(Vulkan *vulkan,
         malloc(numIndices * sizeof(*vulkan->shapes.indices));
 }
 
-static inline void getNormal(vec3 p1, vec3 p2, vec3 p3, vec3 normal) {
-    vec3 a, b;
-    glm_vec3_sub(p3, p2, a);
-    glm_vec3_sub(p1, p2, b);
-    glm_vec3_cross(a, b, normal);
-}
 
-void calculateNormals(Vertex *shape, uint32_t vertsToUpdate) {
-    vec3 normal;
-    getNormal(shape[0].pos, shape[1].pos, shape[2].pos, normal);
-
-    for (size_t i = 0; i < vertsToUpdate; i++) {
-        glm_vec3_copy(normal, shape[i].normal);
-    }
-}
 
 void combineVerticesAndIndicesForSphere(Vulkan *vulkan, Octahedron octahedron,
                                         size_t count, size_t depth) {

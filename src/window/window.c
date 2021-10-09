@@ -132,6 +132,6 @@ void initialise() {
         drawFrame(&window, &vulkan);
     }
 
-    cleanUpVulkan(&window, &vulkan);
+    cleanUpVulkan(window.surface, &vulkan);
     cleanup(&window);
 }
