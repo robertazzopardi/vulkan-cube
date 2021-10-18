@@ -3,6 +3,7 @@
 #include "vulkan_handle/memory.h"
 #include "vulkan_handle/texture.h"
 #include "vulkan_handle/vulkan_handle.h"
+#include <cglm/vec2.h>
 #include <cglm/vec3.h>
 #include <math.h>
 #include <stdarg.h>
@@ -360,16 +361,16 @@ static inline void calculateNormals(Vertex *shape, uint32_t vertsToUpdate) {
     }
 }
 
-static inline bool isInVertexArray(Vertex vert, Vertex *arr,
-                                   uint32_t vertIndex) {
-    for (uint32_t j = 0; j < vertIndex; j++) {
-        if (glm_vec3_eqv(vert.pos, arr[j].pos)) {
-            return true;
-        }
-    }
+// static inline bool isInVertexArray(Vertex vert, Vertex *arr,
+//                                    uint32_t vertIndex) {
+//     for (uint32_t j = 0; j < vertIndex; j++) {
+//         if (glm_vec3_eqv(vert.pos, arr[j].pos)) {
+//             return true;
+//         }
+//     }
 
-    return false;
-}
+//     return false;
+// }
 
 // void calculateIndicesForCube(Shape *vulkanShape, Vertex *shape, size_t
 // length) {
@@ -586,13 +587,108 @@ void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
     vkBindBufferMemory(vulkan->device.device, *buffer, *bufferMemory, 0);
 }
 
+void normSphere(Vulkan *vulkan, uint32_t sectorCount, uint32_t stackCount,
+                uint32_t radius) {
+
+    uint32_t length = 25;
+
+    allocateVerticesAndIndices(vulkan, length, 72);
+
+    Vertex vertices[length];
+    uint32_t index = 0;
+
+    float x, y, z, xy;                           // vertex position
+    float nx, ny, nz, lengthInv = 1.0f / radius; // vertex normal
+    float s, t;                                  // vertex texCoord
+
+    float sectorStep = 2 * GLM_PI / sectorCount;
+    float stackStep = GLM_PI / stackCount;
+    float sectorAngle, stackAngle;
+
+    for (uint32_t i = 0; i <= stackCount; ++i) {
+        stackAngle = GLM_PI / 2 - i * stackStep; // starting from pi/2 to -pi/2
+        xy = radius * cosf(stackAngle);          // r * cos(u)
+        z = radius * sinf(stackAngle);           // r * sin(u)
+
+        // add (sectorCount+1) vertices per stack
+        // the first and last vertices have same position and normal, but
+        // different tex coords
+        for (uint32_t j = 0; j <= sectorCount; ++j) {
+            sectorAngle = j * sectorStep; // starting from 0 to 2pi
+
+            // vertex position (x, y, z)
+            x = xy * cosf(sectorAngle); // r * cos(u) * cos(v)
+            y = xy * sinf(sectorAngle); // r * cos(u) * sin(v)
+            glm_vec3_copy((vec3){x, y, z}, vertices[index].pos);
+
+            // normalized vertex normal (nx, ny, nz)
+            nx = x * lengthInv;
+            ny = y * lengthInv;
+            nz = z * lengthInv;
+            glm_vec3_copy((vec3){nx, ny, nz}, vertices[index].normal);
+
+            // vertex tex coord (s, t) range between [0, 1]
+            s = (float)j / sectorCount;
+            t = (float)i / stackCount;
+            glm_vec2_copy((vec2){s, t}, vertices[index].texCoord);
+
+            glm_vec3_copy((vec3)WHITE, vertices[index].colour);
+
+            index++;
+        }
+    }
+
+    memcpy(vulkan->shapes.vertices, vertices, length * sizeof(*vertices));
+
+    vulkan->shapes.verticesCount = length;
+
+    length = 72;
+    uint16_t indices[length];
+    uint32_t k1, k2;
+    index = 0;
+    for (uint32_t i = 0; i < stackCount; ++i) {
+        k1 = i * (sectorCount + 1); // beginning of current stack
+        k2 = k1 + sectorCount + 1;  // beginning of next stack
+
+        for (uint32_t j = 0; j < sectorCount; ++j, ++k1, ++k2) {
+            // 2 triangles per sector excluding first and last stacks
+            // k1 => k2 => k1+1
+            if (i != 0) {
+                indices[index++] = k1;
+                indices[index++] = k2;
+                indices[index++] = k1 + 1;
+            }
+
+            // k1+1 => k2 => k2+1
+            if (i != (stackCount - 1)) {
+                indices[index++] = k1 + 1;
+                indices[index++] = k2;
+                indices[index++] = k2 + 1;
+            }
+
+            // store indices for lines
+            // vertical lines for all stacks, k1 => k2
+
+            // lineIndices.push_back(k1);
+            // lineIndices.push_back(k2);
+            // if (i != 0) // horizontal lines except 1st stack, k1 => k+1
+            // {
+            // lineIndices.push_back(k1);
+            // lineIndices.push_back(k1 + 1);
+            // }
+        }
+    }
+
+    memcpy(vulkan->shapes.indices, indices, SIZEOF(indices) * sizeof(*indices));
+    vulkan->shapes.indicesCount = SIZEOF(indices);
+}
+
 void createVertexBuffer(Vulkan *vulkan) {
 
     // for (size_t i = 0; i < SIZEOF(cube1); i++) {
     //     vec3 normal;
     //     getNormal(octahedron1[i][0].pos, octahedron1[i][1].pos,
     //     octahedron1[i][2].pos, normal);
-
     //     for (size_t j = 0; j < 4; j++) {
     //         glm_vec3_copy(normal, octahedron1[i][j].normal);
     //     }
@@ -600,8 +696,9 @@ void createVertexBuffer(Vulkan *vulkan) {
 
     // combineVerticesAndIndicesForCube(vulkan, cube1, SIZEOF(cube1));
     // combineVerticesAndIndicesForSphere(vulkan, octahedron1, 8, 4);
-    combineVerticesAndIndicesForSphere(vulkan, icosahedron1,
-                                       SIZEOF(icosahedron1), 3);
+    // combineVerticesAndIndicesForSphere(vulkan, icosahedron1,
+    //                                    SIZEOF(icosahedron1), 3);
+    normSphere(vulkan, 4, 4, 1);
 
     VkDeviceSize bufferSize =
         sizeof(*vulkan->shapes.vertices) * vulkan->shapes.verticesCount;
