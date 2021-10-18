@@ -3,9 +3,10 @@
 #include "vulkan_handle/vulkan_handle.h"
 #include <stdarg.h>
 #include <stdlib.h>
+#include <string.h>
 #include <vulkan/vulkan.h>
 
-void freeMem(const size_t count, ...) {
+inline void freeMem(const size_t count, ...) {
     va_list valist;
 
     va_start(valist, count);
@@ -22,8 +23,8 @@ void freeMem(const size_t count, ...) {
     va_end(valist);
 }
 
-uint32_t findMemoryType(Vulkan *vulkan, uint32_t typeFilter,
-                        VkMemoryPropertyFlags properties) {
+inline uint32_t findMemoryType(Vulkan *vulkan, uint32_t typeFilter,
+                               VkMemoryPropertyFlags properties) {
     VkPhysicalDeviceMemoryProperties memProperties;
     vkGetPhysicalDeviceMemoryProperties(vulkan->device.physicalDevice,
                                         &memProperties);
@@ -37,4 +38,12 @@ uint32_t findMemoryType(Vulkan *vulkan, uint32_t typeFilter,
     }
 
     THROW_ERROR("failed to find suitable memory type!\n");
+}
+
+inline void mapMemory(VkDevice device, VkDeviceMemory deviceMemory,
+                      VkDeviceSize deviceSize, void *toMap) {
+    void *data;
+    vkMapMemory(device, deviceMemory, 0, deviceSize, 0, &data);
+    memcpy(data, toMap, (size_t)deviceSize);
+    vkUnmapMemory(device, deviceMemory);
 }

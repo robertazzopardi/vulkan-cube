@@ -13,7 +13,7 @@ const uint32_t MAX_FAMILY = 1000;
 
 static const char *deviceExtensions[] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
-bool isComplete(QueueFamilyIndices queueFamilyIndices) {
+static inline bool isComplete(QueueFamilyIndices queueFamilyIndices) {
     return queueFamilyIndices.graphicsFamily != MAX_FAMILY &&
            queueFamilyIndices.presentFamily != MAX_FAMILY;
 }
@@ -61,10 +61,6 @@ bool checkDeviceExtensionSupport(VkPhysicalDevice device) {
     VkExtensionProperties availableExtensions[extensionCount];
     vkEnumerateDeviceExtensionProperties(device, NULL, &extensionCount,
                                          availableExtensions);
-
-    // for (uint32_t i = 0; i < extensionCount; i++) {
-    //     printf("%s\n", availableExtensions[i].extensionName);
-    // }
 
     const char *requiredExtensions[SIZEOF(deviceExtensions)];
     for (uint32_t i = 0; i < SIZEOF(deviceExtensions); i++) {
@@ -192,6 +188,7 @@ void createLogicalDevice(Window *window, Vulkan *vulkan) {
     deviceFeatures.samplerAnisotropy = VK_TRUE;
     // enable sample shading feature for the device
     deviceFeatures.sampleRateShading = VK_TRUE;
+    deviceFeatures.fillModeNonSolid = VK_TRUE;
 
     VkDeviceCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;

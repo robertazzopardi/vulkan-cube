@@ -1,5 +1,7 @@
-#ifndef INCLUDE_VULKAN_HANDLE_SHAPE
-#define INCLUDE_VULKAN_HANDLE_SHAPE
+#ifndef INCLUDE_GEOMETRY_GEOMETRY
+#define INCLUDE_GEOMETRY_GEOMETRY
+
+#include <cglm/types.h>
 
 #define RED                                                                    \
     { 1.f, 0.f, 0.f }
@@ -12,13 +14,18 @@
 #define BLACK                                                                  \
     { 0.f, 0.f, 0.f }
 
-typedef float vec2[2];
-typedef float vec3[3];
+#define VEC_2(num)                                                             \
+    { num, num }
+#define VEC_3(num)                                                             \
+    { num, num, num }
+#define VEC_4(num)                                                             \
+    { num, num, num, num }
 
 typedef struct Vertex {
     vec3 pos;
     vec3 colour;
-    // vec2 texCoord;
+    vec3 normal;
+    vec2 texCoord;
 } Vertex;
 
 typedef struct VkImage_T *VkImage;
@@ -82,4 +89,7 @@ VkVertexInputBindingDescription getBindingDescription();
 
 VkVertexInputAttributeDescription *getAttributeDescriptions();
 
-#endif /* INCLUDE_VULKAN_HANDLE_SHAPE */
+void createBufferAndMemory(Vulkan *, VkBuffer *, VkDeviceMemory *, Vertex *,
+                           uint16_t);
+
+#endif /* INCLUDE_GEOMETRY_GEOMETRY */

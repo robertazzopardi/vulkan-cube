@@ -8,7 +8,7 @@
 CC = clang
 
 # define any compile-time flags
-CFLAGS	:= -Wall -Wextra -Werror -W -flto -ffast-math -Oz `sdl2-config --cflags`
+CFLAGS	:= -Wall -Wextra -W -flto -ffast-math -Oz `sdl2-config --cflags`
 CFLAGS  += -fsanitize=address -fno-omit-frame-pointer -ffunction-sections -fdata-sections
 # CFLAGS  += --analyze
 # CFLAGS  += -g
@@ -100,16 +100,17 @@ clean_shaders:
 clean: clean_shaders
 	$(RM) $(OUTPUTMAIN)
 	$(RM) $(call FIXPATH,$(OBJECTS))
+	$(RM) *.plist
 	@echo Cleanup complete!
 
 run: all
-	./$(OUTPUTMAIN)
+	$(OUTPUTMAIN)
 	@echo Executing 'run: all' complete!
 
 check: clean all
 	cppcheck -f --enable=all --inconclusive --check-library --debug-warnings --suppress=missingIncludeSystem --check-config $(INCLUDES) ./$(SRC)
 
-scan-build: clean
+scan_build: clean
 	scan-build make
 	$(RM) *.plist
 
@@ -119,9 +120,10 @@ compile_shaders: clean_shaders
 	GLSLC=$(VULKAN_SDK)/macOS/bin/glslc
 
 # Compile the shaders to .spv files
-	GLSLC $(SRC)/shaders/vertex_shaders/shader.vert -o $(SRC)/shaders/vert.spv
-	GLSLC $(SRC)/shaders/vertex_shaders/shader.frag -o $(SRC)/shaders/frag.spv
+	GLSLC $(SRC)/shaders/light/shader.vert -o $(SRC)/shaders/vert.spv
+	GLSLC $(SRC)/shaders/light/shader.frag -o $(SRC)/shaders/frag.spv
 
+# Dump the .spv files to a header file
 	$(MD) $(INCLUDE)/shaders
 	xxd -i $(SRC)/shaders/frag.spv > $(INCLUDE)/shaders/frag_shader.h
 	xxd -i $(SRC)/shaders/vert.spv > $(INCLUDE)/shaders/vert_shader.h

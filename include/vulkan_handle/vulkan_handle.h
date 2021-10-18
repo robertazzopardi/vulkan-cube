@@ -2,9 +2,9 @@
 #define INCLUDE_VULKAN_HANDLE_VULKAN_HANDLE
 
 #include "device.h"
-#include "graphics_pipeline.h"
+#include "geometry/geometry.h"
+#include "pipeline.h"
 #include "render.h"
-#include "shape.h"
 #include "swapchain.h"
 #include "texture.h"
 #include "uniforms.h"
@@ -25,6 +25,7 @@ typedef struct Vulkan {
     Shape shapes;
     Depth depth;
     UniformBufferObject ubo;
+    DescriptorSet descriptorSet;
     Texture texture;
 } Vulkan;
 
@@ -32,7 +33,7 @@ typedef struct Window Window;
 
 void initVulkan(Window *, Vulkan *);
 
-void cleanUpVulkan(Window *, Vulkan *);
+void cleanUpVulkan(VkSurfaceKHR, Vulkan *);
 
 VkFormat findDepthFormat(Vulkan *);
 

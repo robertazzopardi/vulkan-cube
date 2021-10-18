@@ -62,7 +62,6 @@ VkFormat findSupportedFormat(const VkFormat *candidates, size_t length,
                              VkImageTiling tiling,
                              VkFormatFeatureFlags features,
                              VkPhysicalDevice physicalDevice) {
-    // for (VkFormat format : candidates) {
     for (size_t i = 0; i < length; i++) {
         VkFormatProperties props;
         vkGetPhysicalDeviceFormatProperties(physicalDevice, candidates[i],
@@ -172,13 +171,11 @@ void initVulkan(Window *window, Vulkan *vulkan) {
 
     createCommandPool(window, vulkan);
 
-    // createTextureImage(vulkan);
+    createTextureImage(vulkan);
 
-    // createTextureImageView(vulkan);
+    createTextureImageView(vulkan);
 
-    // createTextureSampler(vulkan);
-
-    //
+    createTextureSampler(vulkan);
 
     createVertexBuffer(vulkan);
     createIndexBuffer(vulkan);
@@ -194,24 +191,24 @@ void initVulkan(Window *window, Vulkan *vulkan) {
     createSyncObjects(vulkan);
 }
 
-void cleanUpVulkan(Window *window, Vulkan *vulkan) {
+void cleanUpVulkan(VkSurfaceKHR surface, Vulkan *vulkan) {
     vkDeviceWaitIdle(vulkan->device.device);
 
     cleanupSwapChain(vulkan);
 
-    // vkDestroySampler(vulkan->device.device, vulkan->texture.textureSampler,
-    //                  NULL);
-    // vkDestroyImageView(vulkan->device.device,
-    // vulkan->texture.textureImageView,
-    //                    NULL);
+    vkDestroySampler(vulkan->device.device, vulkan->texture.textureSampler,
+                     NULL);
+    vkDestroyImageView(vulkan->device.device,
+    vulkan->texture.textureImageView,
+                       NULL);
 
-    // vkDestroyImage(vulkan->device.device, vulkan->texture.textureImage,
-    // NULL); vkFreeMemory(vulkan->device.device,
-    // vulkan->texture.textureImageMemory,
-    //              NULL);
+    vkDestroyImage(vulkan->device.device, vulkan->texture.textureImage,
+    NULL); vkFreeMemory(vulkan->device.device,
+    vulkan->texture.textureImageMemory,
+                 NULL);
 
-    vkDestroyDescriptorSetLayout(vulkan->device.device,
-                                 vulkan->ubo.descriptorSetLayout, NULL);
+    vkDestroyDescriptorSetLayout(
+        vulkan->device.device, vulkan->descriptorSet.descriptorSetLayout, NULL);
 
     if (vulkan->graphicsPipeline.graphicsPipeline == VK_NULL_HANDLE) {
         vkDestroyPipeline(vulkan->device.device,
@@ -243,9 +240,7 @@ void cleanUpVulkan(Window *window, Vulkan *vulkan) {
                        vulkan->semaphores.inFlightFences[i], NULL);
     }
 
-    freeMem(6, vulkan->ubo.descriptorSets,
-            // vulkan->shapes.vertices,
-            // vulkan->shapes.indices,
+    freeMem(6, vulkan->descriptorSet.descriptorSets,
             vulkan->semaphores.renderFinishedSemaphores,
             vulkan->semaphores.imageAvailableSemaphores,
             vulkan->semaphores.inFlightFences,
@@ -262,6 +257,6 @@ void cleanUpVulkan(Window *window, Vulkan *vulkan) {
                                       vulkan->validation.debugMessenger, NULL);
     }
 
-    vkDestroySurfaceKHR(vulkan->instance, window->surface, NULL);
+    vkDestroySurfaceKHR(vulkan->instance, surface, NULL);
     vkDestroyInstance(vulkan->instance, NULL);
 }
