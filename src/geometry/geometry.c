@@ -598,10 +598,10 @@ void createVertexBuffer(Vulkan *vulkan) {
     //     }
     // }
 
-    combineVerticesAndIndicesForCube(vulkan, cube1, SIZEOF(cube1));
+    // combineVerticesAndIndicesForCube(vulkan, cube1, SIZEOF(cube1));
     // combineVerticesAndIndicesForSphere(vulkan, octahedron1, 8, 4);
-    // combineVerticesAndIndicesForSphere(vulkan, icosahedron1,
-    //    SIZEOF(icosahedron1), 3);
+    combineVerticesAndIndicesForSphere(vulkan, icosahedron1,
+                                       SIZEOF(icosahedron1), 3);
 
     VkDeviceSize bufferSize =
         sizeof(*vulkan->shapes.vertices) * vulkan->shapes.verticesCount;
