@@ -120,8 +120,8 @@ compile_shaders: clean_shaders
 	GLSLC=$(VULKAN_SDK)/macOS/bin/glslc
 
 # Compile the shaders to .spv files
-	GLSLC $(SRC)/shaders/light/shader.vert -o $(SRC)/shaders/vert.spv
-	GLSLC $(SRC)/shaders/light/shader.frag -o $(SRC)/shaders/frag.spv
+	GLSLC $(SRC)/shaders/texture/shader.vert -o $(SRC)/shaders/vert.spv
+	GLSLC $(SRC)/shaders/texture/shader.frag -o $(SRC)/shaders/frag.spv
 
 # Dump the .spv files to a header file
 	$(MD) $(INCLUDE)/shaders
