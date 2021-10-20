@@ -31,8 +31,7 @@ void copyBufferToImage(Vulkan *vulkan, VkBuffer buffer, VkImage image,
 static void transitionImageLayout(Vulkan *vulkan, VkImage image,
                                   VkFormat format __unused,
                                   VkImageLayout oldLayout,
-                                  VkImageLayout newLayout, uint32_t
-                                  mipLevels) {
+                                  VkImageLayout newLayout, uint32_t mipLevels) {
     VkCommandBuffer commandBuffer = beginSingleTimeCommands(vulkan);
 
     VkImageMemoryBarrier barrier = {};
@@ -169,8 +168,7 @@ void createTextureImageView(Vulkan *vulkan) {
 
 void createTextureSampler(Vulkan *vulkan) {
     VkPhysicalDeviceProperties properties = {};
-    vkGetPhysicalDeviceProperties(vulkan->device.physicalDevice,
-    &properties);
+    vkGetPhysicalDeviceProperties(vulkan->device.physicalDevice, &properties);
 
     VkSamplerCreateInfo samplerInfo = {};
     samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -197,14 +195,12 @@ void createTextureSampler(Vulkan *vulkan) {
 }
 
 void createTextureImage(Vulkan *vulkan) {
-    SDL_Surface *image =
-        IMG_Load("/Users/rob/Pictures/Affs/20160312_211430_Original.jpg");
+    SDL_Surface *image = IMG_Load("/Users/rob/Downloads/2k_saturn.jpg");
 
     // convert to desired format
     image = SDL_ConvertSurfaceFormat(image, SDL_PIXELFORMAT_ABGR8888, 0);
 
-    VkDeviceSize imageSize = image->w * image->h *
-    image->format->BytesPerPixel;
+    VkDeviceSize imageSize = image->w * image->h * image->format->BytesPerPixel;
 
     vulkan->texture.mipLevels =
         (uint32_t)(floor(log2(glm_max(image->w, image->h)))) + 1;
@@ -227,7 +223,7 @@ void createTextureImage(Vulkan *vulkan) {
     memcpy(data, image->pixels, (size_t)imageSize);
     vkUnmapMemory(vulkan->device.device, stagingBufferMemory);
     mapMemory(vulkan->device.device, stagingBufferMemory, imageSize,
-    image->pixels);
+              image->pixels);
 
     createImage(
         image->w, image->h, vulkan->texture.mipLevels, VK_SAMPLE_COUNT_1_BIT,

@@ -172,7 +172,7 @@ void updateUniformBuffer(Vulkan *vulkan, Window *window,
     // glm_vec3_rotate(vulkan->uniforms.light.pos, window->dt * glm_rad(25.0f),
     //                 (vec3)Z_AXIS);
 
-    glm_rotate(vulkan->ubo.model, window->dt * glm_rad(25.0f), GLM_ZUP);
+    // glm_rotate(vulkan->ubo.model, window->dt * glm_rad(25.0f), GLM_ZUP);
 
     glm_rotate(vulkan->ubo.model, window->mX * 0.00005, GLM_YUP);
     glm_rotate(vulkan->ubo.model, window->mY * 0.00005, GLM_XUP);

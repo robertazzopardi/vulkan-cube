@@ -590,12 +590,9 @@ void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
 void normSphere(Vulkan *vulkan, uint32_t sectorCount, uint32_t stackCount,
                 uint32_t radius) {
 
-    uint32_t length = 25;
+    uint32_t verticesCount = (2 * sectorCount) + (sectorCount * stackCount) + 1;
 
-    allocateVerticesAndIndices(vulkan, length, 72);
-
-    Vertex vertices[length];
-    uint32_t index = 0;
+    allocateVerticesAndIndices(vulkan, verticesCount, 0);
 
     float x, y, z, xy;                           // vertex position
     float nx, ny, nz, lengthInv = 1.0f / radius; // vertex normal
@@ -619,33 +616,34 @@ void normSphere(Vulkan *vulkan, uint32_t sectorCount, uint32_t stackCount,
             // vertex position (x, y, z)
             x = xy * cosf(sectorAngle); // r * cos(u) * cos(v)
             y = xy * sinf(sectorAngle); // r * cos(u) * sin(v)
-            glm_vec3_copy((vec3){x, y, z}, vertices[index].pos);
+            glm_vec3_copy(
+                (vec3){x, y, z},
+                vulkan->shapes.vertices[vulkan->shapes.verticesCount].pos);
 
             // normalized vertex normal (nx, ny, nz)
             nx = x * lengthInv;
             ny = y * lengthInv;
             nz = z * lengthInv;
-            glm_vec3_copy((vec3){nx, ny, nz}, vertices[index].normal);
+            glm_vec3_copy(
+                (vec3){nx, ny, nz},
+                vulkan->shapes.vertices[vulkan->shapes.verticesCount].normal);
 
             // vertex tex coord (s, t) range between [0, 1]
             s = (float)j / sectorCount;
             t = (float)i / stackCount;
-            glm_vec2_copy((vec2){s, t}, vertices[index].texCoord);
+            glm_vec2_copy(
+                (vec2){s, t},
+                vulkan->shapes.vertices[vulkan->shapes.verticesCount].texCoord);
 
-            glm_vec3_copy((vec3)WHITE, vertices[index].colour);
+            glm_vec3_copy(
+                (vec3)WHITE,
+                vulkan->shapes.vertices[vulkan->shapes.verticesCount].colour);
 
-            index++;
+            vulkan->shapes.verticesCount++;
         }
     }
 
-    memcpy(vulkan->shapes.vertices, vertices, length * sizeof(*vertices));
-
-    vulkan->shapes.verticesCount = length;
-
-    length = 72;
-    uint16_t indices[length];
     uint32_t k1, k2;
-    index = 0;
     for (uint32_t i = 0; i < stackCount; ++i) {
         k1 = i * (sectorCount + 1); // beginning of current stack
         k2 = k1 + sectorCount + 1;  // beginning of next stack
@@ -654,33 +652,27 @@ void normSphere(Vulkan *vulkan, uint32_t sectorCount, uint32_t stackCount,
             // 2 triangles per sector excluding first and last stacks
             // k1 => k2 => k1+1
             if (i != 0) {
-                indices[index++] = k1;
-                indices[index++] = k2;
-                indices[index++] = k1 + 1;
+                vulkan->shapes.indices =
+                    realloc(vulkan->shapes.indices,
+                            (vulkan->shapes.indicesCount + 3) *
+                                sizeof(*vulkan->shapes.indices));
+                vulkan->shapes.indices[vulkan->shapes.indicesCount++] = k1;
+                vulkan->shapes.indices[vulkan->shapes.indicesCount++] = k2;
+                vulkan->shapes.indices[vulkan->shapes.indicesCount++] = k1 + 1;
             }
 
             // k1+1 => k2 => k2+1
             if (i != (stackCount - 1)) {
-                indices[index++] = k1 + 1;
-                indices[index++] = k2;
-                indices[index++] = k2 + 1;
+                vulkan->shapes.indices =
+                    realloc(vulkan->shapes.indices,
+                            (vulkan->shapes.indicesCount + 3) *
+                                sizeof(*vulkan->shapes.indices));
+                vulkan->shapes.indices[vulkan->shapes.indicesCount++] = k1 + 1;
+                vulkan->shapes.indices[vulkan->shapes.indicesCount++] = k2;
+                vulkan->shapes.indices[vulkan->shapes.indicesCount++] = k2 + 1;
             }
-
-            // store indices for lines
-            // vertical lines for all stacks, k1 => k2
-
-            // lineIndices.push_back(k1);
-            // lineIndices.push_back(k2);
-            // if (i != 0) // horizontal lines except 1st stack, k1 => k+1
-            // {
-            // lineIndices.push_back(k1);
-            // lineIndices.push_back(k1 + 1);
-            // }
         }
     }
-
-    memcpy(vulkan->shapes.indices, indices, SIZEOF(indices) * sizeof(*indices));
-    vulkan->shapes.indicesCount = SIZEOF(indices);
 }
 
 void createVertexBuffer(Vulkan *vulkan) {
@@ -698,7 +690,7 @@ void createVertexBuffer(Vulkan *vulkan) {
     // combineVerticesAndIndicesForSphere(vulkan, octahedron1, 8, 4);
     // combineVerticesAndIndicesForSphere(vulkan, icosahedron1,
     //                                    SIZEOF(icosahedron1), 3);
-    normSphere(vulkan, 4, 4, 1);
+    normSphere(vulkan, 36, 36, 1);
 
     VkDeviceSize bufferSize =
         sizeof(*vulkan->shapes.vertices) * vulkan->shapes.verticesCount;
