@@ -1,8 +1,7 @@
 #include "vulkan_handle/pipeline.h"
 #include "error_handle.h"
 #include "geometry/geometry.h"
-#include "shaders/frag_shader.h"
-#include "shaders/vert_shader.h"
+#include "shaders/shader.h"
 #include "vulkan_handle/memory.h"
 #include "vulkan_handle/vulkan_handle.h"
 #include <vulkan/vulkan.h>
@@ -34,11 +33,13 @@ createPipelineShaderInfo(VkShaderStageFlagBits stage, VkShaderModule module) {
 
 void createGraphicsPipeline(Vulkan *vulkan) {
     VkShaderModule vertShaderModule;
-    createShaderModule(src_shaders_vert_spv, src_shaders_vert_spv_len,
-                       vulkan->device.device, &vertShaderModule);
+    createShaderModule(SRC_SHADERS_TEXTURE_VERT_SPV,
+                       SRC_SHADERS_TEXTURE_VERT_SPV_LEN, vulkan->device.device,
+                       &vertShaderModule);
     VkShaderModule fragShaderModule;
-    createShaderModule(src_shaders_frag_spv, src_shaders_frag_spv_len,
-                       vulkan->device.device, &fragShaderModule);
+    createShaderModule(SRC_SHADERS_TEXTURE_FRAG_SPV,
+                       SRC_SHADERS_TEXTURE_FRAG_SPV_LEN, vulkan->device.device,
+                       &fragShaderModule);
 
     VkPipelineShaderStageCreateInfo shaderStages[] = {
         createPipelineShaderInfo(VK_SHADER_STAGE_VERTEX_BIT, vertShaderModule),

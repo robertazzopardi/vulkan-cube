@@ -119,11 +119,27 @@ compile_shaders: clean_shaders
 # Acess vulkan sdk path and point to the glslc shader compiler
 	GLSLC=$(VULKAN_SDK)/macOS/bin/glslc
 
+	for texture_type in light texture vertex ; do \
+		GLSLC $(SRC)/shaders/$$texture_type/shader.vert -o $(SRC)/shaders/$$texture_type/vert.spv ; \
+		GLSLC $(SRC)/shaders/$$texture_type/shader.frag -o $(SRC)/shaders/$$texture_type/frag.spv ; \
+		$(MD) -p $(INCLUDE)/shaders/$$texture_type ; \
+		xxd -i -C $(SRC)/shaders/$$texture_type/frag.spv > $(INCLUDE)/shaders/$$texture_type/$${texture_type}_frag_shader.h ; \
+		echo "#ifndef $${texture_type}_FRAG_SHADER\n#define $${texture_type}_FRAG_SHADER\n" | \
+			cat - $(INCLUDE)/shaders/$$texture_type/$${texture_type}_frag_shader.h > temp && \
+			mv temp $(INCLUDE)/shaders/$$texture_type/$${texture_type}_frag_shader.h && echo "\n#endif" >> \
+			$(INCLUDE)/shaders/$$texture_type/$${texture_type}_frag_shader.h ; \
+		xxd -i -C $(SRC)/shaders/$$texture_type/vert.spv > $(INCLUDE)/shaders/$$texture_type/$${texture_type}_vert_shader.h ; \
+		echo "#ifndef $${texture_type}_VERT_SHADER\n#define $${texture_type}_VERT_SHADER\n" | \
+			cat - $(INCLUDE)/shaders/$$texture_type/$${texture_type}_vert_shader.h > \
+			temp && mv temp $(INCLUDE)/shaders/$$texture_type/$${texture_type}_vert_shader.h && \
+			echo "\n#endif" >> $(INCLUDE)/shaders/$$texture_type/$${texture_type}_vert_shader.h ; \
+	done
+
 # Compile the shaders to .spv files
-	GLSLC $(SRC)/shaders/texture/shader.vert -o $(SRC)/shaders/vert.spv
-	GLSLC $(SRC)/shaders/texture/shader.frag -o $(SRC)/shaders/frag.spv
+# GLSLC $(SRC)/shaders/texture/shader.vert -o $(SRC)/shaders/vert.spv
+# GLSLC $(SRC)/shaders/texture/shader.frag -o $(SRC)/shaders/frag.spv
 
 # Dump the .spv files to a header file
-	$(MD) $(INCLUDE)/shaders
-	xxd -i $(SRC)/shaders/frag.spv > $(INCLUDE)/shaders/frag_shader.h
-	xxd -i $(SRC)/shaders/vert.spv > $(INCLUDE)/shaders/vert_shader.h
+# $(MD) $(INCLUDE)/shaders
+# xxd -i $(SRC)/shaders/frag.spv > $(INCLUDE)/shaders/frag_shader.h
+# xxd -i $(SRC)/shaders/vert.spv > $(INCLUDE)/shaders/vert_shader.h
