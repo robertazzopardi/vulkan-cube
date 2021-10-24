@@ -24,14 +24,13 @@ typedef struct DescriptorSet {
 } DescriptorSet;
 
 typedef struct Vulkan Vulkan;
-typedef struct Window Window;
 
 typedef unsigned int uint32_t;
 typedef unsigned long long uint64_t;
 
 typedef uint64_t VkDeviceSize;
 
-void updateUniformBuffer(Vulkan *, Window *, uint32_t);
+void updateUniformBuffer(Vulkan *, uint32_t);
 
 void createDescriptorSetLayout(Vulkan *);
 

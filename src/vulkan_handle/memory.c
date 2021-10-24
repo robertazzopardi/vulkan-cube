@@ -23,6 +23,14 @@ inline void freeMem(const size_t count, ...) {
     va_end(valist);
 }
 
+inline void allocateVerticesAndIndices(Vulkan *vulkan, size_t numVertices,
+                                       size_t numIndices) {
+    vulkan->shapes.vertices =
+        malloc(numVertices * sizeof(*vulkan->shapes.vertices));
+    vulkan->shapes.indices =
+        malloc(numIndices * sizeof(*vulkan->shapes.indices));
+}
+
 inline uint32_t findMemoryType(Vulkan *vulkan, uint32_t typeFilter,
                                VkMemoryPropertyFlags properties) {
     VkPhysicalDeviceMemoryProperties memProperties;

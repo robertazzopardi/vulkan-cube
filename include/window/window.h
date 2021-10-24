@@ -12,6 +12,8 @@ typedef union SDL_Event SDL_Event;
 typedef struct Vulkan Vulkan;
 typedef struct VkSurfaceKHR_T *VkSurfaceKHR;
 
+typedef unsigned int uint32_t;
+
 typedef struct Window {
     SDL_Window *win;
     SDL_Event *event;
@@ -23,10 +25,14 @@ typedef struct Window {
     int mY;
     int wW;
     int wH;
+    bool lmbDown;
+    uint32_t lastUpdate;
 } Window;
 
-void initialise();
+void initSDL();
 
-void createSurface(Window *, Vulkan *);
+Window createWindow();
+
+void createSurface(Vulkan *);
 
 #endif /* INCLUDE_WINDOW_WINDOW */

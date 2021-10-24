@@ -8,7 +8,7 @@
 CC = clang
 
 # define any compile-time flags
-CFLAGS	:= -Wall -Wextra -W -flto -ffast-math -Oz `sdl2-config --cflags`
+CFLAGS	:= -Wall -Wextra -W -flto -ffast-math -Oz `sdl2-config --cflags` -std=c18 -fpic -shared
 CFLAGS  += -fsanitize=address -fno-omit-frame-pointer -ffunction-sections -fdata-sections
 # CFLAGS  += --analyze
 # CFLAGS  += -g
@@ -36,8 +36,12 @@ INCLUDE	:= include
 # define lib directory
 LIB		:= lib
 
+# define examples directory
+EXAMPLES := examples
+
 ifeq ($(OS),Windows_NT)
 MAIN	:= main.exe
+LIB_NAME := libvk.so
 SOURCEDIRS	:= $(SRC)
 INCLUDEDIRS	:= $(INCLUDE)
 LIBDIRS		:= $(LIB)
@@ -46,6 +50,7 @@ RM			:= del /q /f
 MD	:= mkdir
 else
 MAIN	:= main
+LIB_NAME := libvk.dylib
 SOURCEDIRS	:= $(shell find $(SRC) -type d)
 INCLUDEDIRS	:= $(shell find $(INCLUDE) -type d)
 LIBDIRS		:= $(shell find $(LIB) -type d)
@@ -72,19 +77,17 @@ OBJECTS		:= $(SOURCES:.c=.o)
 # deleting dependencies appended to the file from 'make depend'
 #
 
-OUTPUTMAIN	:= $(call FIXPATH,$(OUTPUT)/$(MAIN))
+OUTPUTLIB	:= $(call FIXPATH,$(OUTPUT)/$(LIB_NAME))
+OUTPUTMAIN  := $(call FIXPATH,$(OUTPUT)/$(MAIN))
 
-all: compile_shaders $(OUTPUT) $(MAIN)
-# $(RM) $(OBJECTS)
+all: compile_shaders $(OUTPUT) $(LIB_NAME)
 	@echo Executing 'all' complete!
 
 $(OUTPUT):
 	$(MD) $(OUTPUT)
 
-$(MAIN): $(OBJECTS)
-	$(CC) $(CFLAGS) $(INCLUDES) -o $(OUTPUTMAIN) $(OBJECTS) $(LFLAGS) $(LIBS)
-# $(CC) $(CFLAGS) $(INCLUDES) -c $(SOURCES)
-# $(CC) $(CFLAGS) $(INCLUDES) -o $(OUTPUTMAIN) $(OBJECTS) $(LFLAGS)
+$(LIB_NAME): $(OBJECTS)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $(OUTPUTLIB) $(OBJECTS) $(LFLAGS) $(LIBS)
 
 # this is a suffix replacement rule for building .o's from .c's
 # it uses automatic variables $<: the name of the prerequisite of
@@ -98,14 +101,18 @@ clean_shaders:
 
 .PHONY: clean
 clean: clean_shaders
-	$(RM) $(OUTPUTMAIN)
+	$(RM) $(OUTPUTLIB)
 	$(RM) $(call FIXPATH,$(OBJECTS))
 	$(RM) *.plist
 	@echo Cleanup complete!
 
 run: all
-	$(OUTPUTMAIN)
+	$(OUTPUTLIB)
 	@echo Executing 'run: all' complete!
+
+run_sphere:
+	clang $(call FIXPATH,$(EXAMPLES)/main_sphere.c) -o $(OUTPUTMAIN) $(OUTPUTLIB) -I$(INCLUDE)
+	$(OUTPUTMAIN)
 
 check: clean all
 	cppcheck -f --enable=all --inconclusive --check-library --debug-warnings --suppress=missingIncludeSystem --check-config $(INCLUDES) ./$(SRC)
@@ -134,12 +141,3 @@ compile_shaders: clean_shaders
 			temp && mv temp $(INCLUDE)/shaders/$$texture_type/$${texture_type}_vert_shader.h && \
 			echo "\n#endif" >> $(INCLUDE)/shaders/$$texture_type/$${texture_type}_vert_shader.h ; \
 	done
-
-# Compile the shaders to .spv files
-# GLSLC $(SRC)/shaders/texture/shader.vert -o $(SRC)/shaders/vert.spv
-# GLSLC $(SRC)/shaders/texture/shader.frag -o $(SRC)/shaders/frag.spv
-
-# Dump the .spv files to a header file
-# $(MD) $(INCLUDE)/shaders
-# xxd -i $(SRC)/shaders/frag.spv > $(INCLUDE)/shaders/frag_shader.h
-# xxd -i $(SRC)/shaders/vert.spv > $(INCLUDE)/shaders/vert_shader.h

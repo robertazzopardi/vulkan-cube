@@ -1,5 +1,8 @@
 #include "geometry/geometry.h"
 #include "error_handle.h"
+#include "geometry/cube/cube.h"
+#include "geometry/shpere/sphere.h"
+#include "geometry/shpere/trisphere.h"
 #include "vulkan_handle/memory.h"
 #include "vulkan_handle/texture.h"
 #include "vulkan_handle/vulkan_handle.h"
@@ -12,252 +15,22 @@
 #include <string.h>
 #include <vulkan/vulkan.h>
 
-typedef Vertex Plane[4];
-typedef Vertex Triangle[3];
-typedef Triangle **Sphere;
+inline void getMiddlePoint(vec3 point1, vec3 point2, vec3 res) {
+    res[0] = (point1[0] + point2[0]) / 2.0f;
+    res[1] = (point1[1] + point2[1]) / 2.0f;
+    res[2] = (point1[2] + point2[2]) / 2.0f;
+}
 
-#define X .525731112119133606
-#define Z .850650808352039932
+inline VkVertexInputBindingDescription getBindingDescription() {
+    VkVertexInputBindingDescription bindingDescription = {};
+    bindingDescription.binding = 0;
+    bindingDescription.stride = sizeof(Vertex);
+    bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-typedef Triangle Icosahedron[20];
-Icosahedron icosahedron1 = {
-    {
-        {{-X, 0.0, Z}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{0.0, -Z, X}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{X, 0.0, Z}, WHITE, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{X, 0.0, Z}, RED, GLM_VEC3_ZERO_INIT},
-        {{0.0, Z, X}, RED, GLM_VEC3_ZERO_INIT},
-        {{-X, 0.0, Z}, RED, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{X, 0.0, -Z}, BLUE, GLM_VEC3_ZERO_INIT},
-        {{-X, 0.0, -Z}, BLUE, GLM_VEC3_ZERO_INIT},
-        {{0.0, Z, -X}, BLUE, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{X, 0.0, Z}, GREEN, GLM_VEC3_ZERO_INIT},
-        {{Z, X, 0.0}, GREEN, GLM_VEC3_ZERO_INIT},
-        {{0.0, Z, X}, GREEN, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{X, 0.0, -Z}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{Z, X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{Z, -X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{X, 0.0, -Z}, RED, GLM_VEC3_ZERO_INIT},
-        {{0.0, Z, -X}, RED, GLM_VEC3_ZERO_INIT},
-        {{Z, X, 0.0}, RED, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{0.0, Z, X}, BLUE, GLM_VEC3_ZERO_INIT},
-        {{-Z, X, 0.0}, BLUE, GLM_VEC3_ZERO_INIT},
-        {{-X, 0.0, Z}, BLUE, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{0.0, Z, X}, GREEN, GLM_VEC3_ZERO_INIT},
-        {{Z, X, 0.0}, GREEN, GLM_VEC3_ZERO_INIT},
-        {{0.0, Z, -X}, GREEN, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{-Z, X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{0.0, Z, -X}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{-X, 0.0, -Z}, WHITE, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{0.0, -Z, X}, RED, GLM_VEC3_ZERO_INIT},
-        {{-X, 0.0, Z}, RED, GLM_VEC3_ZERO_INIT},
-        {{-Z, -X, 0.0}, RED, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{0.0, -Z, -X}, BLUE, GLM_VEC3_ZERO_INIT},
-        {{X, 0.0, -Z}, BLUE, GLM_VEC3_ZERO_INIT},
-        {{Z, -X, 0.0}, BLUE, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{0.0, -Z, -X}, GREEN, GLM_VEC3_ZERO_INIT},
-        {{Z, -X, 0.0}, GREEN, GLM_VEC3_ZERO_INIT},
-        {{0.0, -Z, X}, GREEN, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{Z, X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{X, 0.0, Z}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{Z, -X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{-Z, -X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{-Z, X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{-X, 0.0, -Z}, WHITE, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{-Z, X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{-Z, -X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{-X, 0.0, Z}, WHITE, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{-Z, -X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{0.0, -Z, -X}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{0.0, -Z, X}, WHITE, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{-Z, -X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{-X, 0.0, -Z}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{0.0, -Z, -X}, WHITE, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{-Z, X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{0.0, Z, X}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{0.0, Z, -X}, WHITE, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{0.0, -Z, -X}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{-X, 0.0, -Z}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{X, 0.0, -Z}, WHITE, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{X, 0.0, Z}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{0.0, -Z, X}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{Z, -X, 0.0}, WHITE, GLM_VEC3_ZERO_INIT},
-    },
-};
+    return bindingDescription;
+}
 
-typedef Triangle Octahedron[8];
-Octahedron octahedron1 = {
-    {
-        {{0.0f, GLM_SQRT1_2, 0.0f}, RED, GLM_VEC3_ZERO_INIT},
-        {{0.0f, 0.0f, GLM_SQRT1_2}, RED, GLM_VEC3_ZERO_INIT},
-        {{GLM_SQRT1_2, 0.0f, 0.0f}, RED, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{0.0f, -GLM_SQRT1_2, 0.0f}, BLUE, GLM_VEC3_ZERO_INIT},
-        {{GLM_SQRT1_2, 0.0f, 0.0f}, BLUE, GLM_VEC3_ZERO_INIT},
-        {{0.0f, 0.0f, GLM_SQRT1_2}, BLUE, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{0.0f, -GLM_SQRT1_2, 0.0f}, GREEN, GLM_VEC3_ZERO_INIT},
-        {{0.0f, 0.0f, GLM_SQRT1_2}, GREEN, GLM_VEC3_ZERO_INIT},
-        {{-GLM_SQRT1_2, 0.0f, 0.0f}, GREEN, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{0.0f, GLM_SQRT1_2, 0.0f}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{-GLM_SQRT1_2, 0.0f, 0.0f}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{0.0f, 0.0f, GLM_SQRT1_2}, WHITE, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{0.0f, -GLM_SQRT1_2, 0.0f}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{0.0f, 0.0f, -GLM_SQRT1_2}, WHITE, GLM_VEC3_ZERO_INIT},
-        {{GLM_SQRT1_2, 0.0f, 0.0f}, WHITE, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{GLM_SQRT1_2, 0.0f, 0.0f}, GREEN, GLM_VEC3_ZERO_INIT},
-        {{0.0f, 0.0f, -GLM_SQRT1_2}, GREEN, GLM_VEC3_ZERO_INIT},
-        {{0.0f, GLM_SQRT1_2, 0.0f}, GREEN, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{0.0f, -GLM_SQRT1_2, 0.0f}, RED, GLM_VEC3_ZERO_INIT},
-        {{-GLM_SQRT1_2, 0.0f, 0.0f}, RED, GLM_VEC3_ZERO_INIT},
-        {{0.0f, 0.0f, -GLM_SQRT1_2}, RED, GLM_VEC3_ZERO_INIT},
-    },
-    {
-        {{0.0f, GLM_SQRT1_2, 0.0f}, BLUE, GLM_VEC3_ZERO_INIT},
-        {{0.0f, 0.0f, -GLM_SQRT1_2}, BLUE, GLM_VEC3_ZERO_INIT},
-        {{-GLM_SQRT1_2, 0.0f, 0.0f}, BLUE, GLM_VEC3_ZERO_INIT},
-    },
-};
-
-typedef Plane Cube[6];
-Cube cube1 = {
-    {
-        {{-0.5f, -0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT, {1.0f, 0.0f}}, // top
-        {{0.5f, -0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT, {0.0f, 0.0f}},
-        {{0.5f, 0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT, {0.0f, 1.0f}},
-        {{-0.5f, 0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT, {1.0f, 1.0f}},
-    },
-    {
-        {{-0.5f, 0.5f, -0.5f},
-         GREEN,
-         GLM_VEC3_ZERO_INIT,
-         {1.0f, 0.0f}}, // bottom
-        {{0.5f, 0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT, {0.0f, 0.0f}},
-        {{0.5f, -0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT, {0.0f, 1.0f}},
-        {{-0.5f, -0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT, {1.0f, 1.0f}},
-    },
-    {
-        {{-0.5f, 0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT, {1.0f, 0.0f}}, // left
-        {{-0.5f, 0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT, {0.0f, 0.0f}},
-        {{-0.5f, -0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT, {0.0f, 1.0f}},
-        {{-0.5f, -0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT, {1.0f, 1.0f}},
-    },
-    {
-        {{0.5f, -0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT, {1.0f, 0.0f}}, // Right
-        {{0.5f, -0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT, {0.0f, 0.0f}},
-        {{0.5f, 0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT, {0.0f, 1.0f}},
-        {{0.5f, 0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT, {1.0f, 1.0f}},
-    },
-    {
-        {{0.5f, 0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {1.0f, 0.0f}}, // front
-        {{0.5f, 0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {0.0f, 0.0f}},
-        {{-0.5f, 0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {0.0f, 1.0f}},
-        {{-0.5f, 0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {1.0f, 1.0f}},
-    },
-    {
-        {{0.5f, -0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {1.0f, 0.0f}}, // back
-        {{0.5f, -0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {0.0f, 0.0f}},
-        {{-0.5f, -0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {0.0f, 1.0f}},
-        {{-0.5f, -0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT, {1.0f, 1.0f}},
-    },
-};
-// Cube cube1 = {
-//     {
-//         {{-0.5f, -0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT}, // top
-//         {{0.5f, -0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT},
-//         {{0.5f, 0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT},
-//         {{-0.5f, 0.5f, 0.5f}, WHITE, GLM_VEC3_ZERO_INIT},
-//     },
-//     {
-//         {{-0.5f, 0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT}, // bottom
-//         {{0.5f, 0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT},
-//         {{0.5f, -0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT},
-//         {{-0.5f, -0.5f, -0.5f}, GREEN, GLM_VEC3_ZERO_INIT},
-//     },
-//     {
-//         {{-0.5f, 0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT}, // left
-//         {{-0.5f, 0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT},
-//         {{-0.5f, -0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT},
-//         {{-0.5f, -0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT},
-//     },
-//     {
-//         {{0.5f, -0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT}, // Right
-//         {{0.5f, -0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT},
-//         {{0.5f, 0.5f, -0.5f}, RED, GLM_VEC3_ZERO_INIT},
-//         {{0.5f, 0.5f, 0.5f}, RED, GLM_VEC3_ZERO_INIT},
-//     },
-//     {
-//         {{0.5f, 0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT}, // front
-//         {{0.5f, 0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT},
-//         {{-0.5f, 0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT},
-//         {{-0.5f, 0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT},
-//     },
-//     {
-//         {{0.5f, -0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT}, // back
-//         {{0.5f, -0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT},
-//         {{-0.5f, -0.5f, 0.5f}, BLUE, GLM_VEC3_ZERO_INIT},
-//         {{-0.5f, -0.5f, -0.5f}, BLUE, GLM_VEC3_ZERO_INIT},
-//     },
-// };
-
-uint16_t indices[] = {
-    0,  1,  2,  2,  3,  0,  // top
-    4,  5,  6,  6,  7,  4,  // bottom
-    8,  9,  10, 8,  10, 11, // right
-    12, 13, 14, 12, 14, 15, // left
-    16, 17, 18, 16, 18, 19, // front
-    20, 21, 22, 20, 22, 23, // back
-};
-
-void normalize(vec3 a, Vertex *b, float length) {
+inline void normalize(vec3 a, Vertex *b, float length) {
     // get the distance between a and b along the x and y axes
     vec3 d;
     glm_vec3_sub((*b).pos, a, d);
@@ -269,44 +42,6 @@ void normalize(vec3 a, Vertex *b, float length) {
     glm_vec3_scale(d, norm, d);
 
     glm_vec3_add(a, d, (*b).pos);
-}
-
-static inline void getMiddlePoint(vec3 point1, vec3 point2, vec3 res) {
-    res[0] = (point1[0] + point2[0]) / 2.0f;
-    res[1] = (point1[1] + point2[1]) / 2.0f;
-    res[2] = (point1[2] + point2[2]) / 2.0f;
-}
-
-void SplitTriangle(Triangle tri, Triangle *split) {
-    vec3 a, b, c;
-    getMiddlePoint(tri[0].pos, tri[1].pos, a);
-    getMiddlePoint(tri[1].pos, tri[2].pos, b);
-    getMiddlePoint(tri[2].pos, tri[0].pos, c);
-
-    glm_vec3_copy(tri[0].pos, split[0][0].pos);
-    glm_vec3_copy(a, split[0][1].pos);
-    glm_vec3_copy(c, split[0][2].pos);
-
-    glm_vec3_copy(tri[1].pos, split[1][0].pos);
-    glm_vec3_copy(b, split[1][1].pos);
-    glm_vec3_copy(a, split[1][2].pos);
-
-    glm_vec3_copy(tri[2].pos, split[2][0].pos);
-    glm_vec3_copy(c, split[2][1].pos);
-    glm_vec3_copy(b, split[2][2].pos);
-
-    glm_vec3_copy(a, split[3][0].pos);
-    glm_vec3_copy(b, split[3][1].pos);
-    glm_vec3_copy(c, split[3][2].pos);
-}
-
-inline VkVertexInputBindingDescription getBindingDescription() {
-    VkVertexInputBindingDescription bindingDescription = {};
-    bindingDescription.binding = 0;
-    bindingDescription.stride = sizeof(Vertex);
-    bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-    return bindingDescription;
 }
 
 inline VkVertexInputAttributeDescription *getAttributeDescriptions() {
@@ -337,14 +72,6 @@ inline VkVertexInputAttributeDescription *getAttributeDescriptions() {
     return attributeDescriptions;
 }
 
-static inline void calculateIndicesForSphere(Shape *vulkanShape,
-                                             size_t indices) {
-    for (size_t i = vulkanShape->index; i < vulkanShape->index + indices; i++) {
-        vulkanShape->indices[i] = i;
-    }
-    vulkanShape->index += indices;
-}
-
 static inline void getNormal(vec3 p1, vec3 p2, vec3 p3, vec3 normal) {
     vec3 a, b;
     glm_vec3_sub(p3, p2, a);
@@ -352,161 +79,13 @@ static inline void getNormal(vec3 p1, vec3 p2, vec3 p3, vec3 normal) {
     glm_vec3_cross(a, b, normal);
 }
 
-static inline void calculateNormals(Vertex *shape, uint32_t vertsToUpdate) {
+inline void calculateNormals(Vertex *shape, uint32_t vertsToUpdate) {
     vec3 normal;
     getNormal(shape[0].pos, shape[1].pos, shape[2].pos, normal);
 
     for (size_t i = 0; i < vertsToUpdate; i++) {
         glm_vec3_copy(normal, shape[i].normal);
     }
-}
-
-// static inline bool isInVertexArray(Vertex vert, Vertex *arr,
-//                                    uint32_t vertIndex) {
-//     for (uint32_t j = 0; j < vertIndex; j++) {
-//         if (glm_vec3_eqv(vert.pos, arr[j].pos)) {
-//             return true;
-//         }
-//     }
-
-//     return false;
-// }
-
-// void calculateIndicesForCube(Shape *vulkanShape, Vertex *shape, size_t
-// length) {
-//     Vertex arr[length];
-//     uint32_t vertIndex = 0;
-
-//     uint16_t *indis = malloc((length + 2) * sizeof(*indis));
-//     uint32_t indisIndex = 0;
-
-//     for (uint32_t i = 0; i < length; i++) {
-//         Vertex vert = shape[i];
-
-//         if (!isInVertexArray(vert, arr, vertIndex)) {
-//             indis[indisIndex++] = vulkanShape->index++;
-//             arr[vertIndex++] = vert;
-//         }
-
-//         if (vertIndex % 3 == 0) {
-//             indis[indisIndex] = vulkanShape->index - 1;
-//             indisIndex++;
-//         }
-//     }
-
-//     indis[indisIndex++] = indis[0];
-
-//     memcpy(vulkanShape->indices + vulkanShape->indicesCount, indis,
-//            indisIndex * sizeof(*indis));
-
-//     freeMem(1, indis);
-// }
-
-static inline void findTriangles(Triangle triangle, int currentDepth, int depth,
-                                 Triangle *storage, size_t *index) {
-    // Depth is reached.
-    if (currentDepth == depth) {
-        calculateNormals(triangle, 3);
-
-        for (size_t i = 0; i < 3; i++) {
-            glm_vec3_copy(triangle[i].normal, storage[(*index)]->normal);
-            glm_vec3_copy(triangle[i].pos, storage[(*index)++]->pos);
-        }
-        return;
-    }
-
-    Triangle split[4];
-    SplitTriangle(triangle, split);
-
-    findTriangles(split[0], currentDepth + 1, depth, storage, index);
-    findTriangles(split[1], currentDepth + 1, depth, storage, index);
-    findTriangles(split[2], currentDepth + 1, depth, storage, index);
-    findTriangles(split[3], currentDepth + 1, depth, storage, index);
-}
-
-static inline void allocateVerticesAndIndices(Vulkan *vulkan,
-                                              size_t numVertices,
-                                              size_t numIndices) {
-    vulkan->shapes.vertices =
-        malloc(numVertices * sizeof(*vulkan->shapes.vertices));
-    vulkan->shapes.indices =
-        malloc(numIndices * sizeof(*vulkan->shapes.indices));
-}
-
-void combineVerticesAndIndicesForSphere(Vulkan *vulkan, Octahedron octahedron,
-                                        size_t count, size_t depth) {
-    size_t perFace = pow(4, depth);
-    size_t verticesPerFace = perFace * 3;
-    size_t numVertices = count * verticesPerFace;
-
-    // uint16_t m[] = {
-    //     0, 1, 2,
-    //     3, 2, 1,
-    //     3, 1, 8,
-    //     0, 8, 1,
-
-    //     3, 13, 2,
-    //     2, 13, 0,
-    //     3, 8, 13,
-    //     0, 13, 8,
-    // };
-    // allocateVerticesAndIndices(vulkan, numVertices, SIZEOF(m));
-
-    allocateVerticesAndIndices(vulkan, numVertices, numVertices);
-
-    for (size_t i = 0; i < count; i++) {
-        Vertex *face = octahedron[i];
-
-        Triangle faceTriangles[verticesPerFace];
-
-        size_t index = 0;
-        findTriangles(face, 0, depth, faceTriangles, &index);
-
-        Vertex arc[verticesPerFace];
-        for (size_t j = 0; j < verticesPerFace; j++) {
-
-            glm_vec3_copy(faceTriangles[j]->pos, arc[j].pos);
-
-            vec3 a = {0.0f, 0.0f, 0.0f};
-            normalize(a, &arc[j], 0.8);
-
-            glm_vec3_copy(arc[j].pos, arc[j].normal);
-
-            glm_vec3_copy(face->colour, arc[j].colour);
-        }
-
-        memcpy(vulkan->shapes.vertices + vulkan->shapes.verticesCount, arc,
-               verticesPerFace * sizeof(*arc));
-
-        vulkan->shapes.verticesCount += verticesPerFace;
-
-        calculateIndicesForSphere(&vulkan->shapes, verticesPerFace);
-
-        vulkan->shapes.indicesCount += verticesPerFace;
-    }
-
-    // memcpy(vulkan->shapes.indices, m, SIZEOF(m) * sizeof(*m));
-    // vulkan->shapes.indicesCount = SIZEOF(m);
-}
-
-void combineVerticesAndIndicesForCube(Vulkan *vulkan, Cube cube, size_t count) {
-    allocateVerticesAndIndices(vulkan, count * 4, count * 6);
-
-    // TODO clean up
-
-    for (uint32_t i = 0; i < count; i++) {
-        Vertex *shape = cube[i];
-
-        calculateNormals(shape, 4);
-
-        memcpy(vulkan->shapes.vertices + vulkan->shapes.verticesCount, shape,
-               4 * sizeof(*shape));
-
-        vulkan->shapes.verticesCount += 4;
-    }
-
-    memcpy(vulkan->shapes.indices, indices, SIZEOF(indices) * sizeof(*indices));
-    vulkan->shapes.indicesCount = SIZEOF(indices);
 }
 
 void createDepthResources(Vulkan *vulkan) {
@@ -587,114 +166,17 @@ void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
     vkBindBufferMemory(vulkan->device.device, *buffer, *bufferMemory, 0);
 }
 
-void normSphere(Vulkan *vulkan, uint32_t sectorCount, uint32_t stackCount,
-                uint32_t radius) {
+// for (size_t i = 0; i < SIZEOF(cube1); i++) {
+//     vec3 normal;
+//     getNormal(octahedron1[i][0].pos, octahedron1[i][1].pos,
+//     octahedron1[i][2].pos, normal);
+//     for (size_t j = 0; j < 4; j++) {
+//         glm_vec3_copy(normal, octahedron1[i][j].normal);
+//     }
+// }
 
-    uint32_t verticesCount = (2 * sectorCount) + (sectorCount * stackCount) + 1;
-
-    allocateVerticesAndIndices(vulkan, verticesCount, 0);
-
-    float x, y, z, xy;                           // vertex position
-    float nx, ny, nz, lengthInv = 1.0f / radius; // vertex normal
-    float s, t;                                  // vertex texCoord
-
-    float sectorStep = 2 * GLM_PI / sectorCount;
-    float stackStep = GLM_PI / stackCount;
-    float sectorAngle, stackAngle;
-
-    for (uint32_t i = 0; i <= stackCount; ++i) {
-        stackAngle = GLM_PI / 2 - i * stackStep; // starting from pi/2 to -pi/2
-        xy = radius * cosf(stackAngle);          // r * cos(u)
-        z = radius * sinf(stackAngle);           // r * sin(u)
-
-        // add (sectorCount+1) vertices per stack
-        // the first and last vertices have same position and normal, but
-        // different tex coords
-        for (uint32_t j = 0; j <= sectorCount; ++j) {
-            sectorAngle = j * sectorStep; // starting from 0 to 2pi
-
-            // vertex position (x, y, z)
-            x = xy * cosf(sectorAngle); // r * cos(u) * cos(v)
-            y = xy * sinf(sectorAngle); // r * cos(u) * sin(v)
-            glm_vec3_copy(
-                (vec3){x, y, z},
-                vulkan->shapes.vertices[vulkan->shapes.verticesCount].pos);
-
-            // normalized vertex normal (nx, ny, nz)
-            nx = x * lengthInv;
-            ny = y * lengthInv;
-            nz = z * lengthInv;
-            glm_vec3_copy(
-                (vec3){nx, ny, nz},
-                vulkan->shapes.vertices[vulkan->shapes.verticesCount].normal);
-
-            // vertex tex coord (s, t) range between [0, 1]
-            s = (float)j / sectorCount;
-            t = (float)i / stackCount;
-            glm_vec2_copy(
-                (vec2){s, t},
-                vulkan->shapes.vertices[vulkan->shapes.verticesCount].texCoord);
-
-            glm_vec3_copy(
-                (vec3)WHITE,
-                vulkan->shapes.vertices[vulkan->shapes.verticesCount].colour);
-
-            vulkan->shapes.verticesCount++;
-        }
-    }
-
-    uint32_t k1, k2;
-    for (uint32_t i = 0; i < stackCount; ++i) {
-        k1 = i * (sectorCount + 1); // beginning of current stack
-        k2 = k1 + sectorCount + 1;  // beginning of next stack
-
-        for (uint32_t j = 0; j < sectorCount; ++j, ++k1, ++k2) {
-            // 2 triangles per sector excluding first and last stacks
-            // k1 => k2 => k1+1
-            if (i != 0) {
-                vulkan->shapes.indices =
-                    realloc(vulkan->shapes.indices,
-                            (vulkan->shapes.indicesCount + 3) *
-                                sizeof(*vulkan->shapes.indices));
-                vulkan->shapes.indices[vulkan->shapes.indicesCount++] = k1;
-                vulkan->shapes.indices[vulkan->shapes.indicesCount++] = k2;
-                vulkan->shapes.indices[vulkan->shapes.indicesCount++] = k1 + 1;
-            }
-
-            // k1+1 => k2 => k2+1
-            if (i != (stackCount - 1)) {
-                vulkan->shapes.indices =
-                    realloc(vulkan->shapes.indices,
-                            (vulkan->shapes.indicesCount + 3) *
-                                sizeof(*vulkan->shapes.indices));
-                vulkan->shapes.indices[vulkan->shapes.indicesCount++] = k1 + 1;
-                vulkan->shapes.indices[vulkan->shapes.indicesCount++] = k2;
-                vulkan->shapes.indices[vulkan->shapes.indicesCount++] = k2 + 1;
-            }
-        }
-    }
-}
-
-void createVertexBuffer(Vulkan *vulkan) {
-
-    // for (size_t i = 0; i < SIZEOF(cube1); i++) {
-    //     vec3 normal;
-    //     getNormal(octahedron1[i][0].pos, octahedron1[i][1].pos,
-    //     octahedron1[i][2].pos, normal);
-    //     for (size_t j = 0; j < 4; j++) {
-    //         glm_vec3_copy(normal, octahedron1[i][j].normal);
-    //     }
-    // }
-
-    // combineVerticesAndIndicesForCube(vulkan, cube1, SIZEOF(cube1));
-    // combineVerticesAndIndicesForSphere(vulkan, octahedron1, 8, 4);
-    // combineVerticesAndIndicesForSphere(vulkan, icosahedron1,
-    //                                    SIZEOF(icosahedron1), 3);
-    normSphere(vulkan, 36, 36, 1);
-
-    VkDeviceSize bufferSize =
-        sizeof(*vulkan->shapes.vertices) * vulkan->shapes.verticesCount;
-
+void createVertexIndexBuffer(Vulkan *vulkan, void *data, uint64_t bufferSize,
+                             VkBuffer *buffer, VkDeviceMemory *bufferMemory) {
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
     createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -702,47 +184,34 @@ void createVertexBuffer(Vulkan *vulkan) {
                      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                  vulkan, &stagingBuffer, &stagingBufferMemory);
 
-    mapMemory(vulkan->device.device, stagingBufferMemory, bufferSize,
-              vulkan->shapes.vertices);
+    mapMemory(vulkan->device.device, stagingBufferMemory, bufferSize, data);
 
-    createBuffer(bufferSize,
-                 VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-                     VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vulkan,
-                 &vulkan->shapeBuffers.vertexBuffer,
-                 &vulkan->shapeBuffers.vertexBufferMemory);
+    createBuffer(
+        bufferSize,
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vulkan, buffer, bufferMemory);
 
-    copyBuffer(vulkan, stagingBuffer, vulkan->shapeBuffers.vertexBuffer,
-               bufferSize);
+    copyBuffer(vulkan, stagingBuffer, *buffer, bufferSize);
 
     vkDestroyBuffer(vulkan->device.device, stagingBuffer, NULL);
     vkFreeMemory(vulkan->device.device, stagingBufferMemory, NULL);
 }
 
-void createIndexBuffer(Vulkan *vulkan) {
-    VkDeviceSize bufferSize =
-        sizeof(*vulkan->shapes.indices) * vulkan->shapes.indicesCount;
-
-    VkBuffer stagingBuffer;
-    VkDeviceMemory stagingBufferMemory;
-    createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                     VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                 vulkan, &stagingBuffer, &stagingBufferMemory);
-
-    mapMemory(vulkan->device.device, stagingBufferMemory, bufferSize,
-              vulkan->shapes.indices);
-
-    createBuffer(bufferSize,
-                 VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-                     VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vulkan,
-                 &vulkan->shapeBuffers.indexBuffer,
-                 &vulkan->shapeBuffers.indexBufferMemory);
-
-    copyBuffer(vulkan, stagingBuffer, vulkan->shapeBuffers.indexBuffer,
-               bufferSize);
-
-    vkDestroyBuffer(vulkan->device.device, stagingBuffer, NULL);
-    vkFreeMemory(vulkan->device.device, stagingBufferMemory, NULL);
+inline void generateShape(Vulkan *vulkan, ShapeType shapeType) {
+    switch (shapeType) {
+    case CUBE:
+        combineVerticesAndIndicesForCube(vulkan);
+        break;
+    case SPHERE:
+        makeSphere(vulkan, 40, 40, 1);
+        break;
+    case ICOSPHERE:
+    case OCTASPHERE:
+        combineVerticesAndIndicesForSphere(vulkan, shapeType, 3);
+        break;
+    case PLAIN:
+        break;
+    default:
+        break;
+    }
 }

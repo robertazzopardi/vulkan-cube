@@ -3,6 +3,17 @@
 
 #include <cglm/types.h>
 
+typedef enum ShapeType {
+    CUBE,
+    SPHERE,
+    ICOSPHERE,
+    OCTASPHERE,
+    PLAIN,
+} ShapeType;
+
+#define X .525731112119133606
+#define Z .850650808352039932
+
 #define RED                                                                    \
     { 1.f, 0.f, 0.f }
 #define GREEN                                                                  \
@@ -27,6 +38,13 @@ typedef struct Vertex {
     vec3 normal;
     vec2 texCoord;
 } Vertex;
+
+typedef Vertex Plane[4];
+typedef Vertex Triangle[3];
+typedef Triangle **Sphere;
+typedef Triangle Icosahedron[20];
+typedef Triangle Octahedron[8];
+typedef Plane Cube[6];
 
 typedef struct VkImage_T *VkImage;
 typedef struct VkDeviceMemory_T *VkDeviceMemory;
@@ -70,12 +88,15 @@ typedef uint32_t VkFlags;
 typedef VkFlags VkBufferUsageFlags;
 typedef VkFlags VkMemoryPropertyFlags;
 
+void generateShape(Vulkan *, ShapeType);
+
 void createBuffer(VkDeviceSize, VkBufferUsageFlags, VkMemoryPropertyFlags,
                   Vulkan *, VkBuffer *, VkDeviceMemory *);
 
 void createVertexBuffer(Vulkan *);
 
-void createIndexBuffer(Vulkan *);
+void createVertexIndexBuffer(Vulkan *, void *, uint64_t, VkBuffer *,
+                             VkDeviceMemory *);
 
 void createDepthResources(Vulkan *);
 
@@ -91,5 +112,11 @@ VkVertexInputAttributeDescription *getAttributeDescriptions();
 
 void createBufferAndMemory(Vulkan *, VkBuffer *, VkDeviceMemory *, Vertex *,
                            uint16_t);
+
+void calculateNormals(Vertex *, uint32_t);
+
+void normalize(vec3, Vertex *, float);
+
+void getMiddlePoint(vec3, vec3, vec3);
 
 #endif /* INCLUDE_GEOMETRY_GEOMETRY */

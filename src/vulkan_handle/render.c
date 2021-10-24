@@ -7,9 +7,9 @@
 #include <SDL_video.h>
 #include <vulkan/vulkan.h>
 
-void createCommandPool(Window *window, Vulkan *vulkan) {
-    QueueFamilyIndices queueFamilyIndices =
-        findQueueFamilies(vulkan->device.physicalDevice, window->surface);
+void createCommandPool(Vulkan *vulkan) {
+    QueueFamilyIndices queueFamilyIndices = findQueueFamilies(
+        vulkan->device.physicalDevice, vulkan->window.surface);
 
     VkCommandPoolCreateInfo poolInfo = {};
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -21,7 +21,7 @@ void createCommandPool(Window *window, Vulkan *vulkan) {
     }
 }
 
-void createCommandBuffers(Vulkan *vulkan, Window *window) {
+void createCommandBuffers(Vulkan *vulkan) {
     vulkan->renderBuffers.commandBuffers =
         malloc(vulkan->swapchain.swapChainImagesCount *
                sizeof(*vulkan->renderBuffers.commandBuffers));
@@ -39,7 +39,7 @@ void createCommandBuffers(Vulkan *vulkan, Window *window) {
     }
 
     int width, height;
-    SDL_GetWindowSize(window->win, &width, &height);
+    SDL_GetWindowSize(vulkan->window.win, &width, &height);
 
     VkViewport viewport;
     viewport.x = 0.0f;
@@ -159,7 +159,7 @@ void createSyncObjects(Vulkan *vulkan) {
     }
 }
 
-void drawFrame(Window *window, Vulkan *vulkan) {
+void drawFrame(Vulkan *vulkan) {
     vkWaitForFences(vulkan->device.device, 1,
                     &vulkan->semaphores.inFlightFences[vulkan->currentFrame],
                     VK_TRUE, UINT64_MAX);
@@ -171,13 +171,13 @@ void drawFrame(Window *window, Vulkan *vulkan) {
         VK_NULL_HANDLE, &imageIndex);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-        recreateSwapChain(window, vulkan);
+        recreateSwapChain(vulkan);
         return;
     } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
         THROW_ERROR("failed to acquire swap chain image!\n");
     }
 
-    updateUniformBuffer(vulkan, window, imageIndex);
+    updateUniformBuffer(vulkan, imageIndex);
 
     if (vulkan->semaphores.imagesInFlight[imageIndex] != VK_NULL_HANDLE) {
         vkWaitForFences(vulkan->device.device, 1,
@@ -230,9 +230,9 @@ void drawFrame(Window *window, Vulkan *vulkan) {
     result = vkQueuePresentKHR(vulkan->device.presentQueue, &presentInfo);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
-        window->windowResized) {
-        window->windowResized = false;
-        recreateSwapChain(window, vulkan);
+        vulkan->window.windowResized) {
+        vulkan->window.windowResized = false;
+        recreateSwapChain(vulkan);
     } else if (result != VK_SUCCESS) {
         THROW_ERROR("failed to present swap chain image!\n");
     }

@@ -8,7 +8,9 @@
 #include "swapchain.h"
 #include "texture.h"
 #include "uniforms.h"
-#include <validation.h>
+#include "validation.h"
+#include "window/window.h"
+#include <stdlib.h>
 #include <vulkan/vulkan.h>
 
 typedef struct Vulkan {
@@ -27,13 +29,18 @@ typedef struct Vulkan {
     UniformBufferObject ubo;
     DescriptorSet descriptorSet;
     Texture texture;
+    Window window;
 } Vulkan;
 
-typedef struct Window Window;
+extern Vulkan initialise();
 
-void initVulkan(Window *, Vulkan *);
+void initVulkan(Vulkan *);
 
-void cleanUpVulkan(VkSurfaceKHR, Vulkan *);
+void cleanUpVulkan(Vulkan *);
+
+extern void terminate(Vulkan *);
+
+extern void mainLoop(Vulkan *);
 
 VkFormat findDepthFormat(Vulkan *);
 

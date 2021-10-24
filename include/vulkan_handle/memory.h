@@ -20,4 +20,6 @@ uint32_t findMemoryType(Vulkan *, uint32_t, VkMemoryPropertyFlags);
 void mapMemory(VkDevice device, VkDeviceMemory deviceMemory,
                VkDeviceSize deviceSize, void *toMap);
 
+void allocateVerticesAndIndices(Vulkan *, size_t, size_t);
+
 #endif /* INCLUDE_VULKAN_HANDLE_MEMORY */

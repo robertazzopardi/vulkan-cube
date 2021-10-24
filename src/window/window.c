@@ -1,4 +1,4 @@
-#include "window.h"
+#include "window/window.h"
 #include "error_handle.h"
 #include "vulkan_handle/device.h"
 #include "vulkan_handle/memory.h"
@@ -15,9 +15,9 @@
 #define WIDTH_INIT 1280
 #define HEIGHT_INIT 720
 
-void createSurface(Window *window, Vulkan *vulkan) {
-    if (!SDL_Vulkan_CreateSurface(window->win, vulkan->instance,
-                                  &window->surface)) {
+inline void createSurface(Vulkan *vulkan) {
+    if (!SDL_Vulkan_CreateSurface(vulkan->window.win, vulkan->instance,
+                                  &vulkan->window.surface)) {
         // failed to create a surface!
         THROW_ERROR("failed to create window surface!\n");
     }
@@ -42,7 +42,7 @@ static int resizingEventCallback(void *data, SDL_Event *event) {
     return 0;
 }
 
-static inline void initSDL() {
+inline void initSDL() {
     // Init SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_EVENTS) != 0) {
         SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
@@ -56,23 +56,14 @@ static inline void initSDL() {
     }
 }
 
-static inline void cleanup(Window *window) {
-    freeMem(1, window->event);
-
-    SDL_DestroyWindow(window->win);
-
-    IMG_Quit();
-
-    SDL_Quit();
-}
-
-static inline Window createWindow() {
+inline Window createWindow() {
     Window window = {0};
     window.win = SDL_CreateWindow(
         APP_NAME, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH_INIT,
         HEIGHT_INIT, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
     window.running = true;
     window.event = malloc(1 * sizeof(*window.event));
+    window.lastUpdate = SDL_GetTicks();
 
     // Add Window resize callback
     SDL_AddEventWatch(resizingEventCallback, &window);
@@ -108,30 +99,18 @@ static inline void handleUserInput(Window *window) {
     }
 }
 
-void initialise() {
-    initSDL();
-
-    Window window = createWindow();
-
-    Vulkan vulkan = {0};
-    initVulkan(&window, &vulkan);
-
-    uint32_t lastUpdate = SDL_GetTicks();
-
-    while (window.running) {
+inline void mainLoop(Vulkan *vulkan) {
+    while (vulkan->window.running) {
         // Handle Events
-        handleUserInput(&window);
+        handleUserInput(&vulkan->window);
 
         // Physics
         uint32_t current = SDL_GetTicks();
-        window.dt = (current - lastUpdate) / 1000.0f;
+        vulkan->window.dt = (current - vulkan->window.lastUpdate) / 1000.0f;
         // Update
-        lastUpdate = current;
+        vulkan->window.lastUpdate = current;
 
         // Rendering
-        drawFrame(&window, &vulkan);
+        drawFrame(vulkan);
     }
-
-    cleanUpVulkan(window.surface, &vulkan);
-    cleanup(&window);
 }

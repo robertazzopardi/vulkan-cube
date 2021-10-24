@@ -72,19 +72,19 @@ SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device,
     return details;
 }
 
-void recreateSwapChain(Window *window, Vulkan *vulkan) {
+void recreateSwapChain(Vulkan *vulkan) {
     int width = 0, height = 0;
-    SDL_Vulkan_GetDrawableSize(window->win, &width, &height);
+    SDL_Vulkan_GetDrawableSize(vulkan->window.win, &width, &height);
     while (width == 0 || height == 0) {
-        SDL_Vulkan_GetDrawableSize(window->win, &width, &height);
-        SDL_PollEvent(window->event);
+        SDL_Vulkan_GetDrawableSize(vulkan->window.win, &width, &height);
+        SDL_PollEvent(vulkan->window.event);
     }
 
     vkDeviceWaitIdle(vulkan->device.device);
 
     cleanupSwapChain(vulkan);
 
-    createSwapChain(window, vulkan);
+    createSwapChain(vulkan);
     createImageViews(vulkan);
     createRenderPass(vulkan);
     createGraphicsPipeline(vulkan);
@@ -94,7 +94,7 @@ void recreateSwapChain(Window *window, Vulkan *vulkan) {
     createUniformBuffers(vulkan);
     createDescriptorPool(vulkan);
     createDescriptorSets(vulkan);
-    createCommandBuffers(vulkan, window);
+    createCommandBuffers(vulkan);
 
     freeMem(1, vulkan->semaphores.imagesInFlight);
 
@@ -127,16 +127,16 @@ VkSurfaceFormatKHR chooseSwapSurfaceFormat(VkSurfaceFormatKHR *availableFormats,
     return availableFormats[0];
 }
 
-void createSwapChain(Window *window, Vulkan *vulkan) {
-    SwapChainSupportDetails swapChainSupport =
-        querySwapChainSupport(vulkan->device.physicalDevice, window->surface);
+void createSwapChain(Vulkan *vulkan) {
+    SwapChainSupportDetails swapChainSupport = querySwapChainSupport(
+        vulkan->device.physicalDevice, vulkan->window.surface);
 
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(
         swapChainSupport.formats, swapChainSupport.formatCount);
     VkPresentModeKHR presentMode = chooseSwapPresentMode(
         swapChainSupport.presentModes, swapChainSupport.presentModeCount);
     VkExtent2D extent =
-        chooseSwapExtent(*swapChainSupport.capabilities, window->win);
+        chooseSwapExtent(*swapChainSupport.capabilities, vulkan->window.win);
 
     vulkan->swapchain.swapChainImagesCount =
         swapChainSupport.capabilities->minImageCount + 1;
@@ -149,7 +149,7 @@ void createSwapChain(Window *window, Vulkan *vulkan) {
 
     VkSwapchainCreateInfoKHR createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    createInfo.surface = window->surface;
+    createInfo.surface = vulkan->window.surface;
     createInfo.minImageCount = vulkan->swapchain.swapChainImagesCount;
     createInfo.imageFormat = surfaceFormat.format;
     createInfo.imageColorSpace = surfaceFormat.colorSpace;
@@ -159,7 +159,7 @@ void createSwapChain(Window *window, Vulkan *vulkan) {
                             VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT;
 
     QueueFamilyIndices queueFamilyIndices =
-        findQueueFamilies(vulkan->device.physicalDevice, window->surface);
+        findQueueFamilies(vulkan->device.physicalDevice, vulkan->window.surface);
 
     if (queueFamilyIndices.graphicsFamily != queueFamilyIndices.presentFamily) {
         createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;

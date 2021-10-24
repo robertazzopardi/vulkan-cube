@@ -24,10 +24,9 @@ typedef struct VkSurfaceKHR_T *VkSurfaceKHR;
 
 QueueFamilyIndices findQueueFamilies(VkPhysicalDevice, VkSurfaceKHR);
 
-typedef struct Window Window;
 typedef struct Vulkan Vulkan;
 
-void createLogicalDevice(Window *, Vulkan *);
-void pickPhysicalDevice(Window *, Vulkan *);
+void createLogicalDevice(Vulkan *);
+void pickPhysicalDevice(Vulkan *);
 
 #endif /* INCLUDE_VULKAN_HANDLE_DEVICE */

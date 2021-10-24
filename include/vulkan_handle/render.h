@@ -21,13 +21,12 @@ typedef struct Semaphores {
 } Semaphores;
 
 typedef struct Vulkan Vulkan;
-typedef struct Window Window;
 
-void createCommandPool(Window *, Vulkan *);
+void createCommandPool(Vulkan *);
 
-void createCommandBuffers(Vulkan *, Window *);
+void createCommandBuffers(Vulkan *);
 
-void drawFrame(Window *, Vulkan *);
+void drawFrame(Vulkan *);
 
 void createSyncObjects(Vulkan *);
 

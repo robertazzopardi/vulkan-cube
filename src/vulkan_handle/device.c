@@ -142,7 +142,7 @@ VkSampleCountFlagBits getMaxUsableSampleCount(Vulkan *vulkan) {
     return VK_SAMPLE_COUNT_1_BIT;
 }
 
-void pickPhysicalDevice(Window *window, Vulkan *vulkan) {
+void pickPhysicalDevice(Vulkan *vulkan) {
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(vulkan->instance, &deviceCount, NULL);
 
@@ -154,7 +154,7 @@ void pickPhysicalDevice(Window *window, Vulkan *vulkan) {
     vkEnumeratePhysicalDevices(vulkan->instance, &deviceCount, devices);
 
     for (uint32_t i = 0; i < deviceCount; i++) {
-        if (isDeviceSuitable(devices[i], window->surface)) {
+        if (isDeviceSuitable(devices[i], vulkan->window.surface)) {
             vulkan->device.physicalDevice = devices[i];
             vulkan->msaaSamples = getMaxUsableSampleCount(vulkan);
             break;
@@ -166,9 +166,9 @@ void pickPhysicalDevice(Window *window, Vulkan *vulkan) {
     }
 }
 
-void createLogicalDevice(Window *window, Vulkan *vulkan) {
-    QueueFamilyIndices queueFamilyIndices =
-        findQueueFamilies(vulkan->device.physicalDevice, window->surface);
+void createLogicalDevice(Vulkan *vulkan) {
+    QueueFamilyIndices queueFamilyIndices = findQueueFamilies(
+        vulkan->device.physicalDevice, vulkan->window.surface);
 
     uint32_t uniqueQueueFamilies[] = {queueFamilyIndices.graphicsFamily,
                                       queueFamilyIndices.presentFamily};

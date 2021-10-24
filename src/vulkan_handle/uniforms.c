@@ -161,23 +161,20 @@ void createUniformBuffers(Vulkan *vulkan) {
     }
 
     glm_mat4_identity(vulkan->ubo.model);
-
-    // glm_vec3_copy((vec3)WHITE, vulkan->uniforms.light.colour);
-    // glm_vec3_copy((vec3){1.0f, -5.0f, 1.0f}, vulkan->uniforms.light.pos);
 }
 
-void updateUniformBuffer(Vulkan *vulkan, Window *window,
-                         uint32_t currentImage) {
-
-    // glm_vec3_rotate(vulkan->uniforms.light.pos, window->dt * glm_rad(25.0f),
-    //                 (vec3)Z_AXIS);
+void updateUniformBuffer(Vulkan *vulkan, uint32_t currentImage) {
 
     // glm_rotate(vulkan->ubo.model, window->dt * glm_rad(25.0f), GLM_ZUP);
 
-    glm_rotate(vulkan->ubo.model, window->mX * 0.00005, GLM_YUP);
-    glm_rotate(vulkan->ubo.model, window->mY * 0.00005, GLM_XUP);
+    glm_rotate(vulkan->ubo.model, vulkan->window.mX * glm_rad(1.0) * 0.005,
+               GLM_ZUP);
+    glm_rotate(vulkan->ubo.model, vulkan->window.mY * glm_rad(1.0) * 0.005,
+               GLM_XUP);
 
-    glm_lookat((vec3)VEC_3(2.0f), GLM_VEC3_ZERO, GLM_ZUP, vulkan->ubo.view);
+    // glm_lookat((vec3)VEC_3(2.0f), GLM_VEC3_ZERO, GLM_ZUP, vulkan->ubo.view);
+    glm_lookat((vec3){0.0f, 3.0f, 3.0f}, GLM_VEC3_ZERO, GLM_ZUP,
+               vulkan->ubo.view);
 
     float aspectRatio = vulkan->swapchain.swapChainExtent->width /
                         (float)vulkan->swapchain.swapChainExtent->height;

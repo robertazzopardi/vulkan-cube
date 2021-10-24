@@ -1,6 +1,5 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#define GLM_FORCE_LEFT_HANDED
 
 #include "vulkan_handle/vulkan_handle.h"
 #include "error_handle.h"
@@ -10,6 +9,8 @@
 #include "vulkan_handle/texture.h"
 #include "vulkan_handle/validation.h"
 #include "window/window.h"
+#include <SDL.h>
+#include <SDL_image.h>
 #include <SDL_vulkan.h>
 #include <vulkan/vulkan.h>
 
@@ -88,7 +89,7 @@ VkFormat findDepthFormat(Vulkan *vulkan) {
                                vulkan->device.physicalDevice);
 }
 
-void createInstance(SDL_Window *window, Vulkan *vulkan) {
+void createInstance(Vulkan *vulkan) {
     vulkan->device.physicalDevice = VK_NULL_HANDLE;
     vulkan->msaaSamples = VK_SAMPLE_COUNT_1_BIT;
 
@@ -106,12 +107,13 @@ void createInstance(SDL_Window *window, Vulkan *vulkan) {
 
     // Get the required extension count
     uint32_t extensionCount;
-    if (!SDL_Vulkan_GetInstanceExtensions(window, &extensionCount, NULL)) {
+    if (!SDL_Vulkan_GetInstanceExtensions(vulkan->window.win, &extensionCount,
+                                          NULL)) {
         THROW_ERROR("Could not get instance extensions count\n");
     }
 
     const char *extensionNames[extensionCount + 1];
-    if (!SDL_Vulkan_GetInstanceExtensions(window, &extensionCount,
+    if (!SDL_Vulkan_GetInstanceExtensions(vulkan->window.win, &extensionCount,
                                           extensionNames)) {
         THROW_ERROR("Could not get instance extensions names\n");
     }
@@ -142,18 +144,29 @@ void createInstance(SDL_Window *window, Vulkan *vulkan) {
     }
 }
 
-void initVulkan(Window *window, Vulkan *vulkan) {
-    createInstance(window->win, vulkan);
+Vulkan initialise() {
+    initSDL();
+
+    Vulkan vulkan = {0};
+    vulkan.window = createWindow();
+
+    initVulkan(&vulkan);
+
+    return vulkan;
+}
+
+void initVulkan(Vulkan *vulkan) {
+    createInstance(vulkan);
 
     setupDebugMessenger(vulkan);
 
-    createSurface(window, vulkan);
+    createSurface(vulkan);
 
-    pickPhysicalDevice(window, vulkan);
+    pickPhysicalDevice(vulkan);
 
-    createLogicalDevice(window, vulkan);
+    createLogicalDevice(vulkan);
 
-    createSwapChain(window, vulkan);
+    createSwapChain(vulkan);
 
     createImageViews(vulkan);
 
@@ -169,7 +182,7 @@ void initVulkan(Window *window, Vulkan *vulkan) {
 
     createFramebuffers(vulkan);
 
-    createCommandPool(window, vulkan);
+    createCommandPool(vulkan);
 
     createTextureImage(vulkan);
 
@@ -177,8 +190,17 @@ void initVulkan(Window *window, Vulkan *vulkan) {
 
     createTextureSampler(vulkan);
 
-    createVertexBuffer(vulkan);
-    createIndexBuffer(vulkan);
+    generateShape(vulkan, SPHERE);
+    createVertexIndexBuffer(vulkan, vulkan->shapes.vertices,
+                            sizeof(*vulkan->shapes.vertices) *
+                                vulkan->shapes.verticesCount,
+                            &vulkan->shapeBuffers.vertexBuffer,
+                            &vulkan->shapeBuffers.vertexBufferMemory);
+    createVertexIndexBuffer(vulkan, vulkan->shapes.indices,
+                            sizeof(*vulkan->shapes.indices) *
+                                vulkan->shapes.indicesCount,
+                            &vulkan->shapeBuffers.indexBuffer,
+                            &vulkan->shapeBuffers.indexBufferMemory);
 
     createUniformBuffers(vulkan);
 
@@ -186,25 +208,23 @@ void initVulkan(Window *window, Vulkan *vulkan) {
 
     createDescriptorSets(vulkan);
 
-    createCommandBuffers(vulkan, window);
+    createCommandBuffers(vulkan);
 
     createSyncObjects(vulkan);
 }
 
-void cleanUpVulkan(VkSurfaceKHR surface, Vulkan *vulkan) {
+void cleanUpVulkan(Vulkan *vulkan) {
     vkDeviceWaitIdle(vulkan->device.device);
 
     cleanupSwapChain(vulkan);
 
     vkDestroySampler(vulkan->device.device, vulkan->texture.textureSampler,
                      NULL);
-    vkDestroyImageView(vulkan->device.device,
-    vulkan->texture.textureImageView,
+    vkDestroyImageView(vulkan->device.device, vulkan->texture.textureImageView,
                        NULL);
 
-    vkDestroyImage(vulkan->device.device, vulkan->texture.textureImage,
-    NULL); vkFreeMemory(vulkan->device.device,
-    vulkan->texture.textureImageMemory,
+    vkDestroyImage(vulkan->device.device, vulkan->texture.textureImage, NULL);
+    vkFreeMemory(vulkan->device.device, vulkan->texture.textureImageMemory,
                  NULL);
 
     vkDestroyDescriptorSetLayout(
@@ -257,6 +277,18 @@ void cleanUpVulkan(VkSurfaceKHR surface, Vulkan *vulkan) {
                                       vulkan->validation.debugMessenger, NULL);
     }
 
-    vkDestroySurfaceKHR(vulkan->instance, surface, NULL);
+    vkDestroySurfaceKHR(vulkan->instance, vulkan->window.surface, NULL);
     vkDestroyInstance(vulkan->instance, NULL);
+}
+
+inline void terminate(Vulkan *vulkan) {
+    cleanUpVulkan(vulkan);
+
+    freeMem(1, vulkan->window.event);
+
+    SDL_DestroyWindow(vulkan->window.win);
+
+    IMG_Quit();
+
+    SDL_Quit();
 }

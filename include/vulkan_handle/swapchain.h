@@ -30,11 +30,10 @@ typedef struct SwapChain {
 } SwapChain;
 
 typedef struct Vulkan Vulkan;
-typedef struct Window Window;
 
-void createSwapChain(Window *, Vulkan *);
+void createSwapChain(Vulkan *);
 
-void recreateSwapChain(Window *, Vulkan *);
+void recreateSwapChain(Vulkan *);
 
 void cleanupSwapChain(Vulkan *);
 
