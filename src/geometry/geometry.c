@@ -175,6 +175,17 @@ void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
 //     }
 // }
 
+void copyBuffer(Vulkan *vulkan, VkBuffer srcBuffer, VkBuffer dstBuffer,
+                VkDeviceSize size) {
+    VkCommandBuffer commandBuffer = beginSingleTimeCommands(vulkan);
+
+    VkBufferCopy copyRegion = {};
+    copyRegion.size = size;
+    vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+
+    endSingleTimeCommands(vulkan, commandBuffer);
+}
+
 void createVertexIndexBuffer(Vulkan *vulkan, void *data, uint64_t bufferSize,
                              VkBuffer *buffer, VkDeviceMemory *bufferMemory) {
     VkBuffer stagingBuffer;
@@ -200,18 +211,19 @@ void createVertexIndexBuffer(Vulkan *vulkan, void *data, uint64_t bufferSize,
 inline void generateShape(Vulkan *vulkan, ShapeType shapeType) {
     switch (shapeType) {
     case CUBE:
-        combineVerticesAndIndicesForCube(vulkan);
+        makeCube(vulkan);
         break;
     case SPHERE:
         makeSphere(vulkan, 40, 40, 1);
         break;
     case ICOSPHERE:
     case OCTASPHERE:
-        combineVerticesAndIndicesForSphere(vulkan, shapeType, 3);
+        makeTriSphere(vulkan, shapeType, 3);
         break;
     case PLAIN:
         break;
     default:
         break;
     }
+    vulkan->shapeCount++;
 }

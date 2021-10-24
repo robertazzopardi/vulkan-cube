@@ -7,6 +7,9 @@
 # CC = gcc
 CC = clang
 
+# Acess vulkan sdk path and point to the glslc shader compiler
+GLSLC=$(VULKAN_SDK)/macOS/bin/glslc
+
 # define any compile-time flags
 CFLAGS	:= -Wall -Wextra -W -flto -ffast-math -Oz `sdl2-config --cflags` -std=c18 -fpic -shared
 CFLAGS  += -fsanitize=address -fno-omit-frame-pointer -ffunction-sections -fdata-sections
@@ -68,6 +71,9 @@ LIBS		:= $(patsubst %,-L%, $(LIBDIRS:%/=%))
 # define the C source files
 SOURCES		:= $(wildcard $(patsubst %,%/*.c, $(SOURCEDIRS)))
 
+FRAG_SHADERS		:= $(wildcard $(patsubst %,%/*.frag, $(SOURCEDIRS)))
+VERT_SHADERS		:= $(wildcard $(patsubst %,%/*.vert, $(SOURCEDIRS)))
+
 # define the C object files
 OBJECTS		:= $(SOURCES:.c=.o)
 
@@ -97,7 +103,7 @@ $(LIB_NAME): $(OBJECTS)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
 clean_shaders:
-	$(RM) $(SRC)/shaders/*.spv
+	$(RM) $(wildcard $(patsubst %,%/*.spv, $(SOURCEDIRS)))
 
 .PHONY: clean
 clean: clean_shaders
@@ -111,7 +117,7 @@ run: all
 	@echo Executing 'run: all' complete!
 
 run_sphere:
-	clang $(call FIXPATH,$(EXAMPLES)/main_sphere.c) -o $(OUTPUTMAIN) $(OUTPUTLIB) -I$(INCLUDE)
+	$(CC) $(call FIXPATH,$(EXAMPLES)/main_sphere.c) -o $(OUTPUTMAIN) $(OUTPUTLIB) -I$(INCLUDE)
 	$(OUTPUTMAIN)
 
 check: clean all
@@ -122,9 +128,14 @@ scan_build: clean
 	$(RM) *.plist
 
 compile_shaders: clean_shaders
+	@echo ${VERT_SHADERS}
 
-# Acess vulkan sdk path and point to the glslc shader compiler
-	GLSLC=$(VULKAN_SDK)/macOS/bin/glslc
+# for texture_path in $(VERT_SHADERS) ; do \
+# 	echo $$texture_path ; \
+# 	echo $$(dirname $$texture_path) ; \
+# 	GLSLC $$texture_path -o $(call FIXPATH,$$(dirname $$texture_path)/vert.spv) ; \
+# done
+# echo include${$(dirname src/shaders/texture/shader.vert)#*src}
 
 	for texture_type in light texture vertex ; do \
 		GLSLC $(SRC)/shaders/$$texture_type/shader.vert -o $(SRC)/shaders/$$texture_type/vert.spv ; \

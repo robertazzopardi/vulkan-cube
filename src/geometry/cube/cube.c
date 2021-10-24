@@ -44,7 +44,7 @@ Cube cube = {
     },
 };
 
-uint16_t indices[] = {
+const uint16_t indices[] = {
     0,  1,  2,  2,  3,  0,  // top
     4,  5,  6,  6,  7,  4,  // bottom
     8,  9,  10, 8,  10, 11, // right
@@ -53,12 +53,12 @@ uint16_t indices[] = {
     20, 21, 22, 20, 22, 23, // back
 };
 
-void combineVerticesAndIndicesForCube(Vulkan *vulkan) {
+void makeCube(Vulkan *vulkan) {
     size_t count = SIZEOF(cube);
 
     allocateVerticesAndIndices(vulkan, count * 4, count * 6);
 
-    // TODO clean up
+    // TODO: clean up
 
     for (uint32_t i = 0; i < count; i++) {
         Vertex *shape = cube[i];

@@ -53,4 +53,10 @@ void createImage(uint32_t, uint32_t, uint32_t, VkSampleCountFlagBits, VkFormat,
                  VkImageTiling, VkImageUsageFlags, VkMemoryPropertyFlags,
                  Vulkan *, VkImage *, VkDeviceMemory *);
 
+typedef struct VkCommandBuffer_T *VkCommandBuffer;
+
+VkCommandBuffer beginSingleTimeCommands(Vulkan *);
+
+void endSingleTimeCommands(Vulkan *, VkCommandBuffer);
+
 #endif /* INCLUDE_VULKAN_HANDLE_TEXTURE */

@@ -10,7 +10,6 @@
 #include "uniforms.h"
 #include "validation.h"
 #include "window/window.h"
-#include <stdlib.h>
 #include <vulkan/vulkan.h>
 
 typedef struct Vulkan {
@@ -25,6 +24,7 @@ typedef struct Vulkan {
     Semaphores semaphores;
     ShapeBuffers shapeBuffers;
     Shape shapes;
+    uint32_t shapeCount;
     Depth depth;
     UniformBufferObject ubo;
     DescriptorSet descriptorSet;
@@ -34,20 +34,10 @@ typedef struct Vulkan {
 
 extern Vulkan initialise();
 
-void initVulkan(Vulkan *);
-
-void cleanUpVulkan(Vulkan *);
-
 extern void terminate(Vulkan *);
 
 extern void mainLoop(Vulkan *);
 
-VkFormat findDepthFormat(Vulkan *);
-
-VkCommandBuffer beginSingleTimeCommands(Vulkan *);
-
-void endSingleTimeCommands(Vulkan *, VkCommandBuffer);
-
-void copyBuffer(Vulkan *, VkBuffer, VkBuffer, VkDeviceSize);
+extern void generateShape(Vulkan *, ShapeType);
 
 #endif /* INCLUDE_VULKAN_HANDLE_VULKAN_HANDLE */

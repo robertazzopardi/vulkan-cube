@@ -14,81 +14,6 @@
 #include <SDL_vulkan.h>
 #include <vulkan/vulkan.h>
 
-VkCommandBuffer beginSingleTimeCommands(Vulkan *vulkan) {
-    VkCommandBufferAllocateInfo allocInfo = {};
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandPool = vulkan->renderBuffers.commandPool;
-    allocInfo.commandBufferCount = 1;
-
-    VkCommandBuffer commandBuffer;
-    vkAllocateCommandBuffers(vulkan->device.device, &allocInfo, &commandBuffer);
-
-    VkCommandBufferBeginInfo beginInfo = {};
-    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-    vkBeginCommandBuffer(commandBuffer, &beginInfo);
-
-    return commandBuffer;
-}
-
-void endSingleTimeCommands(Vulkan *vulkan, VkCommandBuffer commandBuffer) {
-    vkEndCommandBuffer(commandBuffer);
-
-    VkSubmitInfo submitInfo = {};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffer;
-
-    vkQueueSubmit(vulkan->device.graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-    vkQueueWaitIdle(vulkan->device.graphicsQueue);
-
-    vkFreeCommandBuffers(vulkan->device.device,
-                         vulkan->renderBuffers.commandPool, 1, &commandBuffer);
-}
-
-void copyBuffer(Vulkan *vulkan, VkBuffer srcBuffer, VkBuffer dstBuffer,
-                VkDeviceSize size) {
-    VkCommandBuffer commandBuffer = beginSingleTimeCommands(vulkan);
-
-    VkBufferCopy copyRegion = {};
-    copyRegion.size = size;
-    vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
-
-    endSingleTimeCommands(vulkan, commandBuffer);
-}
-
-VkFormat findSupportedFormat(const VkFormat *candidates, size_t length,
-                             VkImageTiling tiling,
-                             VkFormatFeatureFlags features,
-                             VkPhysicalDevice physicalDevice) {
-    for (size_t i = 0; i < length; i++) {
-        VkFormatProperties props;
-        vkGetPhysicalDeviceFormatProperties(physicalDevice, candidates[i],
-                                            &props);
-
-        if (tiling == VK_IMAGE_TILING_LINEAR &&
-            (props.linearTilingFeatures & features) == features) {
-            return candidates[i];
-        } else if (tiling == VK_IMAGE_TILING_OPTIMAL &&
-                   (props.optimalTilingFeatures & features) == features) {
-            return candidates[i];
-        }
-    }
-
-    THROW_ERROR("Failed to find supported format!\n");
-}
-
-VkFormat findDepthFormat(Vulkan *vulkan) {
-    VkFormat candidates[] = {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT,
-                             VK_FORMAT_D24_UNORM_S8_UINT};
-    return findSupportedFormat(candidates, SIZEOF(candidates),
-                               VK_IMAGE_TILING_OPTIMAL,
-                               VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT,
-                               vulkan->device.physicalDevice);
-}
-
 void createInstance(Vulkan *vulkan) {
     vulkan->device.physicalDevice = VK_NULL_HANDLE;
     vulkan->msaaSamples = VK_SAMPLE_COUNT_1_BIT;
@@ -142,17 +67,6 @@ void createInstance(Vulkan *vulkan) {
     if (vkCreateInstance(&createInfo, NULL, &vulkan->instance) != VK_SUCCESS) {
         THROW_ERROR("failed to create instance!\n");
     }
-}
-
-Vulkan initialise() {
-    initSDL();
-
-    Vulkan vulkan = {0};
-    vulkan.window = createWindow();
-
-    initVulkan(&vulkan);
-
-    return vulkan;
 }
 
 void initVulkan(Vulkan *vulkan) {
@@ -279,6 +193,17 @@ void cleanUpVulkan(Vulkan *vulkan) {
 
     vkDestroySurfaceKHR(vulkan->instance, vulkan->window.surface, NULL);
     vkDestroyInstance(vulkan->instance, NULL);
+}
+
+inline Vulkan initialise() {
+    initSDL();
+
+    Vulkan vulkan = {0};
+    vulkan.window = createWindow();
+
+    initVulkan(&vulkan);
+
+    return vulkan;
 }
 
 inline void terminate(Vulkan *vulkan) {

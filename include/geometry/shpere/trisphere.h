@@ -10,6 +10,6 @@ typedef struct Vertex Vertex;
 
 typedef enum ShapeType ShapeTye;
 
-void combineVerticesAndIndicesForSphere(Vulkan *, ShapeType, size_t);
+void makeTriSphere(Vulkan *, ShapeType, size_t);
 
 #endif /* INCLUDE_GEOMETRY_SHPERE_TRISPHERE */

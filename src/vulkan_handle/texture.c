@@ -195,7 +195,8 @@ void createTextureSampler(Vulkan *vulkan) {
 }
 
 void createTextureImage(Vulkan *vulkan) {
-    SDL_Surface *image = IMG_Load("/Users/rob/Downloads/2k_saturn.jpg");
+    // SDL_Surface *image = IMG_Load("/Users/rob/Downloads/2k_saturn.jpg");
+    SDL_Surface *image = IMG_Load("/Users/rob/Downloads/2k_jupiter.jpg");
 
     // convert to desired format
     image = SDL_ConvertSurfaceFormat(image, SDL_PIXELFORMAT_ABGR8888, 0);
@@ -345,4 +346,38 @@ void createColorResources(Vulkan *vulkan) {
     vulkan->texture.colorImageView =
         createImageView(vulkan->device.device, vulkan->texture.colorImage,
                         colorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+}
+
+VkCommandBuffer beginSingleTimeCommands(Vulkan *vulkan) {
+    VkCommandBufferAllocateInfo allocInfo = {};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandPool = vulkan->renderBuffers.commandPool;
+    allocInfo.commandBufferCount = 1;
+
+    VkCommandBuffer commandBuffer;
+    vkAllocateCommandBuffers(vulkan->device.device, &allocInfo, &commandBuffer);
+
+    VkCommandBufferBeginInfo beginInfo = {};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+    return commandBuffer;
+}
+
+void endSingleTimeCommands(Vulkan *vulkan, VkCommandBuffer commandBuffer) {
+    vkEndCommandBuffer(commandBuffer);
+
+    VkSubmitInfo submitInfo = {};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+
+    vkQueueSubmit(vulkan->device.graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(vulkan->device.graphicsQueue);
+
+    vkFreeCommandBuffers(vulkan->device.device,
+                         vulkan->renderBuffers.commandPool, 1, &commandBuffer);
 }

@@ -277,8 +277,7 @@ static inline void calculateIndicesForSphere(Shape *vulkanShape,
     vulkanShape->index += indices;
 }
 
-void combineVerticesAndIndicesForSphere(Vulkan *vulkan, ShapeType shapeType,
-                                        size_t depth) {
+void makeTriSphere(Vulkan *vulkan, ShapeType shapeType, size_t depth) {
 
     Triangle *vertexData = NULL;
     uint32_t count = 0;

@@ -169,7 +169,7 @@ void updateUniformBuffer(Vulkan *vulkan, uint32_t currentImage) {
 
     glm_rotate(vulkan->ubo.model, vulkan->window.mX * glm_rad(1.0) * 0.005,
                GLM_ZUP);
-    glm_rotate(vulkan->ubo.model, vulkan->window.mY * glm_rad(1.0) * 0.005,
+    glm_rotate(vulkan->ubo.model, -vulkan->window.mY * glm_rad(1.0) * 0.005,
                GLM_XUP);
 
     // glm_lookat((vec3)VEC_3(2.0f), GLM_VEC3_ZERO, GLM_ZUP, vulkan->ubo.view);

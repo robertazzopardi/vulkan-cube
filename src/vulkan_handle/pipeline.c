@@ -188,6 +188,36 @@ void createGraphicsPipeline(Vulkan *vulkan) {
     freeMem(1, attributeDescriptions);
 }
 
+VkFormat findSupportedFormat(const VkFormat *candidates, size_t length,
+                             VkImageTiling tiling,
+                             VkFormatFeatureFlags features,
+                             VkPhysicalDevice physicalDevice) {
+    for (size_t i = 0; i < length; i++) {
+        VkFormatProperties props;
+        vkGetPhysicalDeviceFormatProperties(physicalDevice, candidates[i],
+                                            &props);
+
+        if (tiling == VK_IMAGE_TILING_LINEAR &&
+            (props.linearTilingFeatures & features) == features) {
+            return candidates[i];
+        } else if (tiling == VK_IMAGE_TILING_OPTIMAL &&
+                   (props.optimalTilingFeatures & features) == features) {
+            return candidates[i];
+        }
+    }
+
+    THROW_ERROR("Failed to find supported format!\n");
+}
+
+inline VkFormat findDepthFormat(Vulkan *vulkan) {
+    VkFormat candidates[] = {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT,
+                             VK_FORMAT_D24_UNORM_S8_UINT};
+    return findSupportedFormat(candidates, SIZEOF(candidates),
+                               VK_IMAGE_TILING_OPTIMAL,
+                               VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT,
+                               vulkan->device.physicalDevice);
+}
+
 void createRenderPass(Vulkan *vulkan) {
     VkAttachmentDescription colorAttachment = {};
     colorAttachment.format = *vulkan->swapchain.swapChainImageFormat;

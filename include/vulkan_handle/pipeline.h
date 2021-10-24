@@ -1,5 +1,5 @@
-#ifndef INCLUDE_VULKAN_HANDLE_GRAPHICS_PIPELINE
-#define INCLUDE_VULKAN_HANDLE_GRAPHICS_PIPELINE
+#ifndef INCLUDE_VULKAN_HANDLE_PIPELINE
+#define INCLUDE_VULKAN_HANDLE_PIPELINE
 
 typedef struct VkPipelineLayout_T *VkPipelineLayout;
 typedef struct VkPipeline_T *VkPipeline;
@@ -12,9 +12,12 @@ typedef struct GraphicsPipeline {
 } GraphicsPipeline;
 
 typedef struct Vulkan Vulkan;
+typedef enum VkFormat VkFormat;
 
 void createGraphicsPipeline(Vulkan *);
 
 void createRenderPass(Vulkan *);
 
-#endif /* INCLUDE_VULKAN_HANDLE_GRAPHICS_PIPELINE */
+VkFormat findDepthFormat(Vulkan *);
+
+#endif /* INCLUDE_VULKAN_HANDLE_PIPELINE */
