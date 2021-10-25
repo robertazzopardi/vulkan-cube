@@ -1,5 +1,4 @@
 #include "vulkan_handle/vulkan_handle.h"
-#include <stdlib.h>
 
 int main(void) {
 
@@ -9,5 +8,5 @@ int main(void) {
 
     terminate(&vulkan);
 
-    return EXIT_SUCCESS;
+    return 0;
 }
