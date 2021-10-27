@@ -23,7 +23,7 @@ typedef struct Vulkan {
     RenderBuffers renderBuffers;
     Semaphores semaphores;
     ShapeBuffers shapeBuffers;
-    Shape shapes;
+    Shape *shapes;
     uint32_t shapeCount;
     Depth depth;
     UniformBufferObject ubo;

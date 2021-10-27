@@ -18,31 +18,40 @@ void calculateIndices(Vulkan *vulkan, uint32_t sectorCount,
             // 2 triangles per sector excluding first and last stacks
             // k1 => k2 => k1+1
             if (i != 0) {
-                vulkan->shapes.indices =
-                    realloc(vulkan->shapes.indices,
-                            (vulkan->shapes.indicesCount + 3) *
-                                sizeof(*vulkan->shapes.indices));
-                vulkan->shapes.indices[vulkan->shapes.indicesCount++] = k1;
-                vulkan->shapes.indices[vulkan->shapes.indicesCount++] = k2;
-                vulkan->shapes.indices[vulkan->shapes.indicesCount++] = k1 + 1;
+                vulkan->shapes[vulkan->shapeCount].indices = realloc(
+                    vulkan->shapes[vulkan->shapeCount].indices,
+                    (vulkan->shapes[vulkan->shapeCount].indicesCount + 3) *
+                        sizeof(*vulkan->shapes[vulkan->shapeCount].indices));
+                vulkan->shapes[vulkan->shapeCount].indices
+                    [vulkan->shapes[vulkan->shapeCount].indicesCount++] = k1;
+                vulkan->shapes[vulkan->shapeCount].indices
+                    [vulkan->shapes[vulkan->shapeCount].indicesCount++] = k2;
+                vulkan->shapes[vulkan->shapeCount]
+                    .indices[vulkan->shapes[vulkan->shapeCount]
+                                 .indicesCount++] = k1 + 1;
             }
 
             // k1+1 => k2 => k2+1
             if (i != (stackCount - 1)) {
-                vulkan->shapes.indices =
-                    realloc(vulkan->shapes.indices,
-                            (vulkan->shapes.indicesCount + 3) *
-                                sizeof(*vulkan->shapes.indices));
-                vulkan->shapes.indices[vulkan->shapes.indicesCount++] = k1 + 1;
-                vulkan->shapes.indices[vulkan->shapes.indicesCount++] = k2;
-                vulkan->shapes.indices[vulkan->shapes.indicesCount++] = k2 + 1;
+                vulkan->shapes[vulkan->shapeCount].indices = realloc(
+                    vulkan->shapes[vulkan->shapeCount].indices,
+                    (vulkan->shapes[vulkan->shapeCount].indicesCount + 3) *
+                        sizeof(*vulkan->shapes[vulkan->shapeCount].indices));
+                vulkan->shapes[vulkan->shapeCount]
+                    .indices[vulkan->shapes[vulkan->shapeCount]
+                                 .indicesCount++] = k1 + 1;
+                vulkan->shapes[vulkan->shapeCount].indices
+                    [vulkan->shapes[vulkan->shapeCount].indicesCount++] = k2;
+                vulkan->shapes[vulkan->shapeCount]
+                    .indices[vulkan->shapes[vulkan->shapeCount]
+                                 .indicesCount++] = k2 + 1;
             }
         }
     }
 }
 
 void makeSphere(Vulkan *vulkan, uint32_t sectorCount, uint32_t stackCount,
-                uint32_t radius) {
+                float radius) {
 
     uint32_t verticesCount = (2 * sectorCount) + (sectorCount * stackCount) + 1;
 
@@ -72,7 +81,9 @@ void makeSphere(Vulkan *vulkan, uint32_t sectorCount, uint32_t stackCount,
             y = xy * sinf(sectorAngle); // r * cos(u) * sin(v)
             glm_vec3_copy(
                 (vec3){x, y, z},
-                vulkan->shapes.vertices[vulkan->shapes.verticesCount].pos);
+                vulkan->shapes[vulkan->shapeCount]
+                    .vertices[vulkan->shapes[vulkan->shapeCount].verticesCount]
+                    .pos);
 
             // normalized vertex normal (nx, ny, nz)
             nx = x * lengthInv;
@@ -80,20 +91,26 @@ void makeSphere(Vulkan *vulkan, uint32_t sectorCount, uint32_t stackCount,
             nz = z * lengthInv;
             glm_vec3_copy(
                 (vec3){nx, ny, nz},
-                vulkan->shapes.vertices[vulkan->shapes.verticesCount].normal);
+                vulkan->shapes[vulkan->shapeCount]
+                    .vertices[vulkan->shapes[vulkan->shapeCount].verticesCount]
+                    .normal);
 
             // vertex tex coord (s, t) range between [0, 1]
             s = (float)j / sectorCount;
             t = (float)i / stackCount;
             glm_vec2_copy(
                 (vec2){s, t},
-                vulkan->shapes.vertices[vulkan->shapes.verticesCount].texCoord);
+                vulkan->shapes[vulkan->shapeCount]
+                    .vertices[vulkan->shapes[vulkan->shapeCount].verticesCount]
+                    .texCoord);
 
             glm_vec3_copy(
                 (vec3)WHITE,
-                vulkan->shapes.vertices[vulkan->shapes.verticesCount].colour);
+                vulkan->shapes[vulkan->shapeCount]
+                    .vertices[vulkan->shapes[vulkan->shapeCount].verticesCount]
+                    .colour);
 
-            vulkan->shapes.verticesCount++;
+            vulkan->shapes[vulkan->shapeCount].verticesCount++;
         }
     }
 

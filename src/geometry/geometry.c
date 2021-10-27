@@ -15,6 +15,8 @@
 #include <string.h>
 #include <vulkan/vulkan.h>
 
+static const struct Shape EmptyStruct;
+
 inline void getMiddlePoint(vec3 point1, vec3 point2, vec3 res) {
     res[0] = (point1[0] + point2[0]) / 2.0f;
     res[1] = (point1[1] + point2[1]) / 2.0f;
@@ -209,12 +211,17 @@ void createVertexIndexBuffer(Vulkan *vulkan, void *data, uint64_t bufferSize,
 }
 
 inline void generateShape(Vulkan *vulkan, ShapeType shapeType) {
+
+    vulkan->shapes = realloc(vulkan->shapes, (vulkan->shapeCount + 1) *
+                                                 sizeof(*vulkan->shapes));
+    vulkan->shapes[vulkan->shapeCount] = EmptyStruct;
+
     switch (shapeType) {
     case CUBE:
         makeCube(vulkan);
         break;
     case SPHERE:
-        makeSphere(vulkan, 40, 40, 1);
+        makeSphere(vulkan, 40, 40, 0.7);
         break;
     case ICOSPHERE:
     case OCTASPHERE:
@@ -225,5 +232,6 @@ inline void generateShape(Vulkan *vulkan, ShapeType shapeType) {
     default:
         break;
     }
+
     vulkan->shapeCount++;
 }

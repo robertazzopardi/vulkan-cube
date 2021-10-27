@@ -62,8 +62,6 @@ void createDescriptorSets(Vulkan *vulkan) {
     for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
         layouts[i] = vulkan->descriptorSet.descriptorSetLayout;
     }
-    // memset(layouts, &vulkan->descriptorSet.descriptorSetLayout,
-    //        vulkan->swapchain.swapChainImagesCount * sizeof(*layouts));
 
     VkDescriptorSetAllocateInfo allocInfo = {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
@@ -113,12 +111,13 @@ void createDescriptorSets(Vulkan *vulkan) {
 static inline VkDescriptorSetLayoutBinding
 createDescriptorSetLayoutBinding(VkDescriptorType dType,
                                  VkShaderStageFlags sFlags, uint32_t binding) {
-    VkDescriptorSetLayoutBinding layoutBinding = {};
-    layoutBinding.binding = binding;
-    layoutBinding.descriptorCount = 1;
-    layoutBinding.descriptorType = dType;
-    layoutBinding.pImmutableSamplers = NULL; // Optional
-    layoutBinding.stageFlags = sFlags;
+    VkDescriptorSetLayoutBinding layoutBinding = {
+        .binding = binding,
+        .descriptorCount = 1,
+        .descriptorType = dType,
+        .pImmutableSamplers = NULL, // Optional
+        .stageFlags = sFlags,
+    };
     return layoutBinding;
 }
 

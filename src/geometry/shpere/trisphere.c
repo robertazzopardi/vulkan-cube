@@ -322,13 +322,14 @@ void makeTriSphere(Vulkan *vulkan, ShapeType shapeType, size_t depth) {
             glm_vec3_copy(face->colour, arc[j].colour);
         }
 
-        memcpy(vulkan->shapes.vertices + vulkan->shapes.verticesCount, arc,
-               verticesPerFace * sizeof(*arc));
+        memcpy(vulkan->shapes[vulkan->shapeCount].vertices +
+                   vulkan->shapes[vulkan->shapeCount].verticesCount,
+               arc, verticesPerFace * sizeof(*arc));
 
-        vulkan->shapes.verticesCount += verticesPerFace;
+        vulkan->shapes[vulkan->shapeCount].verticesCount += verticesPerFace;
 
-        calculateIndicesForSphere(&vulkan->shapes, verticesPerFace);
+        calculateIndicesForSphere(vulkan->shapes, verticesPerFace);
 
-        vulkan->shapes.indicesCount += verticesPerFace;
+        vulkan->shapes[vulkan->shapeCount].indicesCount += verticesPerFace;
     }
 }

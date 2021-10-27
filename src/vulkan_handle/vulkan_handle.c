@@ -22,13 +22,14 @@ void createInstance(Vulkan *vulkan) {
         THROW_ERROR("validation layers requested, but not available!\n");
     }
 
-    VkApplicationInfo appInfo = {};
-    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = APP_NAME;
-    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.pEngineName = "No Engine";
-    appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.apiVersion = VK_API_VERSION_1_0;
+    VkApplicationInfo appInfo = {
+        .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
+        .pApplicationName = APP_NAME,
+        .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
+        .pEngineName = "No Engine",
+        .engineVersion = VK_MAKE_VERSION(1, 0, 0),
+        .apiVersion = VK_API_VERSION_1_0,
+    };
 
     // Get the required extension count
     uint32_t extensionCount;
@@ -44,11 +45,12 @@ void createInstance(Vulkan *vulkan) {
     }
     extensionNames[extensionCount] = VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
 
-    VkInstanceCreateInfo createInfo = {};
-    createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    createInfo.pApplicationInfo = &appInfo;
-    createInfo.enabledExtensionCount = SIZEOF(extensionNames);
-    createInfo.ppEnabledExtensionNames = extensionNames;
+    VkInstanceCreateInfo createInfo = {
+        .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+        .pApplicationInfo = &appInfo,
+        .enabledExtensionCount = SIZEOF(extensionNames),
+        .ppEnabledExtensionNames = extensionNames,
+    };
 
     VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo = {};
     if (enableValidationLayers) {
@@ -104,15 +106,40 @@ void initVulkan(Vulkan *vulkan) {
 
     createTextureSampler(vulkan);
 
+    generateShape(vulkan, CUBE);
     generateShape(vulkan, SPHERE);
-    createVertexIndexBuffer(vulkan, vulkan->shapes.vertices,
-                            sizeof(*vulkan->shapes.vertices) *
-                                vulkan->shapes.verticesCount,
+
+    uint32_t vcount = 0;
+    uint32_t icount = 0;
+
+    for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
+        printf("%u\n", vulkan->shapes[i].verticesCount);
+        vcount += vulkan->shapes[i].verticesCount;
+        icount += vulkan->shapes[i].indicesCount;
+    }
+
+    Vertex verts[vcount];
+    uint16_t indis[icount];
+
+    uint32_t vindex = 0;
+    uint32_t iindex = 0;
+
+    for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
+        memcpy(verts + vindex, vulkan->shapes[i].vertices,
+               vulkan->shapes[i].verticesCount *
+                   sizeof(*vulkan->shapes[i].vertices));
+        vindex += vulkan->shapes[i].verticesCount;
+
+        memcpy(indis + iindex, vulkan->shapes[i].indices,
+               vulkan->shapes[i].indicesCount *
+                   sizeof(*vulkan->shapes[i].indices));
+        iindex += vulkan->shapes[i].indicesCount;
+    }
+
+    createVertexIndexBuffer(vulkan, verts, sizeof(*verts) * vcount,
                             &vulkan->shapeBuffers.vertexBuffer,
                             &vulkan->shapeBuffers.vertexBufferMemory);
-    createVertexIndexBuffer(vulkan, vulkan->shapes.indices,
-                            sizeof(*vulkan->shapes.indices) *
-                                vulkan->shapes.indicesCount,
+    createVertexIndexBuffer(vulkan, indis, sizeof(*indis) * icount,
                             &vulkan->shapeBuffers.indexBuffer,
                             &vulkan->shapeBuffers.indexBufferMemory);
 
@@ -174,12 +201,12 @@ void cleanUpVulkan(Vulkan *vulkan) {
                        vulkan->semaphores.inFlightFences[i], NULL);
     }
 
-    freeMem(6, vulkan->descriptorSet.descriptorSets,
+    freeMem(7, vulkan->descriptorSet.descriptorSets,
             vulkan->semaphores.renderFinishedSemaphores,
             vulkan->semaphores.imageAvailableSemaphores,
             vulkan->semaphores.inFlightFences,
             vulkan->semaphores.imagesInFlight,
-            vulkan->renderBuffers.commandBuffers);
+            vulkan->renderBuffers.commandBuffers, vulkan->shapes);
 
     vkDestroyCommandPool(vulkan->device.device,
                          vulkan->renderBuffers.commandPool, NULL);

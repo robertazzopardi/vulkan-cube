@@ -65,12 +65,15 @@ void makeCube(Vulkan *vulkan) {
 
         calculateNormals(shape, 4);
 
-        memcpy(vulkan->shapes.vertices + vulkan->shapes.verticesCount, shape,
-               4 * sizeof(*shape));
+        memcpy(vulkan->shapes[vulkan->shapeCount].vertices +
+                   vulkan->shapes[vulkan->shapeCount].verticesCount,
+               shape, 4 * sizeof(*shape));
 
-        vulkan->shapes.verticesCount += 4;
+        vulkan->shapes[vulkan->shapeCount].verticesCount += 4;
     }
 
-    memcpy(vulkan->shapes.indices, indices, SIZEOF(indices) * sizeof(*indices));
-    vulkan->shapes.indicesCount = SIZEOF(indices);
+    memcpy(vulkan->shapes[vulkan->shapeCount].indices, indices,
+           SIZEOF(indices) * sizeof(*indices));
+    // vulkan->shapes[vulkan->shapeCount].indices = indices;
+    vulkan->shapes[vulkan->shapeCount].indicesCount = SIZEOF(indices);
 }

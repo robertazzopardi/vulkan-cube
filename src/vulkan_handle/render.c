@@ -108,10 +108,35 @@ void createCommandBuffers(Vulkan *vulkan) {
                                 NULL);
 
         // vkCmdDraw(vulkan->renderBuffers.commandBuffers[i],
-        //           vulkan->shapes.verticesCount, 1, 0, 0);
+        //           vulkan->shapes[vulkan->shapeCount].verticesCount, 1, 0,
+        // 0);
 
         vkCmdDrawIndexed(vulkan->renderBuffers.commandBuffers[i],
-                         vulkan->shapes.indicesCount, 1, 0, 0, 0);
+                         vulkan->shapes[vulkan->shapeCount - 1].indicesCount, 1,
+                         0, 0, 0);
+
+        //
+
+        // uint32_t indexCount = 0;
+        // for (uint32_t j = 0; j < vulkan->shapeCount; j++) {
+        //     uint32_t dynamicOffset = j * 256;
+
+        //     vkCmdBindDescriptorSets(vulkan->renderBuffers.commandBuffers[i],
+        //                             VK_PIPELINE_BIND_POINT_GRAPHICS,
+        //                             vulkan->graphicsPipeline.pipelineLayout,
+        //                             0, 1,
+        //                             &vulkan->descriptorSet.descriptorSets[i],
+        //                             1, &dynamicOffset);
+        //     // vkCmdDraw(vulkan->renderBuffers.commandBuffers[i],
+        //     //           vulkan->shapes[j].verticesCount, 1, indexCount, 0);
+        //     vkCmdDrawIndexed(vulkan->renderBuffers.commandBuffers[i],
+        //                      vulkan->shapes[j].indicesCount, 1, indexCount,
+        //                      0, 0);
+
+        //     indexCount += vulkan->shapes[j].verticesCount;
+        // }
+
+        //
 
         vkCmdEndRenderPass(vulkan->renderBuffers.commandBuffers[i]);
 

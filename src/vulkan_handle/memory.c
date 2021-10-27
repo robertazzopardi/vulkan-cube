@@ -25,10 +25,10 @@ inline void freeMem(const size_t count, ...) {
 
 inline void allocateVerticesAndIndices(Vulkan *vulkan, size_t numVertices,
                                        size_t numIndices) {
-    vulkan->shapes.vertices =
-        malloc(numVertices * sizeof(*vulkan->shapes.vertices));
-    vulkan->shapes.indices =
-        malloc(numIndices * sizeof(*vulkan->shapes.indices));
+    vulkan->shapes[vulkan->shapeCount].vertices = malloc(
+        numVertices * sizeof(*vulkan->shapes[vulkan->shapeCount].vertices));
+    vulkan->shapes[vulkan->shapeCount].indices = malloc(
+        numIndices * sizeof(*vulkan->shapes[vulkan->shapeCount].indices));
 }
 
 inline uint32_t findMemoryType(Vulkan *vulkan, uint32_t typeFilter,
