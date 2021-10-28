@@ -189,7 +189,8 @@ void copyBuffer(Vulkan *vulkan, VkBuffer srcBuffer, VkBuffer dstBuffer,
 }
 
 void createVertexIndexBuffer(Vulkan *vulkan, void *data, uint64_t bufferSize,
-                             VkBuffer *buffer, VkDeviceMemory *bufferMemory) {
+                             VkBuffer *buffer, VkDeviceMemory *bufferMemory,
+                             VkBufferUsageFlags usageFlags) {
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
     createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -199,10 +200,8 @@ void createVertexIndexBuffer(Vulkan *vulkan, void *data, uint64_t bufferSize,
 
     mapMemory(vulkan->device.device, stagingBufferMemory, bufferSize, data);
 
-    createBuffer(
-        bufferSize,
-        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vulkan, buffer, bufferMemory);
+    createBuffer(bufferSize, usageFlags, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                 vulkan, buffer, bufferMemory);
 
     copyBuffer(vulkan, stagingBuffer, *buffer, bufferSize);
 

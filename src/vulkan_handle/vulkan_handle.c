@@ -106,42 +106,34 @@ void initVulkan(Vulkan *vulkan) {
 
     createTextureSampler(vulkan);
 
-    generateShape(vulkan, CUBE);
+    // generateShape(vulkan, CUBE);
     generateShape(vulkan, SPHERE);
 
-    uint32_t vcount = 0;
-    uint32_t icount = 0;
+    vulkan->shapeBuffers.vertexBuffer =
+        malloc(vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.vertexBuffer));
+    vulkan->shapeBuffers.vertexBufferMemory = malloc(
+        vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.vertexBufferMemory));
+    vulkan->shapeBuffers.indexBuffer =
+        malloc(vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.indexBuffer));
+    vulkan->shapeBuffers.indexBufferMemory = malloc(
+        vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.indexBufferMemory));
 
     for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
-        printf("%u\n", vulkan->shapes[i].verticesCount);
-        vcount += vulkan->shapes[i].verticesCount;
-        icount += vulkan->shapes[i].indicesCount;
+        createVertexIndexBuffer(vulkan, vulkan->shapes[i].vertices,
+                                sizeof(*vulkan->shapes[i].vertices) *
+                                    vulkan->shapes[i].verticesCount,
+                                &vulkan->shapeBuffers.vertexBuffer[i],
+                                &vulkan->shapeBuffers.vertexBufferMemory[i],
+                                VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+                                    VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+        createVertexIndexBuffer(vulkan, vulkan->shapes[i].indices,
+                                sizeof(*vulkan->shapes[i].indices) *
+                                    vulkan->shapes[i].indicesCount,
+                                &vulkan->shapeBuffers.indexBuffer[i],
+                                &vulkan->shapeBuffers.indexBufferMemory[i],
+                                VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+                                    VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
     }
-
-    Vertex verts[vcount];
-    uint16_t indis[icount];
-
-    uint32_t vindex = 0;
-    uint32_t iindex = 0;
-
-    for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
-        memcpy(verts + vindex, vulkan->shapes[i].vertices,
-               vulkan->shapes[i].verticesCount *
-                   sizeof(*vulkan->shapes[i].vertices));
-        vindex += vulkan->shapes[i].verticesCount;
-
-        memcpy(indis + iindex, vulkan->shapes[i].indices,
-               vulkan->shapes[i].indicesCount *
-                   sizeof(*vulkan->shapes[i].indices));
-        iindex += vulkan->shapes[i].indicesCount;
-    }
-
-    createVertexIndexBuffer(vulkan, verts, sizeof(*verts) * vcount,
-                            &vulkan->shapeBuffers.vertexBuffer,
-                            &vulkan->shapeBuffers.vertexBufferMemory);
-    createVertexIndexBuffer(vulkan, indis, sizeof(*indis) * icount,
-                            &vulkan->shapeBuffers.indexBuffer,
-                            &vulkan->shapeBuffers.indexBufferMemory);
 
     createUniformBuffers(vulkan);
 
@@ -180,15 +172,17 @@ void cleanUpVulkan(Vulkan *vulkan) {
                                 vulkan->graphicsPipeline.pipelineLayout, NULL);
     }
 
-    vkDestroyBuffer(vulkan->device.device, vulkan->shapeBuffers.indexBuffer,
-                    NULL);
-    vkFreeMemory(vulkan->device.device, vulkan->shapeBuffers.indexBufferMemory,
-                 NULL);
+    for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
+        vkDestroyBuffer(vulkan->device.device,
+                        vulkan->shapeBuffers.indexBuffer[i], NULL);
+        vkFreeMemory(vulkan->device.device,
+                     vulkan->shapeBuffers.indexBufferMemory[i], NULL);
 
-    vkDestroyBuffer(vulkan->device.device, vulkan->shapeBuffers.vertexBuffer,
-                    NULL);
-    vkFreeMemory(vulkan->device.device, vulkan->shapeBuffers.vertexBufferMemory,
-                 NULL);
+        vkDestroyBuffer(vulkan->device.device,
+                        vulkan->shapeBuffers.vertexBuffer[i], NULL);
+        vkFreeMemory(vulkan->device.device,
+                     vulkan->shapeBuffers.vertexBufferMemory[i], NULL);
+    }
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         vkDestroySemaphore(vulkan->device.device,
@@ -201,12 +195,19 @@ void cleanUpVulkan(Vulkan *vulkan) {
                        vulkan->semaphores.inFlightFences[i], NULL);
     }
 
-    freeMem(7, vulkan->descriptorSet.descriptorSets,
+    freeMem(11, vulkan->descriptorSet.descriptorSets,
             vulkan->semaphores.renderFinishedSemaphores,
             vulkan->semaphores.imageAvailableSemaphores,
             vulkan->semaphores.inFlightFences,
             vulkan->semaphores.imagesInFlight,
-            vulkan->renderBuffers.commandBuffers, vulkan->shapes);
+            vulkan->renderBuffers.commandBuffers, vulkan->shapes,
+
+            vulkan->shapeBuffers.indexBuffer,
+            vulkan->shapeBuffers.indexBufferMemory,
+            vulkan->shapeBuffers.vertexBuffer,
+            vulkan->shapeBuffers.vertexBufferMemory
+
+    );
 
     vkDestroyCommandPool(vulkan->device.device,
                          vulkan->renderBuffers.commandPool, NULL);

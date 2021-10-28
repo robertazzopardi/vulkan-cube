@@ -11,7 +11,9 @@
 
 const uint32_t MAX_FAMILY = 1000;
 
-static const char *deviceExtensions[] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+static const char *deviceExtensions[] = {
+    VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+};
 
 static inline bool isComplete(QueueFamilyIndices queueFamilyIndices) {
     return queueFamilyIndices.graphicsFamily != MAX_FAMILY &&
@@ -176,11 +178,12 @@ void createLogicalDevice(Vulkan *vulkan) {
 
     float queuePriority = 1.0f;
     for (uint32_t i = 0; i < SIZEOF(uniqueQueueFamilies); i++) {
-        VkDeviceQueueCreateInfo queueCreateInfo = {};
-        queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queueCreateInfo.queueFamilyIndex = uniqueQueueFamilies[i];
-        queueCreateInfo.queueCount = 1;
-        queueCreateInfo.pQueuePriorities = &queuePriority;
+        VkDeviceQueueCreateInfo queueCreateInfo = {
+            .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+            .queueFamilyIndex = uniqueQueueFamilies[i],
+            .queueCount = 1,
+            .pQueuePriorities = &queuePriority,
+        };
         queueCreateInfos[i] = queueCreateInfo;
     }
 
@@ -190,13 +193,14 @@ void createLogicalDevice(Vulkan *vulkan) {
     deviceFeatures.sampleRateShading = VK_TRUE;
     deviceFeatures.fillModeNonSolid = VK_TRUE;
 
-    VkDeviceCreateInfo createInfo = {};
-    createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    createInfo.queueCreateInfoCount = SIZEOF(queueCreateInfos);
-    createInfo.pQueueCreateInfos = queueCreateInfos;
-    createInfo.enabledExtensionCount = SIZEOF(deviceExtensions);
-    createInfo.ppEnabledExtensionNames = deviceExtensions;
-    createInfo.pEnabledFeatures = &deviceFeatures;
+    VkDeviceCreateInfo createInfo = {
+        .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+        .queueCreateInfoCount = SIZEOF(queueCreateInfos),
+        .pQueueCreateInfos = queueCreateInfos,
+        .enabledExtensionCount = SIZEOF(deviceExtensions),
+        .ppEnabledExtensionNames = deviceExtensions,
+        .pEnabledFeatures = &deviceFeatures,
+    };
 
     if (enableValidationLayers) {
         createInfo.enabledLayerCount = SIZEOF(validationLayers);

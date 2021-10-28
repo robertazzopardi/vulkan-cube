@@ -73,15 +73,13 @@ typedef struct Shape {
 typedef struct VkBuffer_T *VkBuffer;
 
 typedef struct ShapeBuffers {
-    VkBuffer vertexBuffer;
-    VkDeviceMemory vertexBufferMemory;
-    VkBuffer indexBuffer;
-    VkDeviceMemory indexBufferMemory;
+    VkBuffer *vertexBuffer;
+    VkDeviceMemory *vertexBufferMemory;
+    VkBuffer *indexBuffer;
+    VkDeviceMemory *indexBufferMemory;
 } ShapeBuffers;
 
 typedef struct Vulkan Vulkan;
-
-void combineVerticesAndIndices(Vulkan *, uint32_t, ...);
 
 typedef uint64_t VkDeviceSize;
 typedef uint32_t VkFlags;
@@ -96,7 +94,7 @@ void createBuffer(VkDeviceSize, VkBufferUsageFlags, VkMemoryPropertyFlags,
 void createVertexBuffer(Vulkan *);
 
 void createVertexIndexBuffer(Vulkan *, void *, uint64_t, VkBuffer *,
-                             VkDeviceMemory *);
+                             VkDeviceMemory *, VkBufferUsageFlags);
 
 void createDepthResources(Vulkan *);
 

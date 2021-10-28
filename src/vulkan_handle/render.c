@@ -11,9 +11,10 @@ void createCommandPool(Vulkan *vulkan) {
     QueueFamilyIndices queueFamilyIndices = findQueueFamilies(
         vulkan->device.physicalDevice, vulkan->window.surface);
 
-    VkCommandPoolCreateInfo poolInfo = {};
-    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily;
+    VkCommandPoolCreateInfo poolInfo = {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+        .queueFamilyIndex = queueFamilyIndices.graphicsFamily,
+    };
 
     if (vkCreateCommandPool(vulkan->device.device, &poolInfo, NULL,
                             &vulkan->renderBuffers.commandPool) != VK_SUCCESS) {
@@ -26,11 +27,12 @@ void createCommandBuffers(Vulkan *vulkan) {
         malloc(vulkan->swapchain.swapChainImagesCount *
                sizeof(*vulkan->renderBuffers.commandBuffers));
 
-    VkCommandBufferAllocateInfo allocInfo = {};
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = vulkan->renderBuffers.commandPool;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandBufferCount = vulkan->swapchain.swapChainImagesCount;
+    VkCommandBufferAllocateInfo allocInfo = {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+        .commandPool = vulkan->renderBuffers.commandPool,
+        .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+        .commandBufferCount = vulkan->swapchain.swapChainImagesCount,
+    };
 
     if (vkAllocateCommandBuffers(vulkan->device.device, &allocInfo,
                                  vulkan->renderBuffers.commandBuffers) !=
@@ -41,19 +43,21 @@ void createCommandBuffers(Vulkan *vulkan) {
     int width, height;
     SDL_GetWindowSize(vulkan->window.win, &width, &height);
 
-    VkViewport viewport;
-    viewport.x = 0.0f;
-    viewport.y = 0.0f;
-    // viewport.width = window.width;
-    // viewport.height = window.height;
-    viewport.width = width;
-    viewport.height = height;
-    viewport.minDepth = 0.0f;
-    viewport.maxDepth = 1.0f;
+    VkViewport viewport = {
+        .x = 0.0f,
+        .y = 0.0f,
+        // .width = window.width,
+        // .height = window.height,
+        .width = width,
+        .height = height,
+        .minDepth = 0.0f,
+        .maxDepth = 1.0f,
+    };
 
-    VkRect2D scissor;
-    scissor.offset = (VkOffset2D){0, 0};
-    scissor.extent = (VkExtent2D){width, height};
+    VkRect2D scissor = {
+        .offset = (VkOffset2D){0, 0},
+        .extent = (VkExtent2D){width, height},
+    };
 
     for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
         VkCommandBufferBeginInfo beginInfo = {};
@@ -91,50 +95,56 @@ void createCommandBuffers(Vulkan *vulkan) {
                           VK_PIPELINE_BIND_POINT_GRAPHICS,
                           vulkan->graphicsPipeline.graphicsPipeline);
 
-        VkBuffer vertexBuffers[] = {vulkan->shapeBuffers.vertexBuffer};
-        VkDeviceSize offsets[] = {0};
+        // VkBuffer vertexBuffers[] = {vulkan->shapeBuffers.vertexBuffer};
+        // VkDeviceSize offsets[] = {0};
 
-        vkCmdBindVertexBuffers(vulkan->renderBuffers.commandBuffers[i], 0, 1,
-                               vertexBuffers, offsets);
+        // vkCmdBindVertexBuffers(vulkan->renderBuffers.commandBuffers[i], 0, 1,
+        //                        vertexBuffers, offsets);
 
-        vkCmdBindIndexBuffer(vulkan->renderBuffers.commandBuffers[i],
-                             vulkan->shapeBuffers.indexBuffer, 0,
-                             VK_INDEX_TYPE_UINT16);
+        // vkCmdBindIndexBuffer(vulkan->renderBuffers.commandBuffers[i],
+        //                      vulkan->shapeBuffers.indexBuffer, 0,
+        //                      VK_INDEX_TYPE_UINT16);
 
-        vkCmdBindDescriptorSets(vulkan->renderBuffers.commandBuffers[i],
-                                VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                vulkan->graphicsPipeline.pipelineLayout, 0, 1,
-                                &vulkan->descriptorSet.descriptorSets[i], 0,
-                                NULL);
+        // vkCmdBindDescriptorSets(vulkan->renderBuffers.commandBuffers[i],
+        //                         VK_PIPELINE_BIND_POINT_GRAPHICS,
+        //                         vulkan->graphicsPipeline.pipelineLayout, 0,
+        //                         1, &vulkan->descriptorSet.descriptorSets[i],
+        //                         0, NULL);
 
-        // vkCmdDraw(vulkan->renderBuffers.commandBuffers[i],
-        //           vulkan->shapes[vulkan->shapeCount].verticesCount, 1, 0,
-        // 0);
+        // // vkCmdDraw(vulkan->renderBuffers.commandBuffers[i],
+        // //           vulkan->shapes[vulkan->shapeCount].verticesCount, 1, 0,
+        // // 0);
 
-        vkCmdDrawIndexed(vulkan->renderBuffers.commandBuffers[i],
-                         vulkan->shapes[vulkan->shapeCount - 1].indicesCount, 1,
-                         0, 0, 0);
+        // vkCmdDrawIndexed(vulkan->renderBuffers.commandBuffers[i],
+        //                  vulkan->shapes[vulkan->shapeCount - 1].indicesCount,
+        //                  1, 0, 0, 0);
 
         //
 
-        // uint32_t indexCount = 0;
-        // for (uint32_t j = 0; j < vulkan->shapeCount; j++) {
-        //     uint32_t dynamicOffset = j * 256;
+        for (uint32_t j = 0; j < vulkan->shapeCount; j++) {
+            VkBuffer vertexBuffers[] = {vulkan->shapeBuffers.vertexBuffer[j]};
+            VkDeviceSize offsets[] = {0};
 
-        //     vkCmdBindDescriptorSets(vulkan->renderBuffers.commandBuffers[i],
-        //                             VK_PIPELINE_BIND_POINT_GRAPHICS,
-        //                             vulkan->graphicsPipeline.pipelineLayout,
-        //                             0, 1,
-        //                             &vulkan->descriptorSet.descriptorSets[i],
-        //                             1, &dynamicOffset);
-        //     // vkCmdDraw(vulkan->renderBuffers.commandBuffers[i],
-        //     //           vulkan->shapes[j].verticesCount, 1, indexCount, 0);
-        //     vkCmdDrawIndexed(vulkan->renderBuffers.commandBuffers[i],
-        //                      vulkan->shapes[j].indicesCount, 1, indexCount,
-        //                      0, 0);
+            vkCmdBindVertexBuffers(vulkan->renderBuffers.commandBuffers[i], 0,
+                                   1, vertexBuffers, offsets);
 
-        //     indexCount += vulkan->shapes[j].verticesCount;
-        // }
+            vkCmdBindIndexBuffer(vulkan->renderBuffers.commandBuffers[i],
+                                 vulkan->shapeBuffers.indexBuffer[j], 0,
+                                 VK_INDEX_TYPE_UINT16);
+
+            vkCmdBindDescriptorSets(vulkan->renderBuffers.commandBuffers[i],
+                                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                    vulkan->graphicsPipeline.pipelineLayout, 0,
+                                    1, &vulkan->descriptorSet.descriptorSets[i],
+                                    0, NULL);
+
+            // vkCmdDraw(vulkan->renderBuffers.commandBuffers[i],
+            //           vulkan->shapes[vulkan->shapeCount].verticesCount, 1, 0,
+            // 0);
+
+            vkCmdDrawIndexed(vulkan->renderBuffers.commandBuffers[i],
+                             vulkan->shapes[j].indicesCount, 1, 0, 0, 0);
+        }
 
         //
 
