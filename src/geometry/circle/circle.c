@@ -1,14 +1,15 @@
-#include "geometry/shpere/sphere.h"
-#include "geometry/geometry.h"
+#include "geometry/circle/circle.h"
 #include "vulkan_handle/memory.h"
 #include "vulkan_handle/vulkan_handle.h"
 #include <cglm/vec2.h>
 #include <cglm/vec3.h>
 #include <math.h>
+#include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 static inline void calculateIndices(Vulkan *vulkan, uint32_t sectorCount,
-                      uint32_t stackCount) {
+                                    uint32_t stackCount) {
     uint32_t k1, k2;
     for (uint32_t i = 0; i < stackCount; ++i) {
         k1 = i * (sectorCount + 1); // beginning of current stack
@@ -50,15 +51,12 @@ static inline void calculateIndices(Vulkan *vulkan, uint32_t sectorCount,
     }
 }
 
-void makeSphere(Vulkan *vulkan, uint32_t sectorCount, uint32_t stackCount,
-                float radius) {
+void makeCircle(Vulkan *vulkan, uint32_t sectorCount, float radius) {
 
-    uint32_t verticesCount = (2 * sectorCount) + (sectorCount * stackCount) + 1;
-
-    allocateVerticesAndIndices(vulkan, verticesCount, 0);
+    uint32_t stackCount = 2;
 
     float x, y, z, xy;                           // vertex position
-    float nx, ny, nz, lengthInv = 1.0f / radius; // vertex normal
+    float nx, ny, nz, lengthInv = 0.5f / radius; // vertex normal
     float s, t;                                  // vertex texCoord
 
     float sectorStep = 2 * GLM_PI / sectorCount;
@@ -74,6 +72,11 @@ void makeSphere(Vulkan *vulkan, uint32_t sectorCount, uint32_t stackCount,
         // the first and last vertices have same position and normal, but
         // different tex coords
         for (uint32_t j = 0; j <= sectorCount; ++j) {
+            vulkan->shapes[vulkan->shapeCount].vertices = realloc(
+                vulkan->shapes[vulkan->shapeCount].vertices,
+                (vulkan->shapes[vulkan->shapeCount].verticesCount + 4) *
+                    sizeof(*vulkan->shapes[vulkan->shapeCount].vertices));
+
             sectorAngle = j * sectorStep; // starting from 0 to 2pi
 
             // vertex position (x, y, z)
@@ -113,6 +116,8 @@ void makeSphere(Vulkan *vulkan, uint32_t sectorCount, uint32_t stackCount,
             vulkan->shapes[vulkan->shapeCount].verticesCount++;
         }
     }
+
+    printf("%u\n", vulkan->shapes[vulkan->shapeCount].verticesCount);
 
     calculateIndices(vulkan, sectorCount, stackCount);
 }

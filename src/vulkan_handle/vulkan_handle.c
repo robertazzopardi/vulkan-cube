@@ -107,7 +107,8 @@ void initVulkan(Vulkan *vulkan) {
     createTextureSampler(vulkan);
 
     // generateShape(vulkan, CUBE);
-    generateShape(vulkan, SPHERE);
+    // generateShape(vulkan, SPHERE);
+    generateShape(vulkan, CIRCLE);
 
     vulkan->shapeBuffers.vertexBuffer =
         malloc(vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.vertexBuffer));

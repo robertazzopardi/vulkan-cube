@@ -8,6 +8,7 @@ typedef enum ShapeType {
     SPHERE,
     ICOSPHERE,
     OCTASPHERE,
+    CIRCLE,
     PLAIN,
 } ShapeType;
 

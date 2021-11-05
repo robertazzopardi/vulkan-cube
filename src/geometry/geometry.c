@@ -1,5 +1,6 @@
 #include "geometry/geometry.h"
 #include "error_handle.h"
+#include "geometry/circle/circle.h"
 #include "geometry/cube/cube.h"
 #include "geometry/shpere/sphere.h"
 #include "geometry/shpere/trisphere.h"
@@ -220,11 +221,14 @@ inline void generateShape(Vulkan *vulkan, ShapeType shapeType) {
         makeCube(vulkan);
         break;
     case SPHERE:
-        makeSphere(vulkan, 40, 40, 0.7);
+        makeSphere(vulkan, 20, 20, 0.7);
         break;
     case ICOSPHERE:
     case OCTASPHERE:
         makeTriSphere(vulkan, shapeType, 3);
+        break;
+    case CIRCLE:
+        makeCircle(vulkan, 2, 1);
         break;
     case PLAIN:
         break;
