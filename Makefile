@@ -39,6 +39,8 @@ INCLUDE	:= include
 # define lib directory
 LIB		:= lib
 
+BUILD	:= build
+
 # define examples directory
 EXAMPLES := examples
 
@@ -75,7 +77,11 @@ FRAG_SHADERS		:= $(wildcard $(patsubst %,%/*.frag, $(SOURCEDIRS)))
 VERT_SHADERS		:= $(wildcard $(patsubst %,%/*.vert, $(SOURCEDIRS)))
 
 # define the C object files
-OBJECTS		:= $(SOURCES:.c=.o)
+# OBJECTS		:= $(SOURCES:.c=.o)
+
+# define the C object files and their output
+BUILDOBJECTS	:= $(SOURCES:.c=.o)
+BUILDOBJECTSOUT 	:= $(subst src,build,$(SOURCES:.c=.o))
 
 #
 # The following part of the makefile is generic; it can be used to
@@ -92,15 +98,16 @@ all: compile_shaders $(OUTPUT) $(LIB_NAME)
 $(OUTPUT):
 	$(MD) $(OUTPUT)
 
-$(LIB_NAME): $(OBJECTS)
-	$(CC) $(CFLAGS) $(INCLUDES) -o $(OUTPUTLIB) $(OBJECTS) $(LFLAGS) $(LIBS)
+$(LIB_NAME): $(BUILDOBJECTS)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $(OUTPUTLIB) $(BUILDOBJECTSOUT) $(LFLAGS) $(LIBS)
 
 # this is a suffix replacement rule for building .o's from .c's
 # it uses automatic variables $<: the name of the prerequisite of
 # the rule(a .c file) and $@: the name of the target of the rule (a .o file)
 # (see the gnu make manual section about automatic variables)
+# $(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 .c.o:
-	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
+	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $(subst src,build,$@)
 
 clean_shaders:
 	$(RM) $(wildcard $(patsubst %,%/*.spv, $(SOURCEDIRS)))
@@ -108,7 +115,8 @@ clean_shaders:
 .PHONY: clean
 clean: clean_shaders
 	$(RM) $(OUTPUTLIB)
-	$(RM) $(call FIXPATH,$(OBJECTS))
+	$(RM) $(OUTPUTMAIN)
+	$(RM) $(call FIXPATH,$(BUILDOBJECTSOUT))
 	$(RM) *.plist
 	@echo Cleanup complete!
 
