@@ -197,6 +197,8 @@ void createTextureSampler(Vulkan *vulkan) {
 void createTextureImage(Vulkan *vulkan) {
     // SDL_Surface *image = IMG_Load("/Users/rob/Downloads/2k_saturn.jpg");
     SDL_Surface *image = IMG_Load("/Users/rob/Downloads/2k_jupiter.jpg");
+    // SDL_Surface *image =
+    // IMG_Load("/Users/rob/Downloads/2k_saturn_ring_alpha.jpg");
 
     // convert to desired format
     image = SDL_ConvertSurfaceFormat(image, SDL_PIXELFORMAT_ABGR8888, 0);

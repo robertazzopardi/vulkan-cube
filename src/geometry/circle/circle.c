@@ -1,6 +1,7 @@
 #include "geometry/circle/circle.h"
 #include "vulkan_handle/memory.h"
 #include "vulkan_handle/vulkan_handle.h"
+#include <cglm/mat3.h>
 #include <cglm/vec2.h>
 #include <cglm/vec3.h>
 #include <math.h>
@@ -53,30 +54,47 @@ static inline void calculateIndices(Vulkan *vulkan, uint32_t sectorCount,
 
 void makeCircle(Vulkan *vulkan, uint32_t sectorCount, float radius) {
 
+    vec3 rotZ[] = {
+        {cos(GLM_PI_2f), -sin(GLM_PI_2f), 0.0f},
+        {sin(GLM_PI_2f), cos(GLM_PI_2f), 0.0f},
+        {0.0f, 0.0f, 1.0f},
+    };
+    vec3 rotY[] = {
+        {cos(GLM_PI_2f), 0.0f, sin(GLM_PI_2f)},
+        {0.0f, 1.0f, 0.0f},
+        {-sin(GLM_PI_2f), 0.0f, cos(GLM_PI_2f)},
+    };
+    vec3 rotX[] = {
+        {1.0f, 0.0f, 0.0f},
+        {0.0f, cos(GLM_PI_2), -sin(GLM_PI_2)},
+        {0.0f, sin(GLM_PI_2), cos(GLM_PI_2)},
+    };
+
     uint32_t stackCount = 2;
 
     float x, y, z, xy;                           // vertex position
     float nx, ny, nz, lengthInv = 0.5f / radius; // vertex normal
     float s, t;                                  // vertex texCoord
 
-    float sectorStep = 2 * GLM_PI / sectorCount;
-    float stackStep = GLM_PI / stackCount;
+    float sectorStep = 2 * GLM_PIf / sectorCount;
+    float stackStep = GLM_PIf / stackCount;
     float sectorAngle, stackAngle;
 
+    vulkan->shapes[vulkan->shapeCount].vertices =
+        malloc((vulkan->shapes[vulkan->shapeCount].verticesCount +
+                (sectorCount + 1) * (stackCount + 1)) *
+               sizeof(*vulkan->shapes[vulkan->shapeCount].vertices));
+
     for (uint32_t i = 0; i <= stackCount; ++i) {
-        stackAngle = GLM_PI / 2 - i * stackStep; // starting from pi/2 to -pi/2
-        xy = radius * cosf(stackAngle);          // r * cos(u)
-        z = radius * sinf(stackAngle);           // r * sin(u)
+        stackAngle = GLM_PI_2f - i * stackStep; // starting from pi/2 to -pi/2
+        xy = radius * cosf(stackAngle);         // r * cos(u)
+        // z = radius * sinf(stackAngle);          // r * sin(u)
+        z = 0.0f;
 
         // add (sectorCount+1) vertices per stack
         // the first and last vertices have same position and normal, but
         // different tex coords
         for (uint32_t j = 0; j <= sectorCount; ++j) {
-            vulkan->shapes[vulkan->shapeCount].vertices = realloc(
-                vulkan->shapes[vulkan->shapeCount].vertices,
-                (vulkan->shapes[vulkan->shapeCount].verticesCount + 4) *
-                    sizeof(*vulkan->shapes[vulkan->shapeCount].vertices));
-
             sectorAngle = j * sectorStep; // starting from 0 to 2pi
 
             // vertex position (x, y, z)
@@ -116,8 +134,6 @@ void makeCircle(Vulkan *vulkan, uint32_t sectorCount, float radius) {
             vulkan->shapes[vulkan->shapeCount].verticesCount++;
         }
     }
-
-    printf("%u\n", vulkan->shapes[vulkan->shapeCount].verticesCount);
 
     calculateIndices(vulkan, sectorCount, stackCount);
 }

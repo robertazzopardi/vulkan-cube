@@ -228,7 +228,7 @@ inline void generateShape(Vulkan *vulkan, ShapeType shapeType) {
         makeTriSphere(vulkan, shapeType, 3);
         break;
     case CIRCLE:
-        makeCircle(vulkan, 2, 1);
+        makeCircle(vulkan, 20, 1);
         break;
     case PLAIN:
         break;

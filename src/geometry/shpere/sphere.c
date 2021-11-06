@@ -8,7 +8,7 @@
 #include <stdlib.h>
 
 static inline void calculateIndices(Vulkan *vulkan, uint32_t sectorCount,
-                      uint32_t stackCount) {
+                                    uint32_t stackCount) {
     uint32_t k1, k2;
     for (uint32_t i = 0; i < stackCount; ++i) {
         k1 = i * (sectorCount + 1); // beginning of current stack
@@ -53,22 +53,23 @@ static inline void calculateIndices(Vulkan *vulkan, uint32_t sectorCount,
 void makeSphere(Vulkan *vulkan, uint32_t sectorCount, uint32_t stackCount,
                 float radius) {
 
-    uint32_t verticesCount = (2 * sectorCount) + (sectorCount * stackCount) + 1;
-
-    allocateVerticesAndIndices(vulkan, verticesCount, 0);
-
     float x, y, z, xy;                           // vertex position
-    float nx, ny, nz, lengthInv = 1.0f / radius; // vertex normal
+    float nx, ny, nz, lengthInv = 0.5f / radius; // vertex normal
     float s, t;                                  // vertex texCoord
 
-    float sectorStep = 2 * GLM_PI / sectorCount;
-    float stackStep = GLM_PI / stackCount;
+    float sectorStep = 2 * GLM_PIf / sectorCount;
+    float stackStep = GLM_PIf / stackCount;
     float sectorAngle, stackAngle;
 
+    vulkan->shapes[vulkan->shapeCount].vertices =
+        malloc((vulkan->shapes[vulkan->shapeCount].verticesCount +
+                (sectorCount + 1) * (stackCount + 1)) *
+               sizeof(*vulkan->shapes[vulkan->shapeCount].vertices));
+
     for (uint32_t i = 0; i <= stackCount; ++i) {
-        stackAngle = GLM_PI / 2 - i * stackStep; // starting from pi/2 to -pi/2
-        xy = radius * cosf(stackAngle);          // r * cos(u)
-        z = radius * sinf(stackAngle);           // r * sin(u)
+        stackAngle = GLM_PI_2f - i * stackStep; // starting from pi/2 to -pi/2
+        xy = radius * cosf(stackAngle);           // r * cos(u)
+        z = radius * sinf(stackAngle);            // r * sin(u)
 
         // add (sectorCount+1) vertices per stack
         // the first and last vertices have same position and normal, but
