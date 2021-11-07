@@ -15,15 +15,11 @@ typedef struct Texture {
     VkDeviceMemory textureImageMemory;
     VkImageView textureImageView;
     VkSampler textureSampler;
-
-    VkImage colorImage;
-    VkDeviceMemory colorImageMemory;
-    VkImageView colorImageView;
 } Texture;
 
 typedef struct Vulkan Vulkan;
 
-void createTextureImage(Vulkan *);
+void createTextureImage(Vulkan *, const char *);
 
 void createTextureImageView(Vulkan *);
 

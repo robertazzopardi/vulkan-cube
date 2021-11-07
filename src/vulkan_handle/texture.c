@@ -164,10 +164,11 @@ void generateMipmaps(Vulkan *vulkan, VkImage image, VkFormat imageFormat,
 }
 
 void createTextureImageView(Vulkan *vulkan) {
-    vulkan->texture.textureImageView =
-        createImageView(vulkan->device.device, vulkan->texture.textureImage,
+    vulkan->shapes[vulkan->shapeCount].texture.textureImageView =
+        createImageView(vulkan->device.device,
+                        vulkan->shapes[vulkan->shapeCount].texture.textureImage,
                         VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT,
-                        vulkan->texture.mipLevels);
+                        vulkan->shapes[vulkan->shapeCount].texture.mipLevels);
 }
 
 void createTextureSampler(Vulkan *vulkan) {
@@ -189,28 +190,31 @@ void createTextureSampler(Vulkan *vulkan) {
         .compareOp = VK_COMPARE_OP_ALWAYS,
         .mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
         .minLod = 0.0f, // Optional
-        .maxLod = (float)vulkan->texture.mipLevels,
+        .maxLod = (float)vulkan->shapes[vulkan->shapeCount].texture.mipLevels,
         .mipLodBias = 0.0f, // Optional
     };
 
-    if (vkCreateSampler(vulkan->device.device, &samplerInfo, NULL,
-                        &vulkan->texture.textureSampler) != VK_SUCCESS) {
+    if (vkCreateSampler(
+            vulkan->device.device, &samplerInfo, NULL,
+            &vulkan->shapes[vulkan->shapeCount].texture.textureSampler) !=
+        VK_SUCCESS) {
         THROW_ERROR("failed to create texture sampler!\n");
     }
 }
 
-void createTextureImage(Vulkan *vulkan) {
+void createTextureImage(Vulkan *vulkan, const char *fileName) {
     // SDL_Surface *image = IMG_Load("/Users/rob/Downloads/2k_saturn.jpg");
     // SDL_Surface *image = IMG_Load("/Users/rob/Downloads/2k_jupiter.jpg");
-    SDL_Surface *image =
-        IMG_Load("/Users/rob/Downloads/2k_saturn_ring_alpha.png");
+    // SDL_Surface *image =
+    //     IMG_Load("/Users/rob/Downloads/2k_saturn_ring_alpha.png");
+    SDL_Surface *image = IMG_Load(fileName);
 
     // convert to desired format
     image = SDL_ConvertSurfaceFormat(image, SDL_PIXELFORMAT_ABGR8888, 0);
 
     VkDeviceSize imageSize = image->w * image->h * image->format->BytesPerPixel;
 
-    vulkan->texture.mipLevels =
+    vulkan->shapes[vulkan->shapeCount].texture.mipLevels =
         (uint32_t)(floor(log2(glm_max(image->w, image->h)))) + 1;
 
     if (!image) {
@@ -234,26 +238,31 @@ void createTextureImage(Vulkan *vulkan) {
               image->pixels);
 
     createImage(
-        image->w, image->h, vulkan->texture.mipLevels, VK_SAMPLE_COUNT_1_BIT,
-        VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL,
+        image->w, image->h,
+        vulkan->shapes[vulkan->shapeCount].texture.mipLevels,
+        VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
             VK_IMAGE_USAGE_SAMPLED_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vulkan,
-        &vulkan->texture.textureImage, &vulkan->texture.textureImageMemory);
+        &vulkan->shapes[vulkan->shapeCount].texture.textureImage,
+        &vulkan->shapes[vulkan->shapeCount].texture.textureImageMemory);
 
-    transitionImageLayout(vulkan, vulkan->texture.textureImage,
-                          VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED,
-                          VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                          vulkan->texture.mipLevels);
-    copyBufferToImage(vulkan, stagingBuffer, vulkan->texture.textureImage,
+    transitionImageLayout(
+        vulkan, vulkan->shapes[vulkan->shapeCount].texture.textureImage,
+        VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        vulkan->shapes[vulkan->shapeCount].texture.mipLevels);
+    copyBufferToImage(vulkan, stagingBuffer,
+                      vulkan->shapes[vulkan->shapeCount].texture.textureImage,
                       (uint32_t)image->w, (uint32_t)image->h);
 
     vkDestroyBuffer(vulkan->device.device, stagingBuffer, NULL);
     vkFreeMemory(vulkan->device.device, stagingBufferMemory, NULL);
 
-    generateMipmaps(vulkan, vulkan->texture.textureImage,
+    generateMipmaps(vulkan,
+                    vulkan->shapes[vulkan->shapeCount].texture.textureImage,
                     VK_FORMAT_R8G8B8A8_SRGB, image->w, image->h,
-                    vulkan->texture.mipLevels);
+                    vulkan->shapes[vulkan->shapeCount].texture.mipLevels);
 
     SDL_FreeSurface(image);
 }
@@ -348,12 +357,11 @@ void createColorResources(Vulkan *vulkan) {
                     VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
                 VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT,
                 // VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                vulkan, &vulkan->texture.colorImage,
-                &vulkan->texture.colorImageMemory);
+                vulkan, &vulkan->colorImage, &vulkan->colorImageMemory);
 
-    vulkan->texture.colorImageView =
-        createImageView(vulkan->device.device, vulkan->texture.colorImage,
-                        colorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+    vulkan->colorImageView =
+        createImageView(vulkan->device.device, vulkan->colorImage, colorFormat,
+                        VK_IMAGE_ASPECT_COLOR_BIT, 1);
 }
 
 VkCommandBuffer beginSingleTimeCommands(Vulkan *vulkan) {

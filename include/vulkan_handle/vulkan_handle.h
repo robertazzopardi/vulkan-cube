@@ -28,8 +28,12 @@ typedef struct Vulkan {
     Depth depth;
     UniformBufferObject ubo;
     DescriptorSet descriptorSet;
-    Texture texture;
+    // Texture texture;
     Window window;
+
+    VkImage colorImage;
+    VkDeviceMemory colorImageMemory;
+    VkImageView colorImageView;
 } Vulkan;
 
 extern Vulkan initialise();

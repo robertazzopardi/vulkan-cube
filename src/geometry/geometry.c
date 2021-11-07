@@ -115,7 +115,7 @@ void createFramebuffers(Vulkan *vulkan) {
                sizeof(*vulkan->renderBuffers.swapChainFramebuffers));
 
     for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
-        VkImageView attachments[] = {vulkan->texture.colorImageView,
+        VkImageView attachments[] = {vulkan->colorImageView,
                                      vulkan->depth.depthImageView,
                                      vulkan->swapchain.swapChainImageViews[i]};
 
@@ -236,6 +236,14 @@ inline void generateShape(Vulkan *vulkan, ShapeType shapeType) {
         break;
     }
 
+    //
+
+    createTextureImage(vulkan, "/Users/rob/Downloads/2k_saturn_ring_alpha.png");
+    createTextureImageView(vulkan);
+    createTextureSampler(vulkan);
+
+    //
+
     vulkan->shapeCount++;
 
     vulkan->shapeBuffers.vertexBuffer =
@@ -263,4 +271,6 @@ inline void generateShape(Vulkan *vulkan, ShapeType shapeType) {
                                 VK_BUFFER_USAGE_TRANSFER_DST_BIT |
                                     VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
     }
+
+    //
 }

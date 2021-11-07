@@ -207,10 +207,10 @@ void createSwapChain(Vulkan *vulkan) {
 }
 
 void cleanupSwapChain(Vulkan *vulkan) {
-    vkDestroyImageView(vulkan->device.device, vulkan->texture.colorImageView,
+    vkDestroyImageView(vulkan->device.device, vulkan->colorImageView,
                        NULL);
-    vkDestroyImage(vulkan->device.device, vulkan->texture.colorImage, NULL);
-    vkFreeMemory(vulkan->device.device, vulkan->texture.colorImageMemory, NULL);
+    vkDestroyImage(vulkan->device.device, vulkan->colorImage, NULL);
+    vkFreeMemory(vulkan->device.device, vulkan->colorImageMemory, NULL);
 
     vkDestroyImageView(vulkan->device.device, vulkan->depth.depthImageView,
                        NULL);

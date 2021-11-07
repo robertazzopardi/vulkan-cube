@@ -100,19 +100,13 @@ void initVulkan(Vulkan *vulkan) {
 
     createCommandPool(vulkan);
 
-    createTextureImage(vulkan);
-
-    createTextureImageView(vulkan);
-
-    createTextureSampler(vulkan);
+    createDescriptorPool(vulkan);
 
     // generateShape(vulkan, CUBE);
     // generateShape(vulkan, SPHERE);
     generateShape(vulkan, CIRCLE);
 
     createUniformBuffers(vulkan);
-
-    createDescriptorPool(vulkan);
 
     createDescriptorSets(vulkan);
 
@@ -126,14 +120,16 @@ void cleanUpVulkan(Vulkan *vulkan) {
 
     cleanupSwapChain(vulkan);
 
-    vkDestroySampler(vulkan->device.device, vulkan->texture.textureSampler,
-                     NULL);
-    vkDestroyImageView(vulkan->device.device, vulkan->texture.textureImageView,
-                       NULL);
+    // vkDestroySampler(vulkan->device.device, vulkan->texture.textureSampler,
+    //                  NULL);
+    // vkDestroyImageView(vulkan->device.device,
+    // vulkan->texture.textureImageView,
+    //                    NULL);
 
-    vkDestroyImage(vulkan->device.device, vulkan->texture.textureImage, NULL);
-    vkFreeMemory(vulkan->device.device, vulkan->texture.textureImageMemory,
-                 NULL);
+    // vkDestroyImage(vulkan->device.device, vulkan->texture.textureImage,
+    // NULL); vkFreeMemory(vulkan->device.device,
+    // vulkan->texture.textureImageMemory,
+    //              NULL);
 
     vkDestroyDescriptorSetLayout(
         vulkan->device.device, vulkan->descriptorSet.descriptorSetLayout, NULL);
@@ -148,6 +144,18 @@ void cleanUpVulkan(Vulkan *vulkan) {
     }
 
     for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
+        vkDestroySampler(vulkan->device.device,
+                         vulkan->shapes[i].texture.textureSampler, NULL);
+        vkDestroyImageView(vulkan->device.device,
+                           vulkan->shapes[i].texture.textureImageView, NULL);
+
+        vkDestroyImage(vulkan->device.device,
+                       vulkan->shapes[i].texture.textureImage, NULL);
+        vkFreeMemory(vulkan->device.device,
+                     vulkan->shapes[i].texture.textureImageMemory, NULL);
+
+        //
+
         vkDestroyBuffer(vulkan->device.device,
                         vulkan->shapeBuffers.indexBuffer[i], NULL);
         vkFreeMemory(vulkan->device.device,

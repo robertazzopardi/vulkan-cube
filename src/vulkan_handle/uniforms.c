@@ -57,8 +57,7 @@ static inline VkWriteDescriptorSet createWriteDescriptorInfo(
 }
 
 void createDescriptorSets(Vulkan *vulkan) {
-    VkDescriptorSetLayout *layouts =
-        malloc(vulkan->swapchain.swapChainImagesCount * sizeof(*layouts));
+    VkDescriptorSetLayout layouts[vulkan->swapchain.swapChainImagesCount];
     for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
         layouts[i] = vulkan->descriptorSet.descriptorSetLayout;
     }
@@ -88,8 +87,10 @@ void createDescriptorSets(Vulkan *vulkan) {
 
         VkDescriptorImageInfo imageInfo = {
             .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-            .imageView = vulkan->texture.textureImageView,
-            .sampler = vulkan->texture.textureSampler,
+            .imageView =
+                vulkan->shapes[vulkan->shapeCount - 1].texture.textureImageView,
+            .sampler =
+                vulkan->shapes[vulkan->shapeCount - 1].texture.textureSampler,
         };
 
         VkWriteDescriptorSet descriptorWrites[] = {
@@ -104,8 +105,6 @@ void createDescriptorSets(Vulkan *vulkan) {
         vkUpdateDescriptorSets(vulkan->device.device, SIZEOF(descriptorWrites),
                                descriptorWrites, 0, NULL);
     }
-
-    freeMem(1, layouts);
 }
 
 static inline VkDescriptorSetLayoutBinding

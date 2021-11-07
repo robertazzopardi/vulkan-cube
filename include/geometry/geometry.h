@@ -1,6 +1,7 @@
 #ifndef INCLUDE_GEOMETRY_GEOMETRY
 #define INCLUDE_GEOMETRY_GEOMETRY
 
+#include "vulkan_handle/texture.h"
 #include <cglm/types.h>
 
 typedef enum ShapeType {
@@ -90,6 +91,8 @@ typedef struct Shape {
     uint16_t indicesCount;
 
     uint32_t index;
+
+    Texture texture;
 } Shape;
 
 typedef struct VkBuffer_T *VkBuffer;
