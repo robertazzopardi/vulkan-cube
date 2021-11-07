@@ -33,6 +33,27 @@ typedef enum ShapeType {
 #define VEC_4(num)                                                             \
     { num, num, num, num }
 
+#define MAT3_ROT_Z                                                             \
+    ((vec3 *){                                                                 \
+        {cos(GLM_PI_2f), -sin(GLM_PI_2f), 0.0f},                               \
+        {sin(GLM_PI_2f), cos(GLM_PI_2f), 0.0f},                                \
+        {0.0f, 0.0f, 1.0f},                                                    \
+    })
+
+#define MAT3_ROT_Y                                                             \
+    ((vec3 *){                                                                 \
+        {cos(GLM_PI_2f), 0.0f, sin(GLM_PI_2f)},                                \
+        {0.0f, 1.0f, 0.0f},                                                    \
+        {-sin(GLM_PI_2f), 0.0f, cos(GLM_PI_2f)},                               \
+    })
+
+#define MAT3_ROT_X                                                             \
+    ((vec3 *){                                                                 \
+        {1.0f, 0.0f, 0.0f},                                                    \
+        {0.0f, cos(GLM_PI_2), -sin(GLM_PI_2)},                                 \
+        {0.0f, sin(GLM_PI_2), cos(GLM_PI_2)},                                  \
+    })
+
 typedef struct Vertex {
     vec3 pos;
     vec3 colour;

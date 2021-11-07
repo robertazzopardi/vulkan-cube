@@ -65,6 +65,7 @@ analysis/**
 data
 output
 lib
+build
 
 bin/main
 valgrind-out.txt

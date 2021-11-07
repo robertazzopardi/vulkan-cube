@@ -1,4 +1,5 @@
 #include "geometry/shpere/sphere.h"
+#include "circle/circle.h"
 #include "geometry/geometry.h"
 #include "vulkan_handle/memory.h"
 #include "vulkan_handle/vulkan_handle.h"
@@ -6,49 +7,6 @@
 #include <cglm/vec3.h>
 #include <math.h>
 #include <stdlib.h>
-
-static inline void calculateIndices(Vulkan *vulkan, uint32_t sectorCount,
-                                    uint32_t stackCount) {
-    uint32_t k1, k2;
-    for (uint32_t i = 0; i < stackCount; ++i) {
-        k1 = i * (sectorCount + 1); // beginning of current stack
-        k2 = k1 + sectorCount + 1;  // beginning of next stack
-
-        for (uint32_t j = 0; j < sectorCount; ++j, ++k1, ++k2) {
-            // 2 triangles per sector excluding first and last stacks
-            // k1 => k2 => k1+1
-            if (i != 0) {
-                vulkan->shapes[vulkan->shapeCount].indices = realloc(
-                    vulkan->shapes[vulkan->shapeCount].indices,
-                    (vulkan->shapes[vulkan->shapeCount].indicesCount + 3) *
-                        sizeof(*vulkan->shapes[vulkan->shapeCount].indices));
-                vulkan->shapes[vulkan->shapeCount].indices
-                    [vulkan->shapes[vulkan->shapeCount].indicesCount++] = k1;
-                vulkan->shapes[vulkan->shapeCount].indices
-                    [vulkan->shapes[vulkan->shapeCount].indicesCount++] = k2;
-                vulkan->shapes[vulkan->shapeCount]
-                    .indices[vulkan->shapes[vulkan->shapeCount]
-                                 .indicesCount++] = k1 + 1;
-            }
-
-            // k1+1 => k2 => k2+1
-            if (i != (stackCount - 1)) {
-                vulkan->shapes[vulkan->shapeCount].indices = realloc(
-                    vulkan->shapes[vulkan->shapeCount].indices,
-                    (vulkan->shapes[vulkan->shapeCount].indicesCount + 3) *
-                        sizeof(*vulkan->shapes[vulkan->shapeCount].indices));
-                vulkan->shapes[vulkan->shapeCount]
-                    .indices[vulkan->shapes[vulkan->shapeCount]
-                                 .indicesCount++] = k1 + 1;
-                vulkan->shapes[vulkan->shapeCount].indices
-                    [vulkan->shapes[vulkan->shapeCount].indicesCount++] = k2;
-                vulkan->shapes[vulkan->shapeCount]
-                    .indices[vulkan->shapes[vulkan->shapeCount]
-                                 .indicesCount++] = k2 + 1;
-            }
-        }
-    }
-}
 
 void makeSphere(Vulkan *vulkan, uint32_t sectorCount, uint32_t stackCount,
                 float radius) {
@@ -68,8 +26,8 @@ void makeSphere(Vulkan *vulkan, uint32_t sectorCount, uint32_t stackCount,
 
     for (uint32_t i = 0; i <= stackCount; ++i) {
         stackAngle = GLM_PI_2f - i * stackStep; // starting from pi/2 to -pi/2
-        xy = radius * cosf(stackAngle);           // r * cos(u)
-        z = radius * sinf(stackAngle);            // r * sin(u)
+        xy = radius * cosf(stackAngle);         // r * cos(u)
+        z = radius * sinf(stackAngle);          // r * sin(u)
 
         // add (sectorCount+1) vertices per stack
         // the first and last vertices have same position and normal, but
@@ -115,5 +73,6 @@ void makeSphere(Vulkan *vulkan, uint32_t sectorCount, uint32_t stackCount,
         }
     }
 
-    calculateIndices(vulkan, sectorCount, stackCount);
+    calculateIndices(&vulkan->shapes[vulkan->shapeCount], sectorCount,
+                     stackCount);
 }

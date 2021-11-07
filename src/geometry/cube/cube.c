@@ -74,6 +74,5 @@ void makeCube(Vulkan *vulkan) {
 
     memcpy(vulkan->shapes[vulkan->shapeCount].indices, indices,
            SIZEOF(indices) * sizeof(*indices));
-    // vulkan->shapes[vulkan->shapeCount].indices = indices;
     vulkan->shapes[vulkan->shapeCount].indicesCount = SIZEOF(indices);
 }

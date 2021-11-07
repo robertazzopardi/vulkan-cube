@@ -1,4 +1,5 @@
 #include "geometry/circle/circle.h"
+#include "geometry/geometry.h"
 #include "vulkan_handle/memory.h"
 #include "vulkan_handle/vulkan_handle.h"
 #include <cglm/mat3.h>
@@ -9,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static inline void calculateIndices(Vulkan *vulkan, uint32_t sectorCount,
+inline void calculateIndices(Shape *shape, uint32_t sectorCount,
                                     uint32_t stackCount) {
     uint32_t k1, k2;
     for (uint32_t i = 0; i < stackCount; ++i) {
@@ -20,56 +21,28 @@ static inline void calculateIndices(Vulkan *vulkan, uint32_t sectorCount,
             // 2 triangles per sector excluding first and last stacks
             // k1 => k2 => k1+1
             if (i != 0) {
-                vulkan->shapes[vulkan->shapeCount].indices = realloc(
-                    vulkan->shapes[vulkan->shapeCount].indices,
-                    (vulkan->shapes[vulkan->shapeCount].indicesCount + 3) *
-                        sizeof(*vulkan->shapes[vulkan->shapeCount].indices));
-                vulkan->shapes[vulkan->shapeCount].indices
-                    [vulkan->shapes[vulkan->shapeCount].indicesCount++] = k1;
-                vulkan->shapes[vulkan->shapeCount].indices
-                    [vulkan->shapes[vulkan->shapeCount].indicesCount++] = k2;
-                vulkan->shapes[vulkan->shapeCount]
-                    .indices[vulkan->shapes[vulkan->shapeCount]
-                                 .indicesCount++] = k1 + 1;
+                shape->indices =
+                    realloc(shape->indices, (shape->indicesCount + 3) *
+                                                sizeof(*shape->indices));
+                shape->indices[shape->indicesCount++] = k1;
+                shape->indices[shape->indicesCount++] = k2;
+                shape->indices[shape->indicesCount++] = k1 + 1;
             }
 
             // k1+1 => k2 => k2+1
             if (i != (stackCount - 1)) {
-                vulkan->shapes[vulkan->shapeCount].indices = realloc(
-                    vulkan->shapes[vulkan->shapeCount].indices,
-                    (vulkan->shapes[vulkan->shapeCount].indicesCount + 3) *
-                        sizeof(*vulkan->shapes[vulkan->shapeCount].indices));
-                vulkan->shapes[vulkan->shapeCount]
-                    .indices[vulkan->shapes[vulkan->shapeCount]
-                                 .indicesCount++] = k1 + 1;
-                vulkan->shapes[vulkan->shapeCount].indices
-                    [vulkan->shapes[vulkan->shapeCount].indicesCount++] = k2;
-                vulkan->shapes[vulkan->shapeCount]
-                    .indices[vulkan->shapes[vulkan->shapeCount]
-                                 .indicesCount++] = k2 + 1;
+                shape->indices =
+                    realloc(shape->indices, (shape->indicesCount + 3) *
+                                                sizeof(*shape->indices));
+                shape->indices[shape->indicesCount++] = k1 + 1;
+                shape->indices[shape->indicesCount++] = k2;
+                shape->indices[shape->indicesCount++] = k2 + 1;
             }
         }
     }
 }
 
 void makeCircle(Vulkan *vulkan, uint32_t sectorCount, float radius) {
-
-    vec3 rotZ[] = {
-        {cos(GLM_PI_2f), -sin(GLM_PI_2f), 0.0f},
-        {sin(GLM_PI_2f), cos(GLM_PI_2f), 0.0f},
-        {0.0f, 0.0f, 1.0f},
-    };
-    vec3 rotY[] = {
-        {cos(GLM_PI_2f), 0.0f, sin(GLM_PI_2f)},
-        {0.0f, 1.0f, 0.0f},
-        {-sin(GLM_PI_2f), 0.0f, cos(GLM_PI_2f)},
-    };
-    vec3 rotX[] = {
-        {1.0f, 0.0f, 0.0f},
-        {0.0f, cos(GLM_PI_2), -sin(GLM_PI_2)},
-        {0.0f, sin(GLM_PI_2), cos(GLM_PI_2)},
-    };
-
     uint32_t stackCount = 2;
 
     float x, y, z, xy;                           // vertex position
@@ -120,7 +93,7 @@ void makeCircle(Vulkan *vulkan, uint32_t sectorCount, float radius) {
             s = (float)j / sectorCount;
             t = (float)i / stackCount;
             glm_vec2_copy(
-                (vec2){s, t},
+                (vec2){t, s},
                 vulkan->shapes[vulkan->shapeCount]
                     .vertices[vulkan->shapes[vulkan->shapeCount].verticesCount]
                     .texCoord);
@@ -135,5 +108,6 @@ void makeCircle(Vulkan *vulkan, uint32_t sectorCount, float radius) {
         }
     }
 
-    calculateIndices(vulkan, sectorCount, stackCount);
+    calculateIndices(&vulkan->shapes[vulkan->shapeCount], sectorCount,
+                     stackCount);
 }
