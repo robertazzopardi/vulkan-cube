@@ -100,6 +100,32 @@ void initVulkan(Vulkan *vulkan) {
     generateShape(vulkan, CIRCLE,
                   "/Users/rob/Downloads/2k_saturn_ring_alpha.png");
 
+    vulkan->shapeBuffers.vertexBuffer =
+        malloc(vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.vertexBuffer));
+    vulkan->shapeBuffers.vertexBufferMemory = malloc(
+        vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.vertexBufferMemory));
+    vulkan->shapeBuffers.indexBuffer =
+        malloc(vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.indexBuffer));
+    vulkan->shapeBuffers.indexBufferMemory = malloc(
+        vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.indexBufferMemory));
+
+    for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
+        createVertexIndexBuffer(vulkan, vulkan->shapes[i].vertices,
+                                sizeof(*vulkan->shapes[i].vertices) *
+                                    vulkan->shapes[i].verticesCount,
+                                &vulkan->shapeBuffers.vertexBuffer[i],
+                                &vulkan->shapeBuffers.vertexBufferMemory[i],
+                                VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+                                    VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+        createVertexIndexBuffer(vulkan, vulkan->shapes[i].indices,
+                                sizeof(*vulkan->shapes[i].indices) *
+                                    vulkan->shapes[i].indicesCount,
+                                &vulkan->shapeBuffers.indexBuffer[i],
+                                &vulkan->shapeBuffers.indexBufferMemory[i],
+                                VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+                                    VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+    }
+
     for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
         createDescriptorSetLayout(
             vulkan, &vulkan->shapes[i].descriptorSet.descriptorSetLayout);

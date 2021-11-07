@@ -91,36 +91,6 @@ void createCommandBuffers(Vulkan *vulkan) {
         vkCmdSetScissor(vulkan->renderBuffers.commandBuffers[i], 0, 1,
                         &scissor);
 
-        // vkCmdBindPipeline(vulkan->renderBuffers.commandBuffers[i],
-        //                   VK_PIPELINE_BIND_POINT_GRAPHICS,
-        //                   vulkan->graphicsPipeline.graphicsPipeline);
-
-        // VkBuffer vertexBuffers[] = {vulkan->shapeBuffers.vertexBuffer};
-        // VkDeviceSize offsets[] = {0};
-
-        // vkCmdBindVertexBuffers(vulkan->renderBuffers.commandBuffers[i], 0, 1,
-        //                        vertexBuffers, offsets);
-
-        // vkCmdBindIndexBuffer(vulkan->renderBuffers.commandBuffers[i],
-        //                      vulkan->shapeBuffers.indexBuffer, 0,
-        //                      VK_INDEX_TYPE_UINT16);
-
-        // vkCmdBindDescriptorSets(vulkan->renderBuffers.commandBuffers[i],
-        //                         VK_PIPELINE_BIND_POINT_GRAPHICS,
-        //                         vulkan->graphicsPipeline.pipelineLayout, 0,
-        //                         1, &vulkan->descriptorSet.descriptorSets[i],
-        //                         0, NULL);
-
-        // // vkCmdDraw(vulkan->renderBuffers.commandBuffers[i],
-        // //           vulkan->shapes[vulkan->shapeCount].verticesCount, 1, 0,
-        // // 0);
-
-        // vkCmdDrawIndexed(vulkan->renderBuffers.commandBuffers[i],
-        //                  vulkan->shapes[vulkan->shapeCount - 1].indicesCount,
-        //                  1, 0, 0, 0);
-
-        //
-
         for (uint32_t j = 0; j < vulkan->shapeCount; j++) {
             vkCmdBindPipeline(
                 vulkan->renderBuffers.commandBuffers[i],
@@ -150,8 +120,6 @@ void createCommandBuffers(Vulkan *vulkan) {
             vkCmdDrawIndexed(vulkan->renderBuffers.commandBuffers[i],
                              vulkan->shapes[j].indicesCount, 1, 0, 0, 0);
         }
-
-        //
 
         vkCmdEndRenderPass(vulkan->renderBuffers.commandBuffers[i]);
 
