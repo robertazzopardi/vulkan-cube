@@ -31,7 +31,9 @@ createPipelineShaderInfo(VkShaderStageFlagBits stage, VkShaderModule module) {
     return shaderInfo;
 }
 
-void createGraphicsPipeline(Vulkan *vulkan) {
+void createGraphicsPipeline(Vulkan *vulkan,
+                            VkDescriptorSetLayout *descriptorSetLayout,
+                            GraphicsPipeline *graphicsPipeline) {
     VkShaderModule vertShaderModule;
     createShaderModule(SRC_SHADERS_TEXTURE_VERT_SPV,
                        SRC_SHADERS_TEXTURE_VERT_SPV_LEN, vulkan->device.device,
@@ -138,11 +140,11 @@ void createGraphicsPipeline(Vulkan *vulkan) {
         .pushConstantRangeCount = 0,
         .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
         .setLayoutCount = 1,
-        .pSetLayouts = &vulkan->descriptorSet.descriptorSetLayout,
+        .pSetLayouts = descriptorSetLayout,
     };
 
     if (vkCreatePipelineLayout(vulkan->device.device, &pipelineLayoutInfo, NULL,
-                               &vulkan->graphicsPipeline.pipelineLayout) !=
+                               &graphicsPipeline->pipelineLayout) !=
         VK_SUCCESS) {
         THROW_ERROR("failed to create pipeline layout!\n");
     }
@@ -169,8 +171,8 @@ void createGraphicsPipeline(Vulkan *vulkan) {
         .pMultisampleState = &multisampling,
         .pDynamicState = &dynamicStateCreateInfo,
         .pColorBlendState = &colorBlending,
-        .layout = vulkan->graphicsPipeline.pipelineLayout,
-        .renderPass = vulkan->graphicsPipeline.renderPass,
+        .layout = graphicsPipeline->pipelineLayout,
+        .renderPass = vulkan->renderPass,
         .subpass = 0,
         .basePipelineHandle = VK_NULL_HANDLE,
         .pDepthStencilState = &depthStencil,
@@ -178,7 +180,7 @@ void createGraphicsPipeline(Vulkan *vulkan) {
 
     if (vkCreateGraphicsPipelines(
             vulkan->device.device, VK_NULL_HANDLE, 1, &pipelineInfo, NULL,
-            &vulkan->graphicsPipeline.graphicsPipeline) != VK_SUCCESS) {
+            &graphicsPipeline->graphicsPipeline) != VK_SUCCESS) {
         THROW_ERROR("failed to create graphics pipeline!\n");
     }
 
@@ -295,7 +297,7 @@ void createRenderPass(Vulkan *vulkan) {
     renderPassInfo.pDependencies = &dependency;
 
     if (vkCreateRenderPass(vulkan->device.device, &renderPassInfo, NULL,
-                           &vulkan->graphicsPipeline.renderPass) !=
+                           &vulkan->renderPass) !=
         VK_SUCCESS) {
         THROW_ERROR("failed to create render pass!\n");
     }

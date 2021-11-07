@@ -17,8 +17,7 @@ void freeMem(const size_t, ...);
 
 uint32_t findMemoryType(Vulkan *, uint32_t, VkMemoryPropertyFlags);
 
-void mapMemory(VkDevice device, VkDeviceMemory deviceMemory,
-               VkDeviceSize deviceSize, void *toMap);
+void mapMemory(VkDevice, VkDeviceMemory, VkDeviceSize, void *);
 
 void allocateVerticesAndIndices(Vulkan *, size_t, size_t);
 

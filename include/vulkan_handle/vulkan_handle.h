@@ -3,10 +3,8 @@
 
 #include "device.h"
 #include "geometry/geometry.h"
-#include "pipeline.h"
 #include "render.h"
 #include "swapchain.h"
-#include "texture.h"
 #include "uniforms.h"
 #include "validation.h"
 #include "window/window.h"
@@ -18,7 +16,7 @@ typedef struct Vulkan {
     Device device;
     VkSampleCountFlagBits msaaSamples;
     SwapChain swapchain;
-    GraphicsPipeline graphicsPipeline;
+    VkRenderPass renderPass;
     size_t currentFrame;
     RenderBuffers renderBuffers;
     Semaphores semaphores;
@@ -27,8 +25,6 @@ typedef struct Vulkan {
     uint32_t shapeCount;
     Depth depth;
     UniformBufferObject ubo;
-    DescriptorSet descriptorSet;
-    // Texture texture;
     Window window;
 
     VkImage colorImage;
@@ -42,6 +38,6 @@ extern void terminate(Vulkan *);
 
 extern void mainLoop(Vulkan *);
 
-extern void generateShape(Vulkan *, ShapeType);
+extern void generateShape(Vulkan *, ShapeType, const char *);
 
 #endif /* INCLUDE_VULKAN_HANDLE_VULKAN_HANDLE */

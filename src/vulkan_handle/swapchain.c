@@ -87,13 +87,24 @@ void recreateSwapChain(Vulkan *vulkan) {
     createSwapChain(vulkan);
     createImageViews(vulkan);
     createRenderPass(vulkan);
-    createGraphicsPipeline(vulkan);
+    // createGraphicsPipeline(vulkan);
     createColorResources(vulkan);
     createDepthResources(vulkan);
     createFramebuffers(vulkan);
-    createUniformBuffers(vulkan);
-    createDescriptorPool(vulkan);
-    createDescriptorSets(vulkan);
+    for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
+        createGraphicsPipeline(
+            vulkan, &vulkan->shapes[i].descriptorSet.descriptorSetLayout,
+            &vulkan->shapes[i].graphicsPipeline);
+        createDescriptorPool(vulkan,
+                             &vulkan->shapes[i].descriptorSet.descriptorPool);
+        createUniformBuffers(vulkan, &vulkan->shapes[i].descriptorSet);
+        createDescriptorSets(vulkan, &vulkan->shapes[i].descriptorSet,
+                             &vulkan->shapes[i].texture);
+    }
+
+    // createUniformBuffers(vulkan);
+    // createDescriptorPool(vulkan);
+    // createDescriptorSets(vulkan);
     createCommandBuffers(vulkan);
 
     freeMem(1, vulkan->semaphores.imagesInFlight);
@@ -207,8 +218,7 @@ void createSwapChain(Vulkan *vulkan) {
 }
 
 void cleanupSwapChain(Vulkan *vulkan) {
-    vkDestroyImageView(vulkan->device.device, vulkan->colorImageView,
-                       NULL);
+    vkDestroyImageView(vulkan->device.device, vulkan->colorImageView, NULL);
     vkDestroyImage(vulkan->device.device, vulkan->colorImage, NULL);
     vkFreeMemory(vulkan->device.device, vulkan->colorImageMemory, NULL);
 
@@ -222,15 +232,40 @@ void cleanupSwapChain(Vulkan *vulkan) {
                          vulkan->swapchain.swapChainImagesCount,
                          vulkan->renderBuffers.commandBuffers);
 
-    vkDestroyPipeline(vulkan->device.device,
-                      vulkan->graphicsPipeline.graphicsPipeline, NULL);
-    vkDestroyPipelineLayout(vulkan->device.device,
-                            vulkan->graphicsPipeline.pipelineLayout, NULL);
-    vkDestroyRenderPass(vulkan->device.device,
-                        vulkan->graphicsPipeline.renderPass, NULL);
+    for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
+        vkDestroyPipeline(vulkan->device.device,
+                          vulkan->shapes[i].graphicsPipeline.graphicsPipeline,
+                          NULL);
+        vkDestroyPipelineLayout(
+            vulkan->device.device,
+            vulkan->shapes[i].graphicsPipeline.pipelineLayout, NULL);
+
+        vkDestroyDescriptorPool(vulkan->device.device,
+                                vulkan->shapes[i].descriptorSet.descriptorPool,
+                                NULL);
+    }
+    // vkDestroyPipeline(vulkan->device.device,
+    //                   vulkan->graphicsPipeline.graphicsPipeline, NULL);
+    // vkDestroyPipelineLayout(vulkan->device.device,
+    //                         vulkan->graphicsPipeline.pipelineLayout, NULL);
+    vkDestroyRenderPass(vulkan->device.device, vulkan->renderPass, NULL);
 
     vkDestroySwapchainKHR(vulkan->device.device, vulkan->swapchain.swapChain,
                           NULL);
+
+    for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
+        for (uint32_t j = 0; j < vulkan->swapchain.swapChainImagesCount; j++) {
+            vkDestroyBuffer(vulkan->device.device,
+                            vulkan->shapes[i].descriptorSet.uniformBuffers[j],
+                            NULL);
+
+            vkFreeMemory(
+                vulkan->device.device,
+                vulkan->shapes[i].descriptorSet.uniformBuffersMemory[j], NULL);
+        }
+        freeMem(2, vulkan->shapes[i].descriptorSet.uniformBuffers,
+                vulkan->shapes[i].descriptorSet.uniformBuffersMemory);
+    }
 
     for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
         vkDestroyFramebuffer(vulkan->device.device,
@@ -240,11 +275,11 @@ void cleanupSwapChain(Vulkan *vulkan) {
         vkDestroyImageView(vulkan->device.device,
                            vulkan->swapchain.swapChainImageViews[i], NULL);
 
-        vkDestroyBuffer(vulkan->device.device,
-                        vulkan->descriptorSet.uniformBuffers[i], NULL);
+        // vkDestroyBuffer(vulkan->device.device,
+        //                 vulkan->descriptorSet.uniformBuffers[i], NULL);
 
-        vkFreeMemory(vulkan->device.device,
-                     vulkan->descriptorSet.uniformBuffersMemory[i], NULL);
+        // vkFreeMemory(vulkan->device.device,
+        //              vulkan->descriptorSet.uniformBuffersMemory[i], NULL);
 
         // vkDestroyBuffer(vulkan->device.device,
         //                 vulkan->descriptorSet.lightBlock[i], NULL);
@@ -253,15 +288,15 @@ void cleanupSwapChain(Vulkan *vulkan) {
         //              vulkan->descriptorSet.lightBlockMemory[i], NULL);
     }
 
-    freeMem(6, vulkan->renderBuffers.swapChainFramebuffers,
+    freeMem(4, vulkan->renderBuffers.swapChainFramebuffers,
             vulkan->swapchain.swapChainImageViews,
-            vulkan->descriptorSet.uniformBuffers,
-            vulkan->descriptorSet.uniformBuffersMemory,
+            // vulkan->descriptorSet.uniformBuffers,
+            // vulkan->descriptorSet.uniformBuffersMemory,
             // vulkan->descriptorSet.lightBlock,
             // vulkan->descriptorSet.lightBlockMemory,
             vulkan->swapchain.swapChainImageFormat,
             vulkan->swapchain.swapChainExtent);
 
-    vkDestroyDescriptorPool(vulkan->device.device,
-                            vulkan->descriptorSet.descriptorPool, NULL);
+    // vkDestroyDescriptorPool(vulkan->device.device,
+    // vulkan->descriptorSet.descriptorPool, NULL);
 }

@@ -88,10 +88,6 @@ void initVulkan(Vulkan *vulkan) {
 
     createRenderPass(vulkan);
 
-    createDescriptorSetLayout(vulkan);
-
-    createGraphicsPipeline(vulkan);
-
     createColorResources(vulkan);
 
     createDepthResources(vulkan);
@@ -100,15 +96,22 @@ void initVulkan(Vulkan *vulkan) {
 
     createCommandPool(vulkan);
 
-    createDescriptorPool(vulkan);
+    generateShape(vulkan, SPHERE, "/Users/rob/Downloads/2k_saturn.jpg");
+    generateShape(vulkan, CIRCLE,
+                  "/Users/rob/Downloads/2k_saturn_ring_alpha.png");
 
-    // generateShape(vulkan, CUBE);
-    // generateShape(vulkan, SPHERE);
-    generateShape(vulkan, CIRCLE);
-
-    createUniformBuffers(vulkan);
-
-    createDescriptorSets(vulkan);
+    for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
+        createDescriptorSetLayout(
+            vulkan, &vulkan->shapes[i].descriptorSet.descriptorSetLayout);
+        createGraphicsPipeline(
+            vulkan, &vulkan->shapes[i].descriptorSet.descriptorSetLayout,
+            &vulkan->shapes[i].graphicsPipeline);
+        createDescriptorPool(vulkan,
+                             &vulkan->shapes[i].descriptorSet.descriptorPool);
+        createUniformBuffers(vulkan, &vulkan->shapes[i].descriptorSet);
+        createDescriptorSets(vulkan, &vulkan->shapes[i].descriptorSet,
+                             &vulkan->shapes[i].texture);
+    }
 
     createCommandBuffers(vulkan);
 
@@ -120,30 +123,20 @@ void cleanUpVulkan(Vulkan *vulkan) {
 
     cleanupSwapChain(vulkan);
 
-    // vkDestroySampler(vulkan->device.device, vulkan->texture.textureSampler,
-    //                  NULL);
-    // vkDestroyImageView(vulkan->device.device,
-    // vulkan->texture.textureImageView,
-    //                    NULL);
-
-    // vkDestroyImage(vulkan->device.device, vulkan->texture.textureImage,
-    // NULL); vkFreeMemory(vulkan->device.device,
-    // vulkan->texture.textureImageMemory,
-    //              NULL);
-
-    vkDestroyDescriptorSetLayout(
-        vulkan->device.device, vulkan->descriptorSet.descriptorSetLayout, NULL);
-
-    if (vulkan->graphicsPipeline.graphicsPipeline == VK_NULL_HANDLE) {
-        vkDestroyPipeline(vulkan->device.device,
-                          vulkan->graphicsPipeline.graphicsPipeline, NULL);
-    }
-    if (vulkan->graphicsPipeline.pipelineLayout == VK_NULL_HANDLE) {
-        vkDestroyPipelineLayout(vulkan->device.device,
-                                vulkan->graphicsPipeline.pipelineLayout, NULL);
-    }
-
     for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
+        if (vulkan->shapes[i].graphicsPipeline.graphicsPipeline ==
+            VK_NULL_HANDLE) {
+            vkDestroyPipeline(
+                vulkan->device.device,
+                vulkan->shapes[i].graphicsPipeline.graphicsPipeline, NULL);
+        }
+        if (vulkan->shapes[i].graphicsPipeline.pipelineLayout ==
+            VK_NULL_HANDLE) {
+            vkDestroyPipelineLayout(
+                vulkan->device.device,
+                vulkan->shapes[i].graphicsPipeline.pipelineLayout, NULL);
+        }
+
         vkDestroySampler(vulkan->device.device,
                          vulkan->shapes[i].texture.textureSampler, NULL);
         vkDestroyImageView(vulkan->device.device,
@@ -154,7 +147,9 @@ void cleanUpVulkan(Vulkan *vulkan) {
         vkFreeMemory(vulkan->device.device,
                      vulkan->shapes[i].texture.textureImageMemory, NULL);
 
-        //
+        vkDestroyDescriptorSetLayout(
+            vulkan->device.device,
+            vulkan->shapes[i].descriptorSet.descriptorSetLayout, NULL);
 
         vkDestroyBuffer(vulkan->device.device,
                         vulkan->shapeBuffers.indexBuffer[i], NULL);
@@ -165,6 +160,8 @@ void cleanUpVulkan(Vulkan *vulkan) {
                         vulkan->shapeBuffers.vertexBuffer[i], NULL);
         vkFreeMemory(vulkan->device.device,
                      vulkan->shapeBuffers.vertexBufferMemory[i], NULL);
+
+        freeMem(1, vulkan->shapes[i].descriptorSet.descriptorSets);
     }
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
@@ -178,13 +175,11 @@ void cleanUpVulkan(Vulkan *vulkan) {
                        vulkan->semaphores.inFlightFences[i], NULL);
     }
 
-    freeMem(11, vulkan->descriptorSet.descriptorSets,
-            vulkan->semaphores.renderFinishedSemaphores,
+    freeMem(10, vulkan->semaphores.renderFinishedSemaphores,
             vulkan->semaphores.imageAvailableSemaphores,
             vulkan->semaphores.inFlightFences,
             vulkan->semaphores.imagesInFlight,
             vulkan->renderBuffers.commandBuffers, vulkan->shapes,
-
             vulkan->shapeBuffers.indexBuffer,
             vulkan->shapeBuffers.indexBufferMemory,
             vulkan->shapeBuffers.vertexBuffer,

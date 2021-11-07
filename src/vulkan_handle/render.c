@@ -70,7 +70,7 @@ void createCommandBuffers(Vulkan *vulkan) {
 
         VkRenderPassBeginInfo renderPassInfo = {};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass = vulkan->graphicsPipeline.renderPass;
+        renderPassInfo.renderPass = vulkan->renderPass;
         renderPassInfo.renderArea.offset = (VkOffset2D){0, 0};
         renderPassInfo.renderArea.extent = *vulkan->swapchain.swapChainExtent;
         renderPassInfo.framebuffer =
@@ -91,9 +91,9 @@ void createCommandBuffers(Vulkan *vulkan) {
         vkCmdSetScissor(vulkan->renderBuffers.commandBuffers[i], 0, 1,
                         &scissor);
 
-        vkCmdBindPipeline(vulkan->renderBuffers.commandBuffers[i],
-                          VK_PIPELINE_BIND_POINT_GRAPHICS,
-                          vulkan->graphicsPipeline.graphicsPipeline);
+        // vkCmdBindPipeline(vulkan->renderBuffers.commandBuffers[i],
+        //                   VK_PIPELINE_BIND_POINT_GRAPHICS,
+        //                   vulkan->graphicsPipeline.graphicsPipeline);
 
         // VkBuffer vertexBuffers[] = {vulkan->shapeBuffers.vertexBuffer};
         // VkDeviceSize offsets[] = {0};
@@ -122,6 +122,11 @@ void createCommandBuffers(Vulkan *vulkan) {
         //
 
         for (uint32_t j = 0; j < vulkan->shapeCount; j++) {
+            vkCmdBindPipeline(
+                vulkan->renderBuffers.commandBuffers[i],
+                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                vulkan->shapes[j].graphicsPipeline.graphicsPipeline);
+
             VkBuffer vertexBuffers[] = {vulkan->shapeBuffers.vertexBuffer[j]};
             VkDeviceSize offsets[] = {0};
 
@@ -132,11 +137,11 @@ void createCommandBuffers(Vulkan *vulkan) {
                                  vulkan->shapeBuffers.indexBuffer[j], 0,
                                  VK_INDEX_TYPE_UINT16);
 
-            vkCmdBindDescriptorSets(vulkan->renderBuffers.commandBuffers[i],
-                                    VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                    vulkan->graphicsPipeline.pipelineLayout, 0,
-                                    1, &vulkan->descriptorSet.descriptorSets[i],
-                                    0, NULL);
+            vkCmdBindDescriptorSets(
+                vulkan->renderBuffers.commandBuffers[i],
+                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                vulkan->shapes[j].graphicsPipeline.pipelineLayout, 0, 1,
+                &vulkan->shapes[j].descriptorSet.descriptorSets[i], 0, NULL);
 
             // vkCmdDraw(vulkan->renderBuffers.commandBuffers[i],
             //           vulkan->shapes[vulkan->shapeCount].verticesCount, 1, 0,
@@ -212,7 +217,11 @@ void drawFrame(Vulkan *vulkan) {
         THROW_ERROR("failed to acquire swap chain image!\n");
     }
 
-    updateUniformBuffer(vulkan, imageIndex);
+    for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
+
+        updateUniformBuffer(vulkan, &vulkan->shapes[i].descriptorSet,
+                            imageIndex);
+    }
 
     if (vulkan->semaphores.imagesInFlight[imageIndex] != VK_NULL_HANDLE) {
         vkWaitForFences(vulkan->device.device, 1,

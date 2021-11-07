@@ -8,6 +8,11 @@ typedef struct VkBuffer_T *VkBuffer;
 typedef struct VkDeviceMemory_T *VkDeviceMemory;
 typedef struct VkDescriptorPool_T *VkDescriptorPool;
 typedef struct VkDescriptorSet_T *VkDescriptorSet;
+typedef struct Vulkan Vulkan;
+typedef struct Texture Texture;
+typedef unsigned int uint32_t;
+typedef unsigned long long uint64_t;
+typedef uint64_t VkDeviceSize;
 
 typedef struct UniformBufferObject {
     mat4 model;
@@ -23,21 +28,14 @@ typedef struct DescriptorSet {
     VkDeviceMemory *uniformBuffersMemory;
 } DescriptorSet;
 
-typedef struct Vulkan Vulkan;
+void updateUniformBuffer(Vulkan *, DescriptorSet *, uint32_t);
 
-typedef unsigned int uint32_t;
-typedef unsigned long long uint64_t;
+void createDescriptorSetLayout(Vulkan *, VkDescriptorSetLayout *);
 
-typedef uint64_t VkDeviceSize;
+void createUniformBuffers(Vulkan *, DescriptorSet *);
 
-void updateUniformBuffer(Vulkan *, uint32_t);
+void createDescriptorPool(Vulkan *, VkDescriptorPool *);
 
-void createDescriptorSetLayout(Vulkan *);
-
-void createUniformBuffers(Vulkan *);
-
-void createDescriptorPool(Vulkan *);
-
-void createDescriptorSets(Vulkan *);
+void createDescriptorSets(Vulkan *, DescriptorSet *, Texture *);
 
 #endif /* INCLUDE_VULKAN_HANDLE_UNIFORMS */

@@ -1,7 +1,9 @@
 #ifndef INCLUDE_GEOMETRY_GEOMETRY
 #define INCLUDE_GEOMETRY_GEOMETRY
 
+#include "vulkan_handle/pipeline.h"
 #include "vulkan_handle/texture.h"
+#include "vulkan_handle/uniforms.h"
 #include <cglm/types.h>
 
 typedef enum ShapeType {
@@ -92,6 +94,8 @@ typedef struct Shape {
 
     uint32_t index;
 
+    GraphicsPipeline graphicsPipeline;
+    DescriptorSet descriptorSet;
     Texture texture;
 } Shape;
 
@@ -111,7 +115,7 @@ typedef uint32_t VkFlags;
 typedef VkFlags VkBufferUsageFlags;
 typedef VkFlags VkMemoryPropertyFlags;
 
-void generateShape(Vulkan *, ShapeType);
+void generateShape(Vulkan *, ShapeType, const char *);
 
 void createBuffer(VkDeviceSize, VkBufferUsageFlags, VkMemoryPropertyFlags,
                   Vulkan *, VkBuffer *, VkDeviceMemory *);

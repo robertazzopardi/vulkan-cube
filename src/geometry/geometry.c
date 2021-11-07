@@ -121,7 +121,7 @@ void createFramebuffers(Vulkan *vulkan) {
 
         VkFramebufferCreateInfo framebufferInfo = {};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = vulkan->graphicsPipeline.renderPass;
+        framebufferInfo.renderPass = vulkan->renderPass;
         framebufferInfo.attachmentCount = SIZEOF(attachments);
         framebufferInfo.pAttachments = attachments;
         framebufferInfo.width = vulkan->swapchain.swapChainExtent->width;
@@ -210,7 +210,8 @@ void createVertexIndexBuffer(Vulkan *vulkan, void *data, uint64_t bufferSize,
     vkFreeMemory(vulkan->device.device, stagingBufferMemory, NULL);
 }
 
-inline void generateShape(Vulkan *vulkan, ShapeType shapeType) {
+inline void generateShape(Vulkan *vulkan, ShapeType shapeType,
+                          const char *textureFileName) {
 
     vulkan->shapes = realloc(vulkan->shapes, (vulkan->shapeCount + 1) *
                                                  sizeof(*vulkan->shapes));
@@ -228,7 +229,7 @@ inline void generateShape(Vulkan *vulkan, ShapeType shapeType) {
         makeTriSphere(vulkan, shapeType, 3);
         break;
     case CIRCLE:
-        makeCircle(vulkan, 20, 1);
+        makeCircle(vulkan, 20, 2);
         break;
     case PLAIN:
         break;
@@ -238,9 +239,11 @@ inline void generateShape(Vulkan *vulkan, ShapeType shapeType) {
 
     //
 
-    createTextureImage(vulkan, "/Users/rob/Downloads/2k_saturn_ring_alpha.png");
+    createTextureImage(vulkan, textureFileName);
     createTextureImageView(vulkan);
     createTextureSampler(vulkan);
+
+    //
 
     //
 

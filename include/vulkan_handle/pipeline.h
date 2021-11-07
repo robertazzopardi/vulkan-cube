@@ -4,17 +4,18 @@
 typedef struct VkPipelineLayout_T *VkPipelineLayout;
 typedef struct VkPipeline_T *VkPipeline;
 typedef struct VkRenderPass_T *VkRenderPass;
+typedef struct VkDescriptorSetLayout_T *VkDescriptorSetLayout;
 
 typedef struct GraphicsPipeline {
     VkPipelineLayout pipelineLayout;
     VkPipeline graphicsPipeline;
-    VkRenderPass renderPass;
 } GraphicsPipeline;
 
 typedef struct Vulkan Vulkan;
 typedef enum VkFormat VkFormat;
 
-void createGraphicsPipeline(Vulkan *);
+void createGraphicsPipeline(Vulkan *, VkDescriptorSetLayout *,
+                            GraphicsPipeline *);
 
 void createRenderPass(Vulkan *);
 
