@@ -1,6 +1,8 @@
 #ifndef INCLUDE_VULKAN_HANDLE_PIPELINE
 #define INCLUDE_VULKAN_HANDLE_PIPELINE
 
+#include <vulkan/vulkan.h>
+
 typedef struct VkPipelineLayout_T *VkPipelineLayout;
 typedef struct VkPipeline_T *VkPipeline;
 typedef struct VkRenderPass_T *VkRenderPass;
@@ -9,6 +11,7 @@ typedef struct VkDescriptorSetLayout_T *VkDescriptorSetLayout;
 typedef struct GraphicsPipeline {
     VkPipelineLayout pipelineLayout;
     VkPipeline graphicsPipeline;
+    VkPrimitiveTopology topology;
 } GraphicsPipeline;
 
 typedef struct Vulkan Vulkan;

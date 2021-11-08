@@ -2,9 +2,9 @@
 #include "error_handle.h"
 #include "geometry/circle/circle.h"
 #include "geometry/cube/cube.h"
+#include "geometry/ring/ring.h"
 #include "geometry/shpere/sphere.h"
 #include "geometry/shpere/trisphere.h"
-#include "geometry/ring/ring.h"
 #include "vulkan_handle/memory.h"
 #include "vulkan_handle/texture.h"
 #include "vulkan_handle/vulkan_handle.h"
@@ -211,6 +211,34 @@ void createVertexIndexBuffer(Vulkan *vulkan, void *data, uint64_t bufferSize,
     vkFreeMemory(vulkan->device.device, stagingBufferMemory, NULL);
 }
 
+inline void bindVertexAndIndexBuffers(Vulkan *vulkan) {
+    vulkan->shapeBuffers.vertexBuffer =
+        malloc(vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.vertexBuffer));
+    vulkan->shapeBuffers.vertexBufferMemory = malloc(
+        vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.vertexBufferMemory));
+    vulkan->shapeBuffers.indexBuffer =
+        malloc(vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.indexBuffer));
+    vulkan->shapeBuffers.indexBufferMemory = malloc(
+        vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.indexBufferMemory));
+
+    for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
+        createVertexIndexBuffer(vulkan, vulkan->shapes[i].vertices,
+                                sizeof(*vulkan->shapes[i].vertices) *
+                                    vulkan->shapes[i].verticesCount,
+                                &vulkan->shapeBuffers.vertexBuffer[i],
+                                &vulkan->shapeBuffers.vertexBufferMemory[i],
+                                VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+                                    VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+        createVertexIndexBuffer(vulkan, vulkan->shapes[i].indices,
+                                sizeof(*vulkan->shapes[i].indices) *
+                                    vulkan->shapes[i].indicesCount,
+                                &vulkan->shapeBuffers.indexBuffer[i],
+                                &vulkan->shapeBuffers.indexBufferMemory[i],
+                                VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+                                    VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+    }
+}
+
 inline void generateShape(Vulkan *vulkan, ShapeType shapeType,
                           const char *textureFileName) {
 
@@ -219,6 +247,10 @@ inline void generateShape(Vulkan *vulkan, ShapeType shapeType,
     vulkan->shapes[vulkan->shapeCount] = EmptyStruct;
 
     Shape *shape = &vulkan->shapes[vulkan->shapeCount];
+
+    vulkan->shapes[vulkan->shapeCount].graphicsPipeline.topology =
+        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    vulkan->shapes[vulkan->shapeCount].indexed = true;
 
     switch (shapeType) {
     case CUBE:
@@ -237,7 +269,10 @@ inline void generateShape(Vulkan *vulkan, ShapeType shapeType,
     case PLAIN:
         break;
     case RING:
-        makeRing(shape, 10, 2);
+        makeRing(shape, 20, 2);
+        vulkan->shapes[vulkan->shapeCount].graphicsPipeline.topology =
+            VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+        vulkan->shapes[vulkan->shapeCount].indexed = false;
     default:
         break;
     }

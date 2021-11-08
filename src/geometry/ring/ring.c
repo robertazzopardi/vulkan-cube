@@ -14,10 +14,10 @@
 void makeRing(Shape *shape, uint32_t sectorCount, float radius) {
     uint32_t stackCount = 2;
 
-    shape->vertices = malloc((10 + 1) * 2 * sizeof(*shape->vertices));
+    shape->vertices = malloc((sectorCount + 1) * 2 * sizeof(*shape->vertices));
 
     float angle = 0;
-    float angleStep = 180.0f / 10.0f;
+    float angleStep = 180.0f / sectorCount;
     float lengthInv = 0.5f / radius;
 
     float x = 0;
@@ -26,14 +26,14 @@ void makeRing(Shape *shape, uint32_t sectorCount, float radius) {
     float nx, ny, nz;
     float s, t;
     float outsideRadius = 2;
-    float insideRadius = 1;
+    float insideRadius = 0.5;
 
-    for (uint32_t i = 0; i <= 10; i++) {
+    for (uint32_t i = 0; i <= sectorCount; i++) {
         float px = x + cos(glm_rad(angle)) * outsideRadius;
         float py = y + sin(glm_rad(angle)) * outsideRadius;
+
         angle += angleStep;
-        // vertex(px, py);
-        glm_vec3_copy((vec3){x, y, z},
+        glm_vec3_copy((vec3){px, py, z},
                       shape->vertices[shape->verticesCount].pos);
 
         // normalized vertex normal (nx, ny, nz)
@@ -58,10 +58,9 @@ void makeRing(Shape *shape, uint32_t sectorCount, float radius) {
 
         px = x + cos(glm_rad(angle)) * insideRadius;
         py = y + sin(glm_rad(angle)) * insideRadius;
-        // vertex(px, py);
         angle += angleStep;
 
-        glm_vec3_copy((vec3){x, y, z},
+        glm_vec3_copy((vec3){px, py, z},
                       shape->vertices[shape->verticesCount].pos);
 
         // normalized vertex normal (nx, ny, nz)

@@ -5,6 +5,7 @@
 #include "vulkan_handle/texture.h"
 #include "vulkan_handle/uniforms.h"
 #include <cglm/types.h>
+#include <stdbool.h>
 
 typedef enum ShapeType {
     CUBE,
@@ -86,6 +87,13 @@ typedef unsigned short uint16_t;
 typedef unsigned int uint32_t;
 typedef unsigned long long uint64_t;
 
+typedef struct ShapeBuffers {
+    VkBuffer *vertexBuffer;
+    VkDeviceMemory *vertexBufferMemory;
+    VkBuffer *indexBuffer;
+    VkDeviceMemory *indexBufferMemory;
+} ShapeBuffers;
+
 typedef struct Shape {
     Vertex *vertices;
     uint32_t verticesCount;
@@ -95,19 +103,15 @@ typedef struct Shape {
 
     uint32_t index;
 
+    bool indexed;
+
     GraphicsPipeline graphicsPipeline;
     DescriptorSet descriptorSet;
     Texture texture;
+    // ShapeBuffers buffers;
 } Shape;
 
 typedef struct VkBuffer_T *VkBuffer;
-
-typedef struct ShapeBuffers {
-    VkBuffer *vertexBuffer;
-    VkDeviceMemory *vertexBufferMemory;
-    VkBuffer *indexBuffer;
-    VkDeviceMemory *indexBufferMemory;
-} ShapeBuffers;
 
 typedef struct Vulkan Vulkan;
 
@@ -146,5 +150,7 @@ void calculateNormals(Vertex *, uint32_t);
 void normalize(vec3, Vertex *, float);
 
 void getMiddlePoint(vec3, vec3, vec3);
+
+void bindVertexAndIndexBuffers(Vulkan *);
 
 #endif /* INCLUDE_GEOMETRY_GEOMETRY */

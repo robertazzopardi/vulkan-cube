@@ -34,6 +34,7 @@ createPipelineShaderInfo(VkShaderStageFlagBits stage, VkShaderModule module) {
 void createGraphicsPipeline(Vulkan *vulkan,
                             VkDescriptorSetLayout *descriptorSetLayout,
                             GraphicsPipeline *graphicsPipeline) {
+
     VkShaderModule vertShaderModule;
     createShaderModule(SRC_SHADERS_TEXTURE_VERT_SPV,
                        SRC_SHADERS_TEXTURE_VERT_SPV_LEN, vulkan->device.device,
@@ -64,7 +65,9 @@ void createGraphicsPipeline(Vulkan *vulkan,
 
     VkPipelineInputAssemblyStateCreateInfo inputAssembly = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
-        .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+        // .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+        // .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP,
+        .topology = graphicsPipeline->topology,
         .primitiveRestartEnable = VK_FALSE,
     };
 
@@ -110,6 +113,9 @@ void createGraphicsPipeline(Vulkan *vulkan,
         .sampleShadingEnable = VK_TRUE, // enable sample shading in the pipeline
         .minSampleShading =
             .2f, // min fraction for sample shading; closer to one is smoother
+        .pSampleMask = NULL,               // Optional
+        .alphaToCoverageEnable = VK_FALSE, // Optional
+        .alphaToOneEnable = VK_FALSE,      // Optional
     };
 
     VkPipelineDepthStencilStateCreateInfo depthStencil = {
@@ -124,7 +130,13 @@ void createGraphicsPipeline(Vulkan *vulkan,
     VkPipelineColorBlendAttachmentState colorBlendAttachment = {
         .colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
                           VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT,
-        .blendEnable = VK_FALSE,
+        .blendEnable = VK_TRUE,
+        .srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA,
+        .dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
+        .colorBlendOp = VK_BLEND_OP_ADD,
+        .srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE,
+        .dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO,
+        .alphaBlendOp = VK_BLEND_OP_ADD,
     };
 
     VkPipelineColorBlendStateCreateInfo colorBlending = {
@@ -297,8 +309,7 @@ void createRenderPass(Vulkan *vulkan) {
     renderPassInfo.pDependencies = &dependency;
 
     if (vkCreateRenderPass(vulkan->device.device, &renderPassInfo, NULL,
-                           &vulkan->renderPass) !=
-        VK_SUCCESS) {
+                           &vulkan->renderPass) != VK_SUCCESS) {
         THROW_ERROR("failed to create render pass!\n");
     }
 }

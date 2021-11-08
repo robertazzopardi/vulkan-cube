@@ -97,36 +97,12 @@ void initVulkan(Vulkan *vulkan) {
     createCommandPool(vulkan);
 
     generateShape(vulkan, SPHERE, "/Users/rob/Downloads/2k_saturn.jpg");
-    generateShape(vulkan, CIRCLE,
-                  "/Users/rob/Downloads/2k_saturn_ring_alpha.png");
-    // generateShape(vulkan, RING,
+    // generateShape(vulkan, CIRCLE,
     //               "/Users/rob/Downloads/2k_saturn_ring_alpha.png");
+    generateShape(vulkan, RING,
+                  "/Users/rob/Downloads/2k_saturn_ring_alpha.png");
 
-    vulkan->shapeBuffers.vertexBuffer =
-        malloc(vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.vertexBuffer));
-    vulkan->shapeBuffers.vertexBufferMemory = malloc(
-        vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.vertexBufferMemory));
-    vulkan->shapeBuffers.indexBuffer =
-        malloc(vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.indexBuffer));
-    vulkan->shapeBuffers.indexBufferMemory = malloc(
-        vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.indexBufferMemory));
-
-    for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
-        createVertexIndexBuffer(vulkan, vulkan->shapes[i].vertices,
-                                sizeof(*vulkan->shapes[i].vertices) *
-                                    vulkan->shapes[i].verticesCount,
-                                &vulkan->shapeBuffers.vertexBuffer[i],
-                                &vulkan->shapeBuffers.vertexBufferMemory[i],
-                                VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-                                    VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-        createVertexIndexBuffer(vulkan, vulkan->shapes[i].indices,
-                                sizeof(*vulkan->shapes[i].indices) *
-                                    vulkan->shapes[i].indicesCount,
-                                &vulkan->shapeBuffers.indexBuffer[i],
-                                &vulkan->shapeBuffers.indexBufferMemory[i],
-                                VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-                                    VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
-    }
+    bindVertexAndIndexBuffers(vulkan);
 
     for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
         createDescriptorSetLayout(
@@ -203,17 +179,18 @@ void cleanUpVulkan(Vulkan *vulkan) {
                        vulkan->semaphores.inFlightFences[i], NULL);
     }
 
-    freeMem(10, vulkan->semaphores.renderFinishedSemaphores,
+    freeMem(6, vulkan->semaphores.renderFinishedSemaphores,
             vulkan->semaphores.imageAvailableSemaphores,
             vulkan->semaphores.inFlightFences,
             vulkan->semaphores.imagesInFlight,
-            vulkan->renderBuffers.commandBuffers, vulkan->shapes,
-            vulkan->shapeBuffers.indexBuffer,
-            vulkan->shapeBuffers.indexBufferMemory,
-            vulkan->shapeBuffers.vertexBuffer,
-            vulkan->shapeBuffers.vertexBufferMemory
+            vulkan->renderBuffers.commandBuffers, vulkan->shapes);
 
-    );
+    // for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
+    //     freeMem(4, vulkan->shapes[i].buffers.indexBuffer,
+    //             vulkan->shapes[i].buffers.indexBufferMemory,
+    //             vulkan->shapes[i].buffers.vertexBuffer,
+    //             vulkan->shapes[i].buffers.vertexBufferMemory);
+    // }
 
     vkDestroyCommandPool(vulkan->device.device,
                          vulkan->renderBuffers.commandPool, NULL);

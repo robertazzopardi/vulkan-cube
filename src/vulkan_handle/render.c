@@ -1,5 +1,6 @@
 #include "vulkan_handle/render.h"
 #include "error_handle.h"
+#include "geometry/geometry.h"
 #include "vulkan_handle/memory.h"
 #include "vulkan_handle/vulkan_handle.h"
 #include "window/window.h"
@@ -59,25 +60,29 @@ void createCommandBuffers(Vulkan *vulkan) {
         .extent = (VkExtent2D){width, height},
     };
 
+    VkCommandBufferBeginInfo beginInfo = {};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+    VkRenderPassBeginInfo renderPassInfo = {};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = vulkan->renderPass;
+    renderPassInfo.renderArea.offset = (VkOffset2D){0, 0};
+    renderPassInfo.renderArea.extent = *vulkan->swapchain.swapChainExtent;
+
     for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
-        VkCommandBufferBeginInfo beginInfo = {};
-        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
         if (vkBeginCommandBuffer(vulkan->renderBuffers.commandBuffers[i],
                                  &beginInfo) != VK_SUCCESS) {
             THROW_ERROR("failed to begin recording command buffer!\n");
         }
 
-        VkRenderPassBeginInfo renderPassInfo = {};
-        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass = vulkan->renderPass;
-        renderPassInfo.renderArea.offset = (VkOffset2D){0, 0};
-        renderPassInfo.renderArea.extent = *vulkan->swapchain.swapChainExtent;
         renderPassInfo.framebuffer =
             vulkan->renderBuffers.swapChainFramebuffers[i];
 
-        VkClearValue clearValues[] = {{.color = {{0.0f, 0.0f, 0.0f, 1.0f}}},
-                                      {{{1.0f, 0}}}};
+        VkClearValue clearValues[] = {
+            {.color = {{0.0f, 0.0f, 0.0f, 1.0f}}},
+            {{{1.0f, 0}}},
+        };
 
         renderPassInfo.clearValueCount = SIZEOF(clearValues);
         renderPassInfo.pClearValues = clearValues;
@@ -91,6 +96,7 @@ void createCommandBuffers(Vulkan *vulkan) {
         vkCmdSetScissor(vulkan->renderBuffers.commandBuffers[i], 0, 1,
                         &scissor);
 
+        VkDeviceSize offsets[] = {0};
         for (uint32_t j = 0; j < vulkan->shapeCount; j++) {
             vkCmdBindPipeline(
                 vulkan->renderBuffers.commandBuffers[i],
@@ -98,14 +104,9 @@ void createCommandBuffers(Vulkan *vulkan) {
                 vulkan->shapes[j].graphicsPipeline.graphicsPipeline);
 
             VkBuffer vertexBuffers[] = {vulkan->shapeBuffers.vertexBuffer[j]};
-            VkDeviceSize offsets[] = {0};
 
             vkCmdBindVertexBuffers(vulkan->renderBuffers.commandBuffers[i], 0,
                                    1, vertexBuffers, offsets);
-
-            vkCmdBindIndexBuffer(vulkan->renderBuffers.commandBuffers[i],
-                                 vulkan->shapeBuffers.indexBuffer[j], 0,
-                                 VK_INDEX_TYPE_UINT16);
 
             vkCmdBindDescriptorSets(
                 vulkan->renderBuffers.commandBuffers[i],
@@ -113,12 +114,17 @@ void createCommandBuffers(Vulkan *vulkan) {
                 vulkan->shapes[j].graphicsPipeline.pipelineLayout, 0, 1,
                 &vulkan->shapes[j].descriptorSet.descriptorSets[i], 0, NULL);
 
-            // vkCmdDraw(vulkan->renderBuffers.commandBuffers[i],
-            //           vulkan->shapes[j].verticesCount, 1, 0,
-            // 0);
+            vkCmdDraw(vulkan->renderBuffers.commandBuffers[i],
+                      vulkan->shapes[j].verticesCount, 1, 0, 0);
 
-            vkCmdDrawIndexed(vulkan->renderBuffers.commandBuffers[i],
-                             vulkan->shapes[j].indicesCount, 1, 0, 0, 0);
+            if (vulkan->shapes[j].indexed) {
+                vkCmdBindIndexBuffer(vulkan->renderBuffers.commandBuffers[i],
+                                     vulkan->shapeBuffers.indexBuffer[j], 0,
+                                     VK_INDEX_TYPE_UINT16);
+
+                vkCmdDrawIndexed(vulkan->renderBuffers.commandBuffers[i],
+                                 vulkan->shapes[j].indicesCount, 1, 0, 0, 0);
+            }
         }
 
         vkCmdEndRenderPass(vulkan->renderBuffers.commandBuffers[i]);
@@ -186,7 +192,6 @@ void drawFrame(Vulkan *vulkan) {
     }
 
     for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
-
         updateUniformBuffer(vulkan, &vulkan->shapes[i].descriptorSet,
                             imageIndex);
     }

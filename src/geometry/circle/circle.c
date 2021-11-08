@@ -75,16 +75,6 @@ void makeCircle(Shape *shape, uint32_t sectorCount, float radius) {
             glm_vec3_copy((vec3){x, y, z},
                           shape->vertices[shape->verticesCount].pos);
 
-            // if ((int)xy == 0) {
-            //     normalize((vec3){0.0f, 0.0f, 0.0f},
-            //               &shape->vertices[shape->verticesCount], -0.5);
-
-            //     printf("%f %f %f\n",
-            //            shape->vertices[shape->verticesCount].pos[0],
-            //            shape->vertices[shape->verticesCount].pos[1],
-            //            shape->vertices[shape->verticesCount].pos[2]);
-            // }
-
             // normalized vertex normal (nx, ny, nz)
             nx = x * lengthInv;
             ny = y * lengthInv;
