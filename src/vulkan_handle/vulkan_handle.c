@@ -99,6 +99,8 @@ void initVulkan(Vulkan *vulkan) {
     generateShape(vulkan, SPHERE, "/Users/rob/Downloads/2k_saturn.jpg");
     generateShape(vulkan, CIRCLE,
                   "/Users/rob/Downloads/2k_saturn_ring_alpha.png");
+    // generateShape(vulkan, RING,
+    //               "/Users/rob/Downloads/2k_saturn_ring_alpha.png");
 
     vulkan->shapeBuffers.vertexBuffer =
         malloc(vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.vertexBuffer));

@@ -114,7 +114,7 @@ void createCommandBuffers(Vulkan *vulkan) {
                 &vulkan->shapes[j].descriptorSet.descriptorSets[i], 0, NULL);
 
             // vkCmdDraw(vulkan->renderBuffers.commandBuffers[i],
-            //           vulkan->shapes[vulkan->shapeCount].verticesCount, 1, 0,
+            //           vulkan->shapes[j].verticesCount, 1, 0,
             // 0);
 
             vkCmdDrawIndexed(vulkan->renderBuffers.commandBuffers[i],

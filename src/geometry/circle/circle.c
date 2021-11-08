@@ -11,7 +11,7 @@
 #include <stdlib.h>
 
 inline void calculateIndices(Shape *shape, uint32_t sectorCount,
-                                    uint32_t stackCount) {
+                             uint32_t stackCount) {
     uint32_t k1, k2;
     for (uint32_t i = 0; i < stackCount; ++i) {
         k1 = i * (sectorCount + 1); // beginning of current stack
@@ -42,7 +42,7 @@ inline void calculateIndices(Shape *shape, uint32_t sectorCount,
     }
 }
 
-void makeCircle(Vulkan *vulkan, uint32_t sectorCount, float radius) {
+void makeCircle(Shape *shape, uint32_t sectorCount, float radius) {
     uint32_t stackCount = 2;
 
     float x, y, z, xy;                           // vertex position
@@ -53,15 +53,14 @@ void makeCircle(Vulkan *vulkan, uint32_t sectorCount, float radius) {
     float stackStep = GLM_PIf / stackCount;
     float sectorAngle, stackAngle;
 
-    vulkan->shapes[vulkan->shapeCount].vertices =
-        malloc((vulkan->shapes[vulkan->shapeCount].verticesCount +
-                (sectorCount + 1) * (stackCount + 1)) *
-               sizeof(*vulkan->shapes[vulkan->shapeCount].vertices));
+    shape->vertices =
+        malloc((shape->verticesCount + (sectorCount + 1) * (stackCount + 1)) *
+               sizeof(*shape->vertices));
 
     for (uint32_t i = 0; i <= stackCount; ++i) {
         stackAngle = GLM_PI_2f - i * stackStep; // starting from pi/2 to -pi/2
-        xy = radius * cosf(stackAngle);         // r * cos(u)
-        // z = radius * sinf(stackAngle);          // r * sin(u)
+        xy = radius * cos(stackAngle);          // r * cos(u)
+        // z = radius * sin(stackAngle);          // r * sin(u)
         z = 0.0f;
 
         // add (sectorCount+1) vertices per stack
@@ -71,43 +70,40 @@ void makeCircle(Vulkan *vulkan, uint32_t sectorCount, float radius) {
             sectorAngle = j * sectorStep; // starting from 0 to 2pi
 
             // vertex position (x, y, z)
-            x = xy * cosf(sectorAngle); // r * cos(u) * cos(v)
-            y = xy * sinf(sectorAngle); // r * cos(u) * sin(v)
-            glm_vec3_copy(
-                (vec3){x, y, z},
-                vulkan->shapes[vulkan->shapeCount]
-                    .vertices[vulkan->shapes[vulkan->shapeCount].verticesCount]
-                    .pos);
+            x = xy * cos(sectorAngle); // r * cos(u) * cos(v)
+            y = xy * sin(sectorAngle); // r * cos(u) * sin(v)
+            glm_vec3_copy((vec3){x, y, z},
+                          shape->vertices[shape->verticesCount].pos);
+
+            // if ((int)xy == 0) {
+            //     normalize((vec3){0.0f, 0.0f, 0.0f},
+            //               &shape->vertices[shape->verticesCount], -0.5);
+
+            //     printf("%f %f %f\n",
+            //            shape->vertices[shape->verticesCount].pos[0],
+            //            shape->vertices[shape->verticesCount].pos[1],
+            //            shape->vertices[shape->verticesCount].pos[2]);
+            // }
 
             // normalized vertex normal (nx, ny, nz)
             nx = x * lengthInv;
             ny = y * lengthInv;
             nz = z * lengthInv;
-            glm_vec3_copy(
-                (vec3){nx, ny, nz},
-                vulkan->shapes[vulkan->shapeCount]
-                    .vertices[vulkan->shapes[vulkan->shapeCount].verticesCount]
-                    .normal);
+            glm_vec3_copy((vec3){nx, ny, nz},
+                          shape->vertices[shape->verticesCount].normal);
 
             // vertex tex coord (s, t) range between [0, 1]
             s = (float)j / sectorCount;
             t = (float)i / stackCount;
-            glm_vec2_copy(
-                (vec2){t, s},
-                vulkan->shapes[vulkan->shapeCount]
-                    .vertices[vulkan->shapes[vulkan->shapeCount].verticesCount]
-                    .texCoord);
+            glm_vec2_copy((vec2){t, s},
+                          shape->vertices[shape->verticesCount].texCoord);
 
-            glm_vec3_copy(
-                (vec3)WHITE,
-                vulkan->shapes[vulkan->shapeCount]
-                    .vertices[vulkan->shapes[vulkan->shapeCount].verticesCount]
-                    .colour);
+            glm_vec3_copy((vec3)WHITE,
+                          shape->vertices[shape->verticesCount].colour);
 
-            vulkan->shapes[vulkan->shapeCount].verticesCount++;
+            shape->verticesCount++;
         }
     }
 
-    calculateIndices(&vulkan->shapes[vulkan->shapeCount], sectorCount,
-                     stackCount);
+    calculateIndices(shape, sectorCount, stackCount);
 }

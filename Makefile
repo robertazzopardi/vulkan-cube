@@ -82,6 +82,7 @@ VERT_SHADERS		:= $(wildcard $(patsubst %,%/*.vert, $(SOURCEDIRS)))
 # define the C object files and their output
 BUILDOBJECTS	:= $(SOURCES:.c=.o)
 BUILDOBJECTSOUT 	:= $(subst src,build,$(SOURCES:.c=.o))
+BUILDDIR := $(dir $(BUILDOBJECTSOUT))
 
 #
 # The following part of the makefile is generic; it can be used to
@@ -92,11 +93,14 @@ BUILDOBJECTSOUT 	:= $(subst src,build,$(SOURCES:.c=.o))
 OUTPUTLIB	:= $(call FIXPATH,$(OUTPUT)/$(LIB_NAME))
 OUTPUTMAIN  := $(call FIXPATH,$(OUTPUT)/$(MAIN))
 
-all: compile_shaders $(OUTPUT) $(LIB_NAME)
+all: compile_shaders $(OUTPUT) $(BUILD) $(LIB_NAME)
 	@echo Executing 'all' complete!
 
 $(OUTPUT):
 	$(MD) $(OUTPUT)
+
+$(BUILD):
+	$(MD) $(BUILDDIR)
 
 $(LIB_NAME): $(BUILDOBJECTS)
 	$(CC) $(CFLAGS) $(INCLUDES) -o $(OUTPUTLIB) $(BUILDOBJECTSOUT) $(LFLAGS) $(LIBS)
@@ -116,7 +120,8 @@ clean_shaders:
 clean: clean_shaders
 	$(RM) $(OUTPUTLIB)
 	$(RM) $(OUTPUTMAIN)
-	$(RM) $(call FIXPATH,$(BUILDOBJECTSOUT))
+	$(RM) -rf $(BUILD)
+# $(RM) $(call FIXPATH,$(BUILDOBJECTSOUT))
 	$(RM) *.plist
 	@echo Cleanup complete!
 

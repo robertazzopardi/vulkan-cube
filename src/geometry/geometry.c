@@ -4,6 +4,7 @@
 #include "geometry/cube/cube.h"
 #include "geometry/shpere/sphere.h"
 #include "geometry/shpere/trisphere.h"
+#include "geometry/ring/ring.h"
 #include "vulkan_handle/memory.h"
 #include "vulkan_handle/texture.h"
 #include "vulkan_handle/vulkan_handle.h"
@@ -91,7 +92,7 @@ inline void calculateNormals(Vertex *shape, uint32_t vertsToUpdate) {
     }
 }
 
-void createDepthResources(Vulkan *vulkan) {
+inline void createDepthResources(Vulkan *vulkan) {
     const VkFormat depthFormat = findDepthFormat(vulkan);
 
     createImage(vulkan->swapchain.swapChainExtent->width,
@@ -217,37 +218,33 @@ inline void generateShape(Vulkan *vulkan, ShapeType shapeType,
                                                  sizeof(*vulkan->shapes));
     vulkan->shapes[vulkan->shapeCount] = EmptyStruct;
 
+    Shape *shape = &vulkan->shapes[vulkan->shapeCount];
+
     switch (shapeType) {
     case CUBE:
         makeCube(vulkan);
         break;
     case SPHERE:
-        makeSphere(vulkan, 20, 20, 0.7);
+        makeSphere(shape, 40, 40, 0.5);
         break;
     case ICOSPHERE:
     case OCTASPHERE:
         makeTriSphere(vulkan, shapeType, 3);
         break;
     case CIRCLE:
-        makeCircle(vulkan, 20, 2);
+        makeCircle(shape, 40, 2);
         break;
     case PLAIN:
         break;
+    case RING:
+        makeRing(shape, 10, 2);
     default:
         break;
     }
-
-    //
 
     createTextureImage(vulkan, textureFileName);
     createTextureImageView(vulkan);
     createTextureSampler(vulkan);
 
-    //
-
-    //
-
     vulkan->shapeCount++;
-
-    //
 }

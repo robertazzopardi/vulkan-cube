@@ -13,6 +13,7 @@ typedef enum ShapeType {
     OCTASPHERE,
     CIRCLE,
     PLAIN,
+    RING,
 } ShapeType;
 
 #define X .525731112119133606

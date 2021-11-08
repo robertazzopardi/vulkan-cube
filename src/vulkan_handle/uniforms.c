@@ -161,8 +161,7 @@ void createUniformBuffers(Vulkan *vulkan, DescriptorSet *descriptorSet) {
 void updateUniformBuffer(Vulkan *vulkan, DescriptorSet *descriptorSet,
                          uint32_t currentImage) {
 
-    // glm_rotate(vulkan->ubo.model, vulkan->window.dt * glm_rad(25.0f),
-    // GLM_XUP);
+    // glm_rotate(vulkan->ubo.model, vulkan->window.dt * glm_rad(25.0f), GLM_ZUP);
 
     glm_rotate(vulkan->ubo.model, vulkan->window.mX * glm_rad(1.0) * 0.005,
                GLM_ZUP);
