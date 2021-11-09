@@ -161,16 +161,19 @@ void createUniformBuffers(Vulkan *vulkan, DescriptorSet *descriptorSet) {
 void updateUniformBuffer(Vulkan *vulkan, DescriptorSet *descriptorSet,
                          uint32_t currentImage) {
 
-    // glm_rotate(vulkan->ubo.model, vulkan->window.dt * glm_rad(25.0f), GLM_ZUP);
+    // glm_rotate(vulkan->ubo.model, vulkan->window.dt * glm_rad(25.0f),
+    // GLM_ZUP);
 
     glm_rotate(vulkan->ubo.model, vulkan->window.mX * glm_rad(1.0) * 0.005,
                GLM_ZUP);
     glm_rotate(vulkan->ubo.model, -vulkan->window.mY * glm_rad(1.0) * 0.005,
                GLM_XUP);
 
-    // glm_lookat((vec3)VEC_3(2.0f), GLM_VEC3_ZERO, GLM_ZUP, vulkan->ubo.view);
-    glm_lookat((vec3){0.0f, 3.0f, 3.0f}, GLM_VEC3_ZERO, GLM_ZUP,
+    // glm_lookat((vec3){-3.0f, -2.0f, -2.0f}, GLM_VEC3_ZERO, GLM_ZUP,
+    //            vulkan->ubo.view);
+    glm_lookat((vec3){0.0f, 3.0f, 2.0f}, GLM_VEC3_ZERO, GLM_ZUP,
                vulkan->ubo.view);
+    glm_rotate(vulkan->ubo.view, GLM_PI, GLM_XUP);
 
     float aspectRatio = vulkan->swapchain.swapChainExtent->width /
                         (float)vulkan->swapchain.swapChainExtent->height;

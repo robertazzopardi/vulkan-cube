@@ -14,7 +14,8 @@
 void makeRing(Shape *shape, uint32_t sectorCount, float radius) {
     uint32_t stackCount = 2;
 
-    shape->vertices = malloc((sectorCount + 1) * 2 * sizeof(*shape->vertices));
+    uint32_t verticesCount = (sectorCount + 1) * 2;
+    shape->vertices = malloc(verticesCount * sizeof(*shape->vertices));
 
     float angle = 0;
     float angleStep = 180.0f / sectorCount;
@@ -24,8 +25,7 @@ void makeRing(Shape *shape, uint32_t sectorCount, float radius) {
     float y = 0;
     float z = 0;
     float nx, ny, nz;
-    float s, t;
-    float outsideRadius = 2;
+    float outsideRadius = 1;
     float insideRadius = 0.5;
 
     for (uint32_t i = 0; i <= sectorCount; i++) {
@@ -44,9 +44,7 @@ void makeRing(Shape *shape, uint32_t sectorCount, float radius) {
                       shape->vertices[shape->verticesCount].normal);
 
         // vertex tex coord (s, t) range between [0, 1]
-        s = (float)1 / sectorCount;
-        t = (float)i / stackCount;
-        glm_vec2_copy((vec2){t, s},
+        glm_vec2_copy((vec2){1, 1},
                       shape->vertices[shape->verticesCount].texCoord);
 
         glm_vec3_copy((vec3)WHITE,
@@ -71,9 +69,7 @@ void makeRing(Shape *shape, uint32_t sectorCount, float radius) {
                       shape->vertices[shape->verticesCount].normal);
 
         // vertex tex coord (s, t) range between [0, 1]
-        s = (float)1 / sectorCount;
-        t = (float)i / stackCount;
-        glm_vec2_copy((vec2){t, s},
+        glm_vec2_copy((vec2){0, 0},
                       shape->vertices[shape->verticesCount].texCoord);
 
         glm_vec3_copy((vec3)WHITE,

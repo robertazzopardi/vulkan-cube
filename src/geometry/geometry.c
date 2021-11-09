@@ -250,6 +250,8 @@ inline void generateShape(Vulkan *vulkan, ShapeType shapeType,
 
     vulkan->shapes[vulkan->shapeCount].graphicsPipeline.topology =
         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    vulkan->shapes[vulkan->shapeCount].graphicsPipeline.cullMode =
+        VK_CULL_MODE_BACK_BIT;
     vulkan->shapes[vulkan->shapeCount].indexed = true;
 
     switch (shapeType) {
@@ -257,7 +259,7 @@ inline void generateShape(Vulkan *vulkan, ShapeType shapeType,
         makeCube(vulkan);
         break;
     case SPHERE:
-        makeSphere(shape, 40, 40, 0.5);
+        makeSphere(shape, 60, 60, 0.4);
         break;
     case ICOSPHERE:
     case OCTASPHERE:
@@ -269,9 +271,11 @@ inline void generateShape(Vulkan *vulkan, ShapeType shapeType,
     case PLAIN:
         break;
     case RING:
-        makeRing(shape, 20, 2);
+        makeRing(shape, 60, 2);
         vulkan->shapes[vulkan->shapeCount].graphicsPipeline.topology =
             VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+        vulkan->shapes[vulkan->shapeCount].graphicsPipeline.cullMode =
+            VK_CULL_MODE_NONE;
         vulkan->shapes[vulkan->shapeCount].indexed = false;
     default:
         break;

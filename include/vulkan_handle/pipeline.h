@@ -12,6 +12,7 @@ typedef struct GraphicsPipeline {
     VkPipelineLayout pipelineLayout;
     VkPipeline graphicsPipeline;
     VkPrimitiveTopology topology;
+    VkCullModeFlagBits cullMode;
 } GraphicsPipeline;
 
 typedef struct Vulkan Vulkan;

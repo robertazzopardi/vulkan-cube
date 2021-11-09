@@ -12,7 +12,7 @@ void makeSphere(Shape *shape, uint32_t sectorCount, uint32_t stackCount,
                 float radius) {
 
     float x, y, z, xy;                           // vertex position
-    float nx, ny, nz, lengthInv = 0.5f / radius; // vertex normal
+    float nx, ny, nz, lengthInv = 1.0f / radius; // vertex normal
     float s, t;                                  // vertex texCoord
 
     float sectorStep = 2 * GLM_PIf / sectorCount;
@@ -25,8 +25,8 @@ void makeSphere(Shape *shape, uint32_t sectorCount, uint32_t stackCount,
 
     for (uint32_t i = 0; i <= stackCount; ++i) {
         stackAngle = GLM_PI_2f - i * stackStep; // starting from pi/2 to -pi/2
-        xy = radius * cos(stackAngle);         // r * cos(u)
-        z = radius * sin(stackAngle);          // r * sin(u)
+        xy = radius * cos(stackAngle);          // r * cos(u)
+        z = radius * sin(stackAngle);           // r * sin(u)
 
         // add (sectorCount+1) vertices per stack
         // the first and last vertices have same position and normal, but
