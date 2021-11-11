@@ -32,7 +32,7 @@ bool checkValidationLayerSupport() {
     return true;
 }
 
-VkBool32
+static inline VkBool32
 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
               VkDebugUtilsMessageTypeFlagsEXT messageType __unused,
               const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
@@ -47,7 +47,7 @@ debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
     return VK_FALSE;
 }
 
-void populateDebugMessengerCreateInfo(
+inline void populateDebugMessengerCreateInfo(
     VkDebugUtilsMessengerCreateInfoEXT *createInfo) {
     createInfo->sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
     createInfo->messageSeverity =
@@ -60,7 +60,7 @@ void populateDebugMessengerCreateInfo(
     createInfo->pfnUserCallback = debugCallback;
 }
 
-VkResult CreateDebugUtilsMessengerEXT(
+static inline VkResult CreateDebugUtilsMessengerEXT(
     VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
     const VkAllocationCallbacks *pAllocator,
     VkDebugUtilsMessengerEXT *pDebugMessenger) {
@@ -73,7 +73,7 @@ VkResult CreateDebugUtilsMessengerEXT(
     return VK_ERROR_EXTENSION_NOT_PRESENT;
 }
 
-void DestroyDebugUtilsMessengerEXT(VkInstance instance,
+inline void DestroyDebugUtilsMessengerEXT(VkInstance instance,
                                    VkDebugUtilsMessengerEXT debugMessenger,
                                    const VkAllocationCallbacks *pAllocator) {
     PFN_vkDestroyDebugUtilsMessengerEXT func =
@@ -84,7 +84,7 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance,
     }
 }
 
-void setupDebugMessenger(Vulkan *vulkan) {
+inline void setupDebugMessenger(Vulkan *vulkan) {
     if (!enableValidationLayers)
         return;
 

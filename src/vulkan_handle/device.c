@@ -9,7 +9,7 @@
 #include <string.h>
 #include <vulkan/vulkan.h>
 
-const uint32_t MAX_FAMILY = 1000;
+static const uint32_t MAX_FAMILY = 1000;
 
 static const char *deviceExtensions[] = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME,
@@ -22,8 +22,10 @@ static inline bool isComplete(QueueFamilyIndices queueFamilyIndices) {
 
 QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device,
                                      VkSurfaceKHR surface) {
-    QueueFamilyIndices queueFamilyIndices = {.graphicsFamily = MAX_FAMILY,
-                                             .presentFamily = MAX_FAMILY};
+    QueueFamilyIndices queueFamilyIndices = {
+        .graphicsFamily = MAX_FAMILY,
+        .presentFamily = MAX_FAMILY,
+    };
 
     uint32_t queueFamilyCount = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, NULL);
@@ -56,7 +58,7 @@ QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device,
     return queueFamilyIndices;
 }
 
-bool checkDeviceExtensionSupport(VkPhysicalDevice device) {
+static bool checkDeviceExtensionSupport(VkPhysicalDevice device) {
     uint32_t extensionCount;
     vkEnumerateDeviceExtensionProperties(device, NULL, &extensionCount, NULL);
 
@@ -90,7 +92,8 @@ bool checkDeviceExtensionSupport(VkPhysicalDevice device) {
     return empty;
 }
 
-bool isDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface) {
+static inline bool isDeviceSuitable(VkPhysicalDevice device,
+                                    VkSurfaceKHR surface) {
     QueueFamilyIndices queueFamilyIndices = findQueueFamilies(device, surface);
 
     bool extensionsSupported = checkDeviceExtensionSupport(device);
@@ -113,7 +116,7 @@ bool isDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface) {
            swapChainAdequate && supportedFeatures.samplerAnisotropy;
 }
 
-VkSampleCountFlagBits getMaxUsableSampleCount(Vulkan *vulkan) {
+static inline VkSampleCountFlagBits getMaxUsableSampleCount(Vulkan *vulkan) {
     VkPhysicalDeviceProperties physicalDeviceProperties;
     vkGetPhysicalDeviceProperties(vulkan->device.physicalDevice,
                                   &physicalDeviceProperties);
@@ -149,7 +152,7 @@ void pickPhysicalDevice(Vulkan *vulkan) {
     vkEnumeratePhysicalDevices(vulkan->instance, &deviceCount, NULL);
 
     if (deviceCount == 0) {
-        THROW_ERROR("failed to find GPUs with Vulkan support!\n");
+        THROW_ERROR("Failed to find GPUs with Vulkan support!\n");
     }
 
     VkPhysicalDevice devices[deviceCount];
@@ -172,8 +175,10 @@ void createLogicalDevice(Vulkan *vulkan) {
     QueueFamilyIndices queueFamilyIndices = findQueueFamilies(
         vulkan->device.physicalDevice, vulkan->window.surface);
 
-    uint32_t uniqueQueueFamilies[] = {queueFamilyIndices.graphicsFamily,
-                                      queueFamilyIndices.presentFamily};
+    uint32_t uniqueQueueFamilies[] = {
+        queueFamilyIndices.graphicsFamily,
+        queueFamilyIndices.presentFamily,
+    };
     VkDeviceQueueCreateInfo queueCreateInfos[SIZEOF(uniqueQueueFamilies)];
 
     float queuePriority = 1.0f;
@@ -187,11 +192,11 @@ void createLogicalDevice(Vulkan *vulkan) {
         queueCreateInfos[i] = queueCreateInfo;
     }
 
-    VkPhysicalDeviceFeatures deviceFeatures = {};
-    deviceFeatures.samplerAnisotropy = VK_TRUE;
-    // enable sample shading feature for the device
-    deviceFeatures.sampleRateShading = VK_TRUE;
-    deviceFeatures.fillModeNonSolid = VK_TRUE;
+    VkPhysicalDeviceFeatures deviceFeatures = {
+        .samplerAnisotropy = VK_TRUE,
+        .sampleRateShading = VK_TRUE,
+        .fillModeNonSolid = VK_TRUE,
+    };
 
     VkDeviceCreateInfo createInfo = {
         .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,

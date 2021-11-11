@@ -186,13 +186,6 @@ void cleanUpVulkan(Vulkan *vulkan) {
             vulkan->semaphores.imagesInFlight,
             vulkan->renderBuffers.commandBuffers, vulkan->shapes);
 
-    // for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
-    //     freeMem(4, vulkan->shapes[i].buffers.indexBuffer,
-    //             vulkan->shapes[i].buffers.indexBufferMemory,
-    //             vulkan->shapes[i].buffers.vertexBuffer,
-    //             vulkan->shapes[i].buffers.vertexBufferMemory);
-    // }
-
     vkDestroyCommandPool(vulkan->device.device,
                          vulkan->renderBuffers.commandPool, NULL);
 

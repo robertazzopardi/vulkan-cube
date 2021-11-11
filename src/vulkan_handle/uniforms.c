@@ -19,7 +19,8 @@ createDescriptorPoolSize(VkDescriptorType type, uint32_t count) {
     return poolSize;
 }
 
-void createDescriptorPool(Vulkan *vulkan, VkDescriptorPool *descriptorPool) {
+inline void createDescriptorPool(Vulkan *vulkan,
+                                 VkDescriptorPool *descriptorPool) {
     VkDescriptorPoolSize poolSizes[] = {
         createDescriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                  vulkan->swapchain.swapChainImagesCount),
@@ -27,11 +28,12 @@ void createDescriptorPool(Vulkan *vulkan, VkDescriptorPool *descriptorPool) {
                                  vulkan->swapchain.swapChainImagesCount),
     };
 
-    VkDescriptorPoolCreateInfo poolInfo = {};
-    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = SIZEOF(poolSizes);
-    poolInfo.pPoolSizes = poolSizes;
-    poolInfo.maxSets = vulkan->swapchain.swapChainImagesCount;
+    VkDescriptorPoolCreateInfo poolInfo = {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .poolSizeCount = SIZEOF(poolSizes),
+        .pPoolSizes = poolSizes,
+        .maxSets = vulkan->swapchain.swapChainImagesCount,
+    };
 
     if (vkCreateDescriptorPool(vulkan->device.device, &poolInfo, NULL,
                                descriptorPool) != VK_SUCCESS) {
@@ -117,7 +119,7 @@ createDescriptorSetLayoutBinding(VkDescriptorType dType,
     return layoutBinding;
 }
 
-void createDescriptorSetLayout(Vulkan *vulkan,
+inline void createDescriptorSetLayout(Vulkan *vulkan,
                                VkDescriptorSetLayout *descriptorSetLayout) {
     VkDescriptorSetLayoutBinding bindings[] = {
         createDescriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
@@ -127,10 +129,11 @@ void createDescriptorSetLayout(Vulkan *vulkan,
             VK_SHADER_STAGE_FRAGMENT_BIT, 1),
     };
 
-    VkDescriptorSetLayoutCreateInfo layoutInfo = {};
-    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = SIZEOF(bindings);
-    layoutInfo.pBindings = bindings;
+    VkDescriptorSetLayoutCreateInfo layoutInfo = {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        .bindingCount = SIZEOF(bindings),
+        .pBindings = bindings,
+    };
 
     if (vkCreateDescriptorSetLayout(vulkan->device.device, &layoutInfo, NULL,
                                     descriptorSetLayout) != VK_SUCCESS) {
@@ -138,7 +141,7 @@ void createDescriptorSetLayout(Vulkan *vulkan,
     }
 }
 
-void createUniformBuffers(Vulkan *vulkan, DescriptorSet *descriptorSet) {
+inline void createUniformBuffers(Vulkan *vulkan, DescriptorSet *descriptorSet) {
     descriptorSet->uniformBuffers =
         malloc(vulkan->swapchain.swapChainImagesCount *
                sizeof(*descriptorSet->uniformBuffers));
@@ -158,7 +161,7 @@ void createUniformBuffers(Vulkan *vulkan, DescriptorSet *descriptorSet) {
     glm_mat4_identity(vulkan->ubo.model);
 }
 
-void updateUniformBuffer(Vulkan *vulkan, DescriptorSet *descriptorSet,
+inline void updateUniformBuffer(Vulkan *vulkan, DescriptorSet *descriptorSet,
                          uint32_t currentImage) {
 
     // glm_rotate(vulkan->ubo.model, vulkan->window.dt * glm_rad(25.0f),

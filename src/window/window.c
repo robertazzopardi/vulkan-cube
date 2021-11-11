@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <vulkan/vulkan.h>
 
-// static const float FRAME_DELAY = 1000.0f / 60.0f;
 #define WIDTH_INIT 1280
 #define HEIGHT_INIT 720
 

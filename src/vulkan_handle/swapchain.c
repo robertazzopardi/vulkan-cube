@@ -11,15 +11,19 @@
 #include <stdlib.h>
 #include <vulkan/vulkan.h>
 
-VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR capabilities,
-                            SDL_Window *window) {
+static inline VkExtent2D
+chooseSwapExtent(const VkSurfaceCapabilitiesKHR capabilities,
+                 SDL_Window *window) {
     if (capabilities.currentExtent.width != UINT32_MAX) {
         return capabilities.currentExtent;
     } else {
         int width, height;
         SDL_GetWindowSize(window, &width, &height);
 
-        VkExtent2D actualExtent = {(uint32_t)width, (uint32_t)height};
+        VkExtent2D actualExtent = {
+            (uint32_t)width,
+            (uint32_t)height,
+        };
 
         glm_clamp(actualExtent.width, capabilities.minImageExtent.width,
                   capabilities.maxImageExtent.width);
@@ -32,12 +36,13 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR capabilities,
 
 SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device,
                                               VkSurfaceKHR surface) {
-    SwapChainSupportDetails details = {0};
-    details.formats = NULL;
-    details.presentModes = NULL;
-    details.formatCount = 0;
-    details.presentModeCount = 0;
-    details.capabilities = malloc(1 * sizeof(*details.capabilities));
+    SwapChainSupportDetails details = {
+        .formats = NULL,
+        .presentModes = NULL,
+        .formatCount = 0,
+        .presentModeCount = 0,
+        .capabilities = malloc(1 * sizeof(*details.capabilities)),
+    };
 
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface,
                                               details.capabilities);
@@ -87,10 +92,10 @@ void recreateSwapChain(Vulkan *vulkan) {
     createSwapChain(vulkan);
     createImageViews(vulkan);
     createRenderPass(vulkan);
-    // createGraphicsPipeline(vulkan);
     createColorResources(vulkan);
     createDepthResources(vulkan);
     createFramebuffers(vulkan);
+
     for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
         createGraphicsPipeline(
             vulkan, &vulkan->shapes[i].descriptorSet.descriptorSetLayout,
@@ -102,20 +107,16 @@ void recreateSwapChain(Vulkan *vulkan) {
                              &vulkan->shapes[i].texture);
     }
 
-    // createUniformBuffers(vulkan);
-    // createDescriptorPool(vulkan);
-    // createDescriptorSets(vulkan);
     createCommandBuffers(vulkan);
 
     freeMem(1, vulkan->semaphores.imagesInFlight);
 
     vulkan->semaphores.imagesInFlight =
-        calloc(vulkan->swapchain.swapChainImagesCount,
-               sizeof(*vulkan->semaphores.imagesInFlight));
+        malloc(1 * sizeof(*vulkan->semaphores.imagesInFlight));
 }
 
-VkPresentModeKHR chooseSwapPresentMode(VkPresentModeKHR *availablePresentModes,
-                                       uint32_t count) {
+static inline VkPresentModeKHR
+chooseSwapPresentMode(VkPresentModeKHR *availablePresentModes, uint32_t count) {
     for (uint32_t i = 0; i < count; i++) {
         if (availablePresentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR) {
             return availablePresentModes[i];
@@ -125,8 +126,8 @@ VkPresentModeKHR chooseSwapPresentMode(VkPresentModeKHR *availablePresentModes,
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-VkSurfaceFormatKHR chooseSwapSurfaceFormat(VkSurfaceFormatKHR *availableFormats,
-                                           uint32_t count) {
+static inline VkSurfaceFormatKHR
+chooseSwapSurfaceFormat(VkSurfaceFormatKHR *availableFormats, uint32_t count) {
     for (uint32_t i = 0; i < count; i++) {
         if (availableFormats[i].format == VK_FORMAT_B8G8R8A8_SRGB &&
             availableFormats[i].colorSpace ==
@@ -167,6 +168,11 @@ void createSwapChain(Vulkan *vulkan) {
         .imageExtent = extent,
         .imageArrayLayers = 1,
         .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+        .preTransform = swapChainSupport.capabilities->currentTransform,
+        .compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
+        .presentMode = presentMode,
+        .clipped = VK_TRUE,
+        .oldSwapchain = VK_NULL_HANDLE,
     };
 
     QueueFamilyIndices queueFamilyIndices = findQueueFamilies(
@@ -176,19 +182,14 @@ void createSwapChain(Vulkan *vulkan) {
         createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
         createInfo.queueFamilyIndexCount = 2;
 
-        uint32_t queueFamilyIndicesArr[] = {queueFamilyIndices.graphicsFamily,
-                                            queueFamilyIndices.presentFamily};
+        uint32_t queueFamilyIndicesArr[] = {
+            queueFamilyIndices.graphicsFamily,
+            queueFamilyIndices.presentFamily,
+        };
         createInfo.pQueueFamilyIndices = queueFamilyIndicesArr;
     } else {
         createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
     }
-
-    createInfo.preTransform = swapChainSupport.capabilities->currentTransform;
-    createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-    createInfo.presentMode = presentMode;
-    createInfo.clipped = VK_TRUE;
-
-    createInfo.oldSwapchain = VK_NULL_HANDLE;
 
     if (vkCreateSwapchainKHR(vulkan->device.device, &createInfo, NULL,
                              &vulkan->swapchain.swapChain) != VK_SUCCESS) {
@@ -244,10 +245,7 @@ void cleanupSwapChain(Vulkan *vulkan) {
                                 vulkan->shapes[i].descriptorSet.descriptorPool,
                                 NULL);
     }
-    // vkDestroyPipeline(vulkan->device.device,
-    //                   vulkan->graphicsPipeline.graphicsPipeline, NULL);
-    // vkDestroyPipelineLayout(vulkan->device.device,
-    //                         vulkan->graphicsPipeline.pipelineLayout, NULL);
+
     vkDestroyRenderPass(vulkan->device.device, vulkan->renderPass, NULL);
 
     vkDestroySwapchainKHR(vulkan->device.device, vulkan->swapchain.swapChain,
@@ -274,29 +272,10 @@ void cleanupSwapChain(Vulkan *vulkan) {
 
         vkDestroyImageView(vulkan->device.device,
                            vulkan->swapchain.swapChainImageViews[i], NULL);
-
-        // vkDestroyBuffer(vulkan->device.device,
-        //                 vulkan->descriptorSet.uniformBuffers[i], NULL);
-
-        // vkFreeMemory(vulkan->device.device,
-        //              vulkan->descriptorSet.uniformBuffersMemory[i], NULL);
-
-        // vkDestroyBuffer(vulkan->device.device,
-        //                 vulkan->descriptorSet.lightBlock[i], NULL);
-
-        // vkFreeMemory(vulkan->device.device,
-        //              vulkan->descriptorSet.lightBlockMemory[i], NULL);
     }
 
     freeMem(4, vulkan->renderBuffers.swapChainFramebuffers,
             vulkan->swapchain.swapChainImageViews,
-            // vulkan->descriptorSet.uniformBuffers,
-            // vulkan->descriptorSet.uniformBuffersMemory,
-            // vulkan->descriptorSet.lightBlock,
-            // vulkan->descriptorSet.lightBlockMemory,
             vulkan->swapchain.swapChainImageFormat,
             vulkan->swapchain.swapChainExtent);
-
-    // vkDestroyDescriptorPool(vulkan->device.device,
-    // vulkan->descriptorSet.descriptorPool, NULL);
 }

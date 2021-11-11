@@ -6,8 +6,9 @@
 #include "vulkan_handle/vulkan_handle.h"
 #include <vulkan/vulkan.h>
 
-void createShaderModule(unsigned char *code, uint32_t length, VkDevice device,
-                        VkShaderModule *shaderModule) {
+static inline void createShaderModule(unsigned char *code, uint32_t length,
+                                      VkDevice device,
+                                      VkShaderModule *shaderModule) {
     VkShaderModuleCreateInfo createInfo = {
         .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
         .codeSize = length,
@@ -37,12 +38,12 @@ void createGraphicsPipeline(Vulkan *vulkan,
 
     VkShaderModule vertShaderModule;
     createShaderModule(SRC_SHADERS_LIGHT_TEXTURE_VERT_SPV,
-                       SRC_SHADERS_LIGHT_TEXTURE_VERT_SPV_LEN, vulkan->device.device,
-                       &vertShaderModule);
+                       SRC_SHADERS_LIGHT_TEXTURE_VERT_SPV_LEN,
+                       vulkan->device.device, &vertShaderModule);
     VkShaderModule fragShaderModule;
     createShaderModule(SRC_SHADERS_LIGHT_TEXTURE_FRAG_SPV,
-                       SRC_SHADERS_LIGHT_TEXTURE_FRAG_SPV_LEN, vulkan->device.device,
-                       &fragShaderModule);
+                       SRC_SHADERS_LIGHT_TEXTURE_FRAG_SPV_LEN,
+                       vulkan->device.device, &fragShaderModule);
 
     VkPipelineShaderStageCreateInfo shaderStages[] = {
         createPipelineShaderInfo(VK_SHADER_STAGE_VERTEX_BIT, vertShaderModule),
@@ -65,8 +66,6 @@ void createGraphicsPipeline(Vulkan *vulkan,
 
     VkPipelineInputAssemblyStateCreateInfo inputAssembly = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
-        // .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-        // .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP,
         .topology = graphicsPipeline->topology,
         .primitiveRestartEnable = VK_FALSE,
     };
@@ -101,7 +100,6 @@ void createGraphicsPipeline(Vulkan *vulkan,
         // .polygonMode = VK_POLYGON_MODE_LINE,
         // .polygonMode = VK_POLYGON_MODE_POINT,
         .lineWidth = 1.0f,
-        // .cullMode = VK_CULL_MODE_BACK_BIT,
         .cullMode = graphicsPipeline->cullMode,
         .frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
         .depthBiasEnable = VK_FALSE,
@@ -109,11 +107,9 @@ void createGraphicsPipeline(Vulkan *vulkan,
 
     VkPipelineMultisampleStateCreateInfo multisampling = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
-        // .sampleShadingEnable = VK_FALSE,
         .rasterizationSamples = vulkan->msaaSamples,
         .sampleShadingEnable = VK_TRUE, // enable sample shading in the pipeline
-        .minSampleShading =
-            .2f, // min fraction for sample shading; closer to one is smoother
+        .minSampleShading = .2f,
         .pSampleMask = NULL,               // Optional
         .alphaToCoverageEnable = VK_FALSE, // Optional
         .alphaToOneEnable = VK_FALSE,      // Optional
@@ -203,10 +199,10 @@ void createGraphicsPipeline(Vulkan *vulkan,
     freeMem(1, attributeDescriptions);
 }
 
-VkFormat findSupportedFormat(const VkFormat *candidates, size_t length,
-                             VkImageTiling tiling,
-                             VkFormatFeatureFlags features,
-                             VkPhysicalDevice physicalDevice) {
+static inline VkFormat findSupportedFormat(const VkFormat *candidates,
+                                           size_t length, VkImageTiling tiling,
+                                           VkFormatFeatureFlags features,
+                                           VkPhysicalDevice physicalDevice) {
     for (size_t i = 0; i < length; i++) {
         VkFormatProperties props;
         vkGetPhysicalDeviceFormatProperties(physicalDevice, candidates[i],
@@ -225,8 +221,11 @@ VkFormat findSupportedFormat(const VkFormat *candidates, size_t length,
 }
 
 inline VkFormat findDepthFormat(Vulkan *vulkan) {
-    VkFormat candidates[] = {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT,
-                             VK_FORMAT_D24_UNORM_S8_UINT};
+    VkFormat candidates[] = {
+        VK_FORMAT_D32_SFLOAT,
+        VK_FORMAT_D32_SFLOAT_S8_UINT,
+        VK_FORMAT_D24_UNORM_S8_UINT,
+    };
     return findSupportedFormat(candidates, SIZEOF(candidates),
                                VK_IMAGE_TILING_OPTIMAL,
                                VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT,
@@ -234,80 +233,89 @@ inline VkFormat findDepthFormat(Vulkan *vulkan) {
 }
 
 void createRenderPass(Vulkan *vulkan) {
-    VkAttachmentDescription colorAttachment = {};
-    colorAttachment.format = *vulkan->swapchain.swapChainImageFormat;
-    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-    colorAttachment.samples = vulkan->msaaSamples;
+    VkAttachmentDescription colorAttachment = {
+        .format = *vulkan->swapchain.swapChainImageFormat,
+        .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+        .storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+        .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+        .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+        .finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        .samples = vulkan->msaaSamples,
+    };
 
-    VkAttachmentDescription depthAttachment = {};
-    depthAttachment.format = findDepthFormat(vulkan);
-    depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    depthAttachment.finalLayout =
-        VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-    depthAttachment.samples = vulkan->msaaSamples;
+    VkAttachmentDescription depthAttachment = {
+        .format = findDepthFormat(vulkan),
+        .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+        .storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+        .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+        .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+        .finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+        .samples = vulkan->msaaSamples,
+    };
 
-    VkAttachmentDescription colorAttachmentResolve = {};
-    colorAttachmentResolve.format = *vulkan->swapchain.swapChainImageFormat;
-    colorAttachmentResolve.samples = VK_SAMPLE_COUNT_1_BIT;
-    colorAttachmentResolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    colorAttachmentResolve.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    colorAttachmentResolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    colorAttachmentResolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    colorAttachmentResolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachmentResolve.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    VkAttachmentDescription colorAttachmentResolve = {
+        .format = *vulkan->swapchain.swapChainImageFormat,
+        .samples = VK_SAMPLE_COUNT_1_BIT,
+        .loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+        .storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+        .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+        .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+        .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+    };
 
-    VkAttachmentReference colorAttachmentRef = {};
-    colorAttachmentRef.attachment = 0;
-    colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    VkAttachmentReference colorAttachmentRef = {
+        .attachment = 0,
+        .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+    };
 
-    VkAttachmentReference depthAttachmentRef = {};
-    depthAttachmentRef.attachment = 1;
-    depthAttachmentRef.layout =
-        VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    VkAttachmentReference depthAttachmentRef = {
+        .attachment = 1,
+        .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+    };
 
-    VkAttachmentReference colorAttachmentResolveRef = {};
-    colorAttachmentResolveRef.attachment = 2;
-    colorAttachmentResolveRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    VkAttachmentReference colorAttachmentResolveRef = {
+        .attachment = 2,
+        .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+    };
 
-    VkSubpassDescription subpass = {};
-    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass.colorAttachmentCount = 1;
-    subpass.pColorAttachments = &colorAttachmentRef;
-    subpass.pDepthStencilAttachment = &depthAttachmentRef;
-    subpass.pResolveAttachments = &colorAttachmentResolveRef;
+    VkSubpassDescription subpass = {
+        .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+        .colorAttachmentCount = 1,
+        .pColorAttachments = &colorAttachmentRef,
+        .pDepthStencilAttachment = &depthAttachmentRef,
+        .pResolveAttachments = &colorAttachmentResolveRef,
+    };
 
-    VkSubpassDependency dependency = {};
-    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-    dependency.dstSubpass = 0;
-    dependency.srcAccessMask = 0;
-    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-                              VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-                              VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
-                               VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+    VkSubpassDependency dependency = {
+        .srcSubpass = VK_SUBPASS_EXTERNAL,
+        .dstSubpass = 0,
+        .srcAccessMask = 0,
+        .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
+                        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
+                        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+        .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
+                         VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+    };
 
-    VkAttachmentDescription attachments[] = {colorAttachment, depthAttachment,
-                                             colorAttachmentResolve};
-    VkRenderPassCreateInfo renderPassInfo = {};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    renderPassInfo.attachmentCount = SIZEOF(attachments);
-    renderPassInfo.pAttachments = attachments;
-    renderPassInfo.subpassCount = 1;
-    renderPassInfo.pSubpasses = &subpass;
-    renderPassInfo.dependencyCount = 1;
-    renderPassInfo.pDependencies = &dependency;
+    VkAttachmentDescription attachments[] = {
+        colorAttachment,
+        depthAttachment,
+        colorAttachmentResolve,
+    };
+
+    VkRenderPassCreateInfo renderPassInfo = {
+        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
+        .attachmentCount = SIZEOF(attachments),
+        .pAttachments = attachments,
+        .subpassCount = 1,
+        .pSubpasses = &subpass,
+        .dependencyCount = 1,
+        .pDependencies = &dependency,
+    };
 
     if (vkCreateRenderPass(vulkan->device.device, &renderPassInfo, NULL,
                            &vulkan->renderPass) != VK_SUCCESS) {

@@ -3,7 +3,10 @@
 
 #include <stdbool.h>
 
-static const char *validationLayers[] = {"VK_LAYER_KHRONOS_validation"};
+static const char *validationLayers[] = {
+    "VK_LAYER_KHRONOS_validation",
+    // "VK_LAYER_LUNARG_monitor",
+};
 
 // #define NDEBUG
 #ifdef NDEBUG
