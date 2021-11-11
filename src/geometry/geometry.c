@@ -17,7 +17,7 @@
 #include <string.h>
 #include <vulkan/vulkan.h>
 
-static const struct Shape EmptyStruct;
+static const struct Shape EmptyShape;
 
 inline void getMiddlePoint(vec3 point1, vec3 point2, vec3 res) {
     res[0] = (point1[0] + point2[0]) / 2.0f;
@@ -244,7 +244,7 @@ inline void generateShape(Vulkan *vulkan, ShapeType shapeType,
 
     vulkan->shapes = realloc(vulkan->shapes, (vulkan->shapeCount + 1) *
                                                  sizeof(*vulkan->shapes));
-    vulkan->shapes[vulkan->shapeCount] = EmptyStruct;
+    vulkan->shapes[vulkan->shapeCount] = EmptyShape;
 
     Shape *shape = &vulkan->shapes[vulkan->shapeCount];
 

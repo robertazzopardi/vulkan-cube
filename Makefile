@@ -150,7 +150,7 @@ compile_shaders: clean_shaders
 # done
 # echo include${$(dirname src/shaders/texture/shader.vert)#*src}
 
-	for texture_type in light texture vertex ; do \
+	for texture_type in light texture vertex light_texture ; do \
 		GLSLC $(SRC)/shaders/$$texture_type/shader.vert -o $(SRC)/shaders/$$texture_type/vert.spv ; \
 		GLSLC $(SRC)/shaders/$$texture_type/shader.frag -o $(SRC)/shaders/$$texture_type/frag.spv ; \
 		$(MD) -p $(INCLUDE)/shaders/$$texture_type ; \

@@ -36,12 +36,12 @@ void createGraphicsPipeline(Vulkan *vulkan,
                             GraphicsPipeline *graphicsPipeline) {
 
     VkShaderModule vertShaderModule;
-    createShaderModule(SRC_SHADERS_TEXTURE_VERT_SPV,
-                       SRC_SHADERS_TEXTURE_VERT_SPV_LEN, vulkan->device.device,
+    createShaderModule(SRC_SHADERS_LIGHT_TEXTURE_VERT_SPV,
+                       SRC_SHADERS_LIGHT_TEXTURE_VERT_SPV_LEN, vulkan->device.device,
                        &vertShaderModule);
     VkShaderModule fragShaderModule;
-    createShaderModule(SRC_SHADERS_TEXTURE_FRAG_SPV,
-                       SRC_SHADERS_TEXTURE_FRAG_SPV_LEN, vulkan->device.device,
+    createShaderModule(SRC_SHADERS_LIGHT_TEXTURE_FRAG_SPV,
+                       SRC_SHADERS_LIGHT_TEXTURE_FRAG_SPV_LEN, vulkan->device.device,
                        &fragShaderModule);
 
     VkPipelineShaderStageCreateInfo shaderStages[] = {
