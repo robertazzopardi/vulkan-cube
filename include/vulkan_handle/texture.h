@@ -29,12 +29,7 @@ void createImageViews(Vulkan *);
 
 void createColorResources(Vulkan *);
 
-typedef struct VkBuffer_T *VkBuffer;
-void copyBufferToImage(Vulkan *, VkBuffer, VkImage, uint32_t, uint32_t);
-
 typedef enum VkFormat VkFormat;
-void generateMipmaps(Vulkan *, VkImage, VkFormat, int, int, uint32_t);
-
 typedef struct VkDevice_T *VkDevice;
 typedef uint32_t VkFlags;
 typedef VkFlags VkImageAspectFlags;

@@ -7,8 +7,9 @@
 #include <cglm/util.h>
 #include <vulkan/vulkan.h>
 
-void copyBufferToImage(Vulkan *vulkan, VkBuffer buffer, VkImage image,
-                       uint32_t width, uint32_t height) {
+static inline void copyBufferToImage(Vulkan *vulkan, VkBuffer buffer,
+                                     VkImage image, uint32_t width,
+                                     uint32_t height) {
     VkCommandBuffer commandBuffer = beginSingleTimeCommands(vulkan);
 
     VkBufferImageCopy region = {
@@ -76,8 +77,9 @@ static void transitionImageLayout(Vulkan *vulkan, VkImage image,
     endSingleTimeCommands(vulkan, commandBuffer);
 }
 
-void generateMipmaps(Vulkan *vulkan, VkImage image, VkFormat imageFormat,
-                     int32_t texWidth, int32_t texHeight, uint32_t mipLevels) {
+static void generateMipmaps(Vulkan *vulkan, VkImage image, VkFormat imageFormat,
+                            int32_t texWidth, int32_t texHeight,
+                            uint32_t mipLevels) {
     // Check if image format supports linear blitting
     VkFormatProperties formatProperties;
     vkGetPhysicalDeviceFormatProperties(vulkan->device.physicalDevice,
@@ -163,7 +165,7 @@ void generateMipmaps(Vulkan *vulkan, VkImage image, VkFormat imageFormat,
     endSingleTimeCommands(vulkan, commandBuffer);
 }
 
-void createTextureImageView(Vulkan *vulkan) {
+inline void createTextureImageView(Vulkan *vulkan) {
     vulkan->shapes[vulkan->shapeCount].texture.textureImageView =
         createImageView(vulkan->device.device,
                         vulkan->shapes[vulkan->shapeCount].texture.textureImage,
@@ -171,7 +173,7 @@ void createTextureImageView(Vulkan *vulkan) {
                         vulkan->shapes[vulkan->shapeCount].texture.mipLevels);
 }
 
-void createTextureSampler(Vulkan *vulkan) {
+inline void createTextureSampler(Vulkan *vulkan) {
     VkPhysicalDeviceProperties properties = {};
     vkGetPhysicalDeviceProperties(vulkan->device.physicalDevice, &properties);
 
@@ -203,10 +205,6 @@ void createTextureSampler(Vulkan *vulkan) {
 }
 
 void createTextureImage(Vulkan *vulkan, const char *fileName) {
-    // SDL_Surface *image = IMG_Load("/Users/rob/Downloads/2k_saturn.jpg");
-    // SDL_Surface *image = IMG_Load("/Users/rob/Downloads/2k_jupiter.jpg");
-    // SDL_Surface *image =
-    //     IMG_Load("/Users/rob/Downloads/2k_saturn_ring_alpha.png");
     SDL_Surface *image = IMG_Load(fileName);
 
     // convert to desired format
@@ -311,9 +309,10 @@ void createImage(uint32_t width, uint32_t height, uint32_t mipLevels,
     vkBindImageMemory(vulkan->device.device, *image, *imageMemory, 0);
 }
 
-VkImageView createImageView(VkDevice device, VkImage image, VkFormat format,
-                            VkImageAspectFlags aspectFlags,
-                            uint32_t mipLevels) {
+inline VkImageView createImageView(VkDevice device, VkImage image,
+                                   VkFormat format,
+                                   VkImageAspectFlags aspectFlags,
+                                   uint32_t mipLevels) {
     VkImageViewCreateInfo viewInfo = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
         .image = image,
@@ -334,7 +333,7 @@ VkImageView createImageView(VkDevice device, VkImage image, VkFormat format,
     return imageView;
 }
 
-void createImageViews(Vulkan *vulkan) {
+inline void createImageViews(Vulkan *vulkan) {
     vulkan->swapchain.swapChainImageViews =
         malloc(vulkan->swapchain.swapChainImagesCount *
                sizeof(*vulkan->swapchain.swapChainImageViews));
@@ -347,7 +346,7 @@ void createImageViews(Vulkan *vulkan) {
     }
 }
 
-void createColorResources(Vulkan *vulkan) {
+inline void createColorResources(Vulkan *vulkan) {
     VkFormat colorFormat = *vulkan->swapchain.swapChainImageFormat;
 
     createImage(vulkan->swapchain.swapChainExtent->width,
@@ -364,7 +363,7 @@ void createColorResources(Vulkan *vulkan) {
                         VK_IMAGE_ASPECT_COLOR_BIT, 1);
 }
 
-VkCommandBuffer beginSingleTimeCommands(Vulkan *vulkan) {
+inline VkCommandBuffer beginSingleTimeCommands(Vulkan *vulkan) {
     VkCommandBufferAllocateInfo allocInfo = {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
         .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
@@ -384,7 +383,8 @@ VkCommandBuffer beginSingleTimeCommands(Vulkan *vulkan) {
     return commandBuffer;
 }
 
-void endSingleTimeCommands(Vulkan *vulkan, VkCommandBuffer commandBuffer) {
+inline void endSingleTimeCommands(Vulkan *vulkan,
+                                  VkCommandBuffer commandBuffer) {
     vkEndCommandBuffer(commandBuffer);
 
     VkSubmitInfo submitInfo = {

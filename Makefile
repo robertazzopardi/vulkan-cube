@@ -4,7 +4,6 @@
 #
 
 # define the C compiler to use
-# CC = gcc
 CC = clang
 
 # Acess vulkan sdk path and point to the glslc shader compiler
@@ -121,7 +120,6 @@ clean: clean_shaders
 	$(RM) $(OUTPUTLIB)
 	$(RM) $(OUTPUTMAIN)
 	$(RM) -rf $(BUILD)
-# $(RM) $(call FIXPATH,$(BUILDOBJECTSOUT))
 	$(RM) *.plist
 	@echo Cleanup complete!
 

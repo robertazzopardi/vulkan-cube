@@ -11,13 +11,16 @@
 void makeSphere(Shape *shape, uint32_t sectorCount, uint32_t stackCount,
                 float radius) {
 
-    float x, y, z, xy;                           // vertex position
-    float nx, ny, nz, lengthInv = 1.0f / radius; // vertex normal
-    float s, t;                                  // vertex texCoord
+    float xy;                        // vertex position
+    float lengthInv = 1.0f / radius; // vertex normal
 
     float sectorStep = 2 * GLM_PIf / sectorCount;
     float stackStep = GLM_PIf / stackCount;
     float sectorAngle, stackAngle;
+
+    vec3 p = GLM_VEC3_ZERO_INIT;
+    vec3 n = GLM_VEC3_ZERO_INIT;
+    vec2 t = GLM_VEC2_ZERO_INIT;
 
     shape->vertices =
         malloc((shape->verticesCount + (sectorCount + 1) * (stackCount + 1)) *
@@ -26,7 +29,7 @@ void makeSphere(Shape *shape, uint32_t sectorCount, uint32_t stackCount,
     for (uint32_t i = 0; i <= stackCount; ++i) {
         stackAngle = GLM_PI_2f - i * stackStep; // starting from pi/2 to -pi/2
         xy = radius * cos(stackAngle);          // r * cos(u)
-        z = radius * sin(stackAngle);           // r * sin(u)
+        p[2] = radius * sin(stackAngle);        // r * sin(u)
 
         // add (sectorCount+1) vertices per stack
         // the first and last vertices have same position and normal, but
@@ -35,23 +38,18 @@ void makeSphere(Shape *shape, uint32_t sectorCount, uint32_t stackCount,
             sectorAngle = j * sectorStep; // starting from 0 to 2pi
 
             // vertex position (x, y, z)
-            x = xy * cos(sectorAngle); // r * cos(u) * cos(v)
-            y = xy * sin(sectorAngle); // r * cos(u) * sin(v)
-            glm_vec3_copy((vec3){x, y, z},
-                          shape->vertices[shape->verticesCount].pos);
+            p[0] = xy * cos(sectorAngle); // r * cos(u) * cos(v)
+            p[1] = xy * sin(sectorAngle); // r * cos(u) * sin(v)
+            glm_vec3_copy(p, shape->vertices[shape->verticesCount].pos);
 
             // normalized vertex normal (nx, ny, nz)
-            nx = x * lengthInv;
-            ny = y * lengthInv;
-            nz = z * lengthInv;
-            glm_vec3_copy((vec3){nx, ny, nz},
-                          shape->vertices[shape->verticesCount].normal);
+            glm_vec3_scale(p, lengthInv, n);
+            glm_vec3_copy(n, shape->vertices[shape->verticesCount].normal);
 
             // vertex tex coord (s, t) range between [0, 1]
-            s = (float)j / sectorCount;
-            t = (float)i / stackCount;
-            glm_vec2_copy((vec2){s, t},
-                          shape->vertices[shape->verticesCount].texCoord);
+            t[0] = (float)j / sectorCount;
+            t[1] = (float)i / stackCount;
+            glm_vec2_copy(t, shape->vertices[shape->verticesCount].texCoord);
 
             glm_vec3_copy((vec3)WHITE,
                           shape->vertices[shape->verticesCount].colour);
