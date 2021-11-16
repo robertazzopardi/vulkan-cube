@@ -116,9 +116,11 @@ void createFramebuffers(Vulkan *vulkan) {
                sizeof(*vulkan->renderBuffers.swapChainFramebuffers));
 
     for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
-        VkImageView attachments[] = {vulkan->colorImageView,
-                                     vulkan->depth.depthImageView,
-                                     vulkan->swapchain.swapChainImageViews[i]};
+        VkImageView attachments[] = {
+            vulkan->colorImageView,
+            vulkan->depth.depthImageView,
+            vulkan->swapchain.swapChainImageViews[i],
+        };
 
         VkFramebufferCreateInfo framebufferInfo = {};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;

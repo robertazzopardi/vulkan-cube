@@ -16,7 +16,6 @@
 
 void createInstance(Vulkan *vulkan) {
     vulkan->device.physicalDevice = VK_NULL_HANDLE;
-    vulkan->msaaSamples = VK_SAMPLE_COUNT_1_BIT;
 
     if (enableValidationLayers && !checkValidationLayerSupport()) {
         THROW_ERROR("validation layers requested, but not available!\n");
@@ -96,12 +95,12 @@ void initVulkan(Vulkan *vulkan) {
 
     createCommandPool(vulkan);
 
-    // generateShape(vulkan, CUBE, "/Users/rob/Downloads/2k_saturn.jpg");
-    generateShape(vulkan, SPHERE, "/Users/rob/Downloads/2k_saturn.jpg");
+    generateShape(vulkan, CUBE, "/Users/rob/Downloads/2k_saturn.jpg");
+    // generateShape(vulkan, SPHERE, "/Users/rob/Downloads/2k_saturn.jpg");
     // generateShape(vulkan, CIRCLE,
     //               "/Users/rob/Downloads/2k_saturn_ring_alpha.png");
-    generateShape(vulkan, RING,
-                  "/Users/rob/Downloads/2k_saturn_ring_alpha.png");
+    // generateShape(vulkan, RING,
+                //   "/Users/rob/Downloads/2k_saturn_ring_alpha.png");
 
     bindVertexAndIndexBuffers(vulkan);
 
@@ -203,8 +202,9 @@ void cleanUpVulkan(Vulkan *vulkan) {
 inline Vulkan initialise() {
     initSDL();
 
-    Vulkan vulkan = {0};
-    vulkan.window = createWindow();
+    Vulkan vulkan = {
+        .window = createWindow(),
+    };
 
     initVulkan(&vulkan);
 

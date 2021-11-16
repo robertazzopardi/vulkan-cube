@@ -79,17 +79,17 @@ void createDescriptorSets(Vulkan *vulkan, DescriptorSet *descriptorSet,
         THROW_ERROR("failed to allocate descriptor sets!\n");
     }
 
+    VkDescriptorImageInfo imageInfo = {
+        .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+        .imageView = texture->textureImageView,
+        .sampler = texture->textureSampler,
+    };
+
     for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
         VkDescriptorBufferInfo bufferInfo = {
             .buffer = descriptorSet->uniformBuffers[i],
             .offset = 0,
             .range = sizeof(UniformBufferObject),
-        };
-
-        VkDescriptorImageInfo imageInfo = {
-            .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-            .imageView = texture->textureImageView,
-            .sampler = texture->textureSampler,
         };
 
         VkWriteDescriptorSet descriptorWrites[] = {
@@ -119,8 +119,9 @@ createDescriptorSetLayoutBinding(VkDescriptorType dType,
     return layoutBinding;
 }
 
-inline void createDescriptorSetLayout(Vulkan *vulkan,
-                               VkDescriptorSetLayout *descriptorSetLayout) {
+inline void
+createDescriptorSetLayout(Vulkan *vulkan,
+                          VkDescriptorSetLayout *descriptorSetLayout) {
     VkDescriptorSetLayoutBinding bindings[] = {
         createDescriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                          VK_SHADER_STAGE_VERTEX_BIT, 0),
@@ -162,7 +163,7 @@ inline void createUniformBuffers(Vulkan *vulkan, DescriptorSet *descriptorSet) {
 }
 
 inline void updateUniformBuffer(Vulkan *vulkan, DescriptorSet *descriptorSet,
-                         uint32_t currentImage) {
+                                uint32_t currentImage) {
 
     // glm_rotate(vulkan->ubo.model, vulkan->window.dt * glm_rad(25.0f),
     // GLM_ZUP);

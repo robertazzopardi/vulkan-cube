@@ -227,11 +227,11 @@ void createTextureImage(Vulkan *vulkan, const char *fileName) {
                      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                  vulkan, &stagingBuffer, &stagingBufferMemory);
 
-    void *data;
-    vkMapMemory(vulkan->device.device, stagingBufferMemory, 0, imageSize, 0,
-                &data);
-    memcpy(data, image->pixels, (size_t)imageSize);
-    vkUnmapMemory(vulkan->device.device, stagingBufferMemory);
+    // void *data;
+    // vkMapMemory(vulkan->device.device, stagingBufferMemory, 0, imageSize, 0,
+    //             &data);
+    // memcpy(data, image->pixels, (size_t)imageSize);
+    // vkUnmapMemory(vulkan->device.device, stagingBufferMemory);
     mapMemory(vulkan->device.device, stagingBufferMemory, imageSize,
               image->pixels);
 

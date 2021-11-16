@@ -69,6 +69,13 @@ void createCommandBuffers(Vulkan *vulkan) {
     renderPassInfo.renderArea.offset = (VkOffset2D){0, 0};
     renderPassInfo.renderArea.extent = *vulkan->swapchain.swapChainExtent;
 
+    VkClearValue clearValues[] = {
+        {.color = {{0.0f, 0.0f, 0.0f, 1.0f}}},
+        {{{1.0f, 0}}},
+    };
+
+    VkDeviceSize offsets[] = {0};
+
     for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
 
         if (vkBeginCommandBuffer(vulkan->renderBuffers.commandBuffers[i],
@@ -78,11 +85,6 @@ void createCommandBuffers(Vulkan *vulkan) {
 
         renderPassInfo.framebuffer =
             vulkan->renderBuffers.swapChainFramebuffers[i];
-
-        VkClearValue clearValues[] = {
-            {.color = {{0.0f, 0.0f, 0.0f, 1.0f}}},
-            {{{1.0f, 0}}},
-        };
 
         renderPassInfo.clearValueCount = SIZEOF(clearValues);
         renderPassInfo.pClearValues = clearValues;
@@ -96,23 +98,24 @@ void createCommandBuffers(Vulkan *vulkan) {
         vkCmdSetScissor(vulkan->renderBuffers.commandBuffers[i], 0, 1,
                         &scissor);
 
-        VkDeviceSize offsets[] = {0};
         for (uint32_t j = 0; j < vulkan->shapeCount; j++) {
             vkCmdBindPipeline(
                 vulkan->renderBuffers.commandBuffers[i],
                 VK_PIPELINE_BIND_POINT_GRAPHICS,
                 vulkan->shapes[j].graphicsPipeline.graphicsPipeline);
 
-            VkBuffer vertexBuffers[] = {vulkan->shapeBuffers.vertexBuffer[j]};
-
-            vkCmdBindVertexBuffers(vulkan->renderBuffers.commandBuffers[i], 0,
-                                   1, vertexBuffers, offsets);
-
             vkCmdBindDescriptorSets(
                 vulkan->renderBuffers.commandBuffers[i],
                 VK_PIPELINE_BIND_POINT_GRAPHICS,
                 vulkan->shapes[j].graphicsPipeline.pipelineLayout, 0, 1,
                 &vulkan->shapes[j].descriptorSet.descriptorSets[i], 0, NULL);
+
+            VkBuffer vertexBuffers[] = {
+                vulkan->shapeBuffers.vertexBuffer[j],
+            };
+
+            vkCmdBindVertexBuffers(vulkan->renderBuffers.commandBuffers[i], 0,
+                                   1, vertexBuffers, offsets);
 
             vkCmdDraw(vulkan->renderBuffers.commandBuffers[i],
                       vulkan->shapes[j].verticesCount, 1, 0, 0);
@@ -174,8 +177,7 @@ void createSyncObjects(Vulkan *vulkan) {
 }
 
 void drawFrame(Vulkan *vulkan) {
-    vkWaitForFences(vulkan->device.device, 1,
-                    &vulkan->semaphores.inFlightFences[vulkan->currentFrame],
+    vkWaitForFences(vulkan->device.device, 1, vulkan->semaphores.inFlightFences,
                     VK_TRUE, UINT64_MAX);
 
     uint32_t imageIndex;
@@ -229,7 +231,7 @@ void drawFrame(Vulkan *vulkan) {
                   &vulkan->semaphores.inFlightFences[vulkan->currentFrame]);
 
     if (vkQueueSubmit(
-            vulkan->device.graphicsQueue, 1, &submitInfo,
+            vulkan->device.presentQueue, 1, &submitInfo,
             vulkan->semaphores.inFlightFences[vulkan->currentFrame]) !=
         VK_SUCCESS) {
         THROW_ERROR("failed to submit draw command buffer!\n");

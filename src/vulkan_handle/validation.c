@@ -73,9 +73,10 @@ static inline VkResult CreateDebugUtilsMessengerEXT(
     return VK_ERROR_EXTENSION_NOT_PRESENT;
 }
 
-inline void DestroyDebugUtilsMessengerEXT(VkInstance instance,
-                                   VkDebugUtilsMessengerEXT debugMessenger,
-                                   const VkAllocationCallbacks *pAllocator) {
+inline void
+DestroyDebugUtilsMessengerEXT(VkInstance instance,
+                              VkDebugUtilsMessengerEXT debugMessenger,
+                              const VkAllocationCallbacks *pAllocator) {
     PFN_vkDestroyDebugUtilsMessengerEXT func =
         (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
             instance, "vkDestroyDebugUtilsMessengerEXT");

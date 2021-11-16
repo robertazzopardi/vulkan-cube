@@ -146,8 +146,8 @@ void createGraphicsPipeline(Vulkan *vulkan,
     };
 
     VkPipelineLayoutCreateInfo pipelineLayoutInfo = {
-        .pushConstantRangeCount = 0,
         .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+        .pushConstantRangeCount = 0,
         .setLayoutCount = 1,
         .pSetLayouts = descriptorSetLayout,
     };
@@ -158,8 +158,10 @@ void createGraphicsPipeline(Vulkan *vulkan,
         THROW_ERROR("failed to create pipeline layout!\n");
     }
 
-    VkDynamicState dynamicStates[] = {VK_DYNAMIC_STATE_VIEWPORT,
-                                      VK_DYNAMIC_STATE_SCISSOR};
+    VkDynamicState dynamicStates[] = {
+        VK_DYNAMIC_STATE_VIEWPORT,
+        VK_DYNAMIC_STATE_SCISSOR,
+    };
 
     VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
@@ -257,13 +259,13 @@ void createRenderPass(Vulkan *vulkan) {
 
     VkAttachmentDescription colorAttachmentResolve = {
         .format = *vulkan->swapchain.swapChainImageFormat,
-        .samples = VK_SAMPLE_COUNT_1_BIT,
         .loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
         .storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
         .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
         .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
         .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
         .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+        .samples = VK_SAMPLE_COUNT_1_BIT,
     };
 
     VkAttachmentReference colorAttachmentRef = {
