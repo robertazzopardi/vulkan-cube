@@ -193,9 +193,12 @@ void drawFrame(Vulkan *vulkan) {
         THROW_ERROR("failed to acquire swap chain image!\n");
     }
 
+    updateUniformBuffer(vulkan, NULL, imageIndex);
     for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
-        updateUniformBuffer(vulkan, &vulkan->shapes[i].descriptorSet,
-                            imageIndex);
+        mapMemory(
+            vulkan->device.device,
+            vulkan->shapes[i].descriptorSet.uniformBuffersMemory[imageIndex],
+            sizeof(vulkan->ubo), &vulkan->ubo);
     }
 
     if (vulkan->semaphores.imagesInFlight[imageIndex] != VK_NULL_HANDLE) {

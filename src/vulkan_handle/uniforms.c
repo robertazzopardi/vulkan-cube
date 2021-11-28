@@ -158,14 +158,12 @@ inline void createUniformBuffers(Vulkan *vulkan, DescriptorSet *descriptorSet) {
                      vulkan, &descriptorSet->uniformBuffers[i],
                      &descriptorSet->uniformBuffersMemory[i]);
     }
-
-    glm_mat4_identity(vulkan->ubo.model);
 }
 
 inline void updateUniformBuffer(Vulkan *vulkan, DescriptorSet *descriptorSet,
                                 uint32_t currentImage) {
 
-    // glm_rotate(vulkan->ubo.model, vulkan->window.dt * glm_rad(25.0f),
+    // glm_rotate(vulkan->ubo.model, -vulkan->window.dt * glm_rad(95.0f),
     // GLM_ZUP);
 
     glm_rotate(vulkan->ubo.model, vulkan->window.mX * glm_rad(1.0) * 0.005,
@@ -173,10 +171,8 @@ inline void updateUniformBuffer(Vulkan *vulkan, DescriptorSet *descriptorSet,
     glm_rotate(vulkan->ubo.model, -vulkan->window.mY * glm_rad(1.0) * 0.005,
                GLM_XUP);
 
-    // glm_lookat((vec3){-3.0f, -2.0f, -2.0f}, GLM_VEC3_ZERO, GLM_ZUP,
-    //            vulkan->ubo.view);
-    glm_lookat((vec3){0.0f, 3.0f, 2.0f}, GLM_VEC3_ZERO, GLM_ZUP,
-               vulkan->ubo.view);
+    glm_vec3_rotate(vulkan->camera.eye, 0.005f, GLM_ZUP);
+    glm_lookat(vulkan->camera.eye, GLM_VEC3_ZERO, GLM_ZUP, vulkan->ubo.view);
     glm_rotate(vulkan->ubo.view, GLM_PI, GLM_XUP);
 
     float aspectRatio = vulkan->swapchain.swapChainExtent->width /
@@ -184,8 +180,4 @@ inline void updateUniformBuffer(Vulkan *vulkan, DescriptorSet *descriptorSet,
     glm_perspective(glm_rad(45.0f), aspectRatio, 0.1f, 10.0f, vulkan->ubo.proj);
 
     vulkan->ubo.proj[1][1] *= -1;
-
-    mapMemory(vulkan->device.device,
-              descriptorSet->uniformBuffersMemory[currentImage],
-              sizeof(vulkan->ubo), &vulkan->ubo);
 }

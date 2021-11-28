@@ -227,11 +227,6 @@ void createTextureImage(Vulkan *vulkan, const char *fileName) {
                      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                  vulkan, &stagingBuffer, &stagingBufferMemory);
 
-    // void *data;
-    // vkMapMemory(vulkan->device.device, stagingBufferMemory, 0, imageSize, 0,
-    //             &data);
-    // memcpy(data, image->pixels, (size_t)imageSize);
-    // vkUnmapMemory(vulkan->device.device, stagingBufferMemory);
     mapMemory(vulkan->device.device, stagingBufferMemory, imageSize,
               image->pixels);
 
@@ -250,6 +245,7 @@ void createTextureImage(Vulkan *vulkan, const char *fileName) {
         VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         vulkan->shapes[vulkan->shapeCount].texture.mipLevels);
+
     copyBufferToImage(vulkan, stagingBuffer,
                       vulkan->shapes[vulkan->shapeCount].texture.textureImage,
                       (uint32_t)image->w, (uint32_t)image->h);

@@ -8,6 +8,8 @@
 #include <SDL_image.h>
 #include <SDL_pixels.h>
 #include <SDL_vulkan.h>
+#include <cglm/mat4.h>
+#include <cglm/vec3.h>
 #include <stdlib.h>
 #include <vulkan/vulkan.h>
 
@@ -99,6 +101,9 @@ static inline void handleUserInput(Window *window) {
 }
 
 inline void mainLoop(Vulkan *vulkan) {
+    glm_vec3_copy((vec3){5.0f, 1.0f, 2.0f}, vulkan->camera.eye);
+    glm_mat4_identity(vulkan->ubo.model);
+
     while (vulkan->window.running) {
         // Handle Events
         handleUserInput(&vulkan->window);

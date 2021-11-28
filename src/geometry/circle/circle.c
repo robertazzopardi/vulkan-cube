@@ -12,7 +12,7 @@
 
 inline void calculateIndices(Shape *shape, uint32_t sectorCount,
                              uint32_t stackCount) {
-    uint32_t k1, k2;
+    uint16_t k1, k2;
     for (uint32_t i = 0; i < stackCount; ++i) {
         k1 = i * (sectorCount + 1); // beginning of current stack
         k2 = k1 + sectorCount + 1;  // beginning of next stack

@@ -14,6 +14,10 @@ typedef unsigned int uint32_t;
 typedef unsigned long long uint64_t;
 typedef uint64_t VkDeviceSize;
 
+typedef struct Camera {
+    vec3 eye;
+} Camera;
+
 typedef struct UniformBufferObject {
     mat4 model;
     mat4 view;

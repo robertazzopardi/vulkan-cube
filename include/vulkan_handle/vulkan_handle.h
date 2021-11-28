@@ -25,6 +25,7 @@ typedef struct Vulkan {
     uint32_t shapeCount;
     Depth depth;
     UniformBufferObject ubo;
+    Camera camera;
     Window window;
 
     VkImage colorImage;

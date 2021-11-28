@@ -152,6 +152,7 @@ void createSwapChain(Vulkan *vulkan) {
 
     vulkan->swapchain.swapChainImagesCount =
         swapChainSupport.capabilities->minImageCount + 1;
+
     if (swapChainSupport.capabilities->maxImageCount > 0 &&
         vulkan->swapchain.swapChainImagesCount >
             swapChainSupport.capabilities->maxImageCount) {

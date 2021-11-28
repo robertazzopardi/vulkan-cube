@@ -162,7 +162,6 @@ void pickPhysicalDevice(Vulkan *vulkan) {
         if (isDeviceSuitable(devices[i], vulkan->window.surface)) {
             vulkan->device.physicalDevice = devices[i];
             vulkan->msaaSamples = getMaxUsableSampleCount(vulkan);
-            printf("samples %u\n", vulkan->msaaSamples);
             break;
         }
     }

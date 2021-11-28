@@ -57,8 +57,7 @@ void createInstance(Vulkan *vulkan) {
         createInfo.ppEnabledLayerNames = validationLayers;
 
         populateDebugMessengerCreateInfo(&debugCreateInfo);
-        createInfo.pNext =
-            (VkDebugUtilsMessengerCreateInfoEXT *)&debugCreateInfo;
+        createInfo.pNext = &debugCreateInfo;
     } else {
         createInfo.enabledLayerCount = 0;
 
@@ -95,16 +94,30 @@ void initVulkan(Vulkan *vulkan) {
 
     createCommandPool(vulkan);
 
-    generateShape(vulkan, CUBE, "/Users/rob/Downloads/2k_saturn.jpg");
-    // generateShape(vulkan, SPHERE, "/Users/rob/Downloads/2k_saturn.jpg");
+    // generateShape(vulkan, CUBE, "/Users/rob/Downloads/2k_saturn.jpg");
+    generateShape(vulkan, SPHERE, "/Users/rob/Downloads/2k_saturn.jpg");
     // generateShape(vulkan, CIRCLE,
     //               "/Users/rob/Downloads/2k_saturn_ring_alpha.png");
     // generateShape(vulkan, RING,
-                //   "/Users/rob/Downloads/2k_saturn_ring_alpha.png");
+    //               "/Users/rob/Downloads/2k_saturn_ring_alpha.png");
 
     bindVertexAndIndexBuffers(vulkan);
 
     for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
+        createVertexIndexBuffer(vulkan, vulkan->shapes[i].vertices,
+                                sizeof(*vulkan->shapes[i].vertices) *
+                                    vulkan->shapes[i].verticesCount,
+                                &vulkan->shapeBuffers.vertexBuffer[i],
+                                &vulkan->shapeBuffers.vertexBufferMemory[i],
+                                VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+                                    VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+        createVertexIndexBuffer(vulkan, vulkan->shapes[i].indices,
+                                sizeof(*vulkan->shapes[i].indices) *
+                                    vulkan->shapes[i].indicesCount,
+                                &vulkan->shapeBuffers.indexBuffer[i],
+                                &vulkan->shapeBuffers.indexBufferMemory[i],
+                                VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+                                    VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
         createDescriptorSetLayout(
             vulkan, &vulkan->shapes[i].descriptorSet.descriptorSetLayout);
         createGraphicsPipeline(

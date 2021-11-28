@@ -143,11 +143,12 @@ void createFramebuffers(Vulkan *vulkan) {
 void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
                   VkMemoryPropertyFlags properties, Vulkan *vulkan,
                   VkBuffer *buffer, VkDeviceMemory *bufferMemory) {
-    VkBufferCreateInfo bufferInfo = {0};
-    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferInfo.size = size;
-    bufferInfo.usage = usage;
-    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    VkBufferCreateInfo bufferInfo = {
+        .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+        .size = size,
+        .usage = usage,
+        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+    };
 
     if (vkCreateBuffer(vulkan->device.device, &bufferInfo, NULL, buffer) !=
         VK_SUCCESS) {
@@ -158,11 +159,12 @@ void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
     vkGetBufferMemoryRequirements(vulkan->device.device, *buffer,
                                   &memRequirements);
 
-    VkMemoryAllocateInfo allocInfo = {0};
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex =
-        findMemoryType(vulkan, memRequirements.memoryTypeBits, properties);
+    VkMemoryAllocateInfo allocInfo = {
+        .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        .allocationSize = memRequirements.size,
+        .memoryTypeIndex =
+            findMemoryType(vulkan, memRequirements.memoryTypeBits, properties),
+    };
 
     if (vkAllocateMemory(vulkan->device.device, &allocInfo, NULL,
                          bufferMemory) != VK_SUCCESS) {
@@ -223,22 +225,24 @@ inline void bindVertexAndIndexBuffers(Vulkan *vulkan) {
     vulkan->shapeBuffers.indexBufferMemory = malloc(
         vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.indexBufferMemory));
 
-    for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
-        createVertexIndexBuffer(vulkan, vulkan->shapes[i].vertices,
-                                sizeof(*vulkan->shapes[i].vertices) *
-                                    vulkan->shapes[i].verticesCount,
-                                &vulkan->shapeBuffers.vertexBuffer[i],
-                                &vulkan->shapeBuffers.vertexBufferMemory[i],
-                                VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-                                    VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-        createVertexIndexBuffer(vulkan, vulkan->shapes[i].indices,
-                                sizeof(*vulkan->shapes[i].indices) *
-                                    vulkan->shapes[i].indicesCount,
-                                &vulkan->shapeBuffers.indexBuffer[i],
-                                &vulkan->shapeBuffers.indexBufferMemory[i],
-                                VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-                                    VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
-    }
+    // for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
+    //     printf("%zu %u\n", sizeof(*vulkan->shapes[i].vertices),
+    //            vulkan->shapes[i].verticesCount);
+    //     createVertexIndexBuffer(vulkan, vulkan->shapes[i].vertices,
+    //                             sizeof(*vulkan->shapes[i].vertices) *
+    //                                 vulkan->shapes[i].verticesCount,
+    //                             &vulkan->shapeBuffers.vertexBuffer[i],
+    //                             &vulkan->shapeBuffers.vertexBufferMemory[i],
+    //                             VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+    //                                 VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    //     createVertexIndexBuffer(vulkan, vulkan->shapes[i].indices,
+    //                             sizeof(*vulkan->shapes[i].indices) *
+    //                                 vulkan->shapes[i].indicesCount,
+    //                             &vulkan->shapeBuffers.indexBuffer[i],
+    //                             &vulkan->shapeBuffers.indexBufferMemory[i],
+    //                             VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+    //                                 VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+    // }
 }
 
 inline void generateShape(Vulkan *vulkan, ShapeType shapeType,
@@ -261,7 +265,7 @@ inline void generateShape(Vulkan *vulkan, ShapeType shapeType,
         makeCube(vulkan);
         break;
     case SPHERE:
-        makeSphere(shape, 60, 60, 0.4);
+        makeSphere(shape, 40, 40, 0.4);
         break;
     case ICOSPHERE:
     case OCTASPHERE:
