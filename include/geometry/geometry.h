@@ -130,8 +130,6 @@ void createVertexBuffer(Vulkan *);
 void createVertexIndexBuffer(Vulkan *, void *, uint64_t, VkBuffer *,
                              VkDeviceMemory *, VkBufferUsageFlags);
 
-void createDepthResources(Vulkan *);
-
 void createFramebuffers(Vulkan *);
 
 typedef struct VkVertexInputBindingDescription VkVertexInputBindingDescription;
@@ -151,6 +149,6 @@ void normalize(vec3, Vertex *, float);
 
 void getMiddlePoint(vec3, vec3, vec3);
 
-void bindVertexAndIndexBuffers(Vulkan *);
+// void bindVertexAndIndexBuffers(Vulkan *);
 
 #endif /* INCLUDE_GEOMETRY_GEOMETRY */

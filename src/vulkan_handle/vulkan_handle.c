@@ -86,9 +86,13 @@ void initVulkan(Vulkan *vulkan) {
 
     createRenderPass(vulkan);
 
-    createColorResources(vulkan);
-
-    createDepthResources(vulkan);
+    createResourceFormat(vulkan, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+                         VK_IMAGE_ASPECT_DEPTH_BIT, &vulkan->depth.depthImage,
+                         &vulkan->depth.depthImageMemory,
+                         &vulkan->depth.depthImageView);
+    createResourceFormat(vulkan, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                         VK_IMAGE_ASPECT_COLOR_BIT, &vulkan->colorImage,
+                         &vulkan->colorImageMemory, &vulkan->colorImageView);
 
     createFramebuffers(vulkan);
 
@@ -98,37 +102,8 @@ void initVulkan(Vulkan *vulkan) {
     generateShape(vulkan, SPHERE, "/Users/rob/Downloads/2k_saturn.jpg");
     // generateShape(vulkan, CIRCLE,
     //               "/Users/rob/Downloads/2k_saturn_ring_alpha.png");
-    // generateShape(vulkan, RING,
-    //               "/Users/rob/Downloads/2k_saturn_ring_alpha.png");
-
-    bindVertexAndIndexBuffers(vulkan);
-
-    for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
-        createVertexIndexBuffer(vulkan, vulkan->shapes[i].vertices,
-                                sizeof(*vulkan->shapes[i].vertices) *
-                                    vulkan->shapes[i].verticesCount,
-                                &vulkan->shapeBuffers.vertexBuffer[i],
-                                &vulkan->shapeBuffers.vertexBufferMemory[i],
-                                VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-                                    VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-        createVertexIndexBuffer(vulkan, vulkan->shapes[i].indices,
-                                sizeof(*vulkan->shapes[i].indices) *
-                                    vulkan->shapes[i].indicesCount,
-                                &vulkan->shapeBuffers.indexBuffer[i],
-                                &vulkan->shapeBuffers.indexBufferMemory[i],
-                                VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-                                    VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
-        createDescriptorSetLayout(
-            vulkan, &vulkan->shapes[i].descriptorSet.descriptorSetLayout);
-        createGraphicsPipeline(
-            vulkan, &vulkan->shapes[i].descriptorSet.descriptorSetLayout,
-            &vulkan->shapes[i].graphicsPipeline);
-        createDescriptorPool(vulkan,
-                             &vulkan->shapes[i].descriptorSet.descriptorPool);
-        createUniformBuffers(vulkan, &vulkan->shapes[i].descriptorSet);
-        createDescriptorSets(vulkan, &vulkan->shapes[i].descriptorSet,
-                             &vulkan->shapes[i].texture);
-    }
+    generateShape(vulkan, RING,
+                  "/Users/rob/Downloads/2k_saturn_ring_alpha.png");
 
     createCommandBuffers(vulkan);
 

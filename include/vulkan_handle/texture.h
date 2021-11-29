@@ -3,6 +3,8 @@
 
 typedef unsigned int uint32_t;
 typedef enum VkSampleCountFlagBits VkSampleCountFlagBits;
+typedef enum VkImageUsageFlagBits VkImageUsageFlagBits;
+typedef enum VkImageAspectFlagBits VkImageAspectFlagBits;
 typedef struct VkImage_T *VkImage;
 typedef struct VkDeviceMemory_T *VkDeviceMemory;
 typedef struct VkImageView_T *VkImageView;
@@ -27,7 +29,8 @@ void createTextureSampler(Vulkan *);
 
 void createImageViews(Vulkan *);
 
-void createColorResources(Vulkan *);
+void createResourceFormat(Vulkan *, VkImageUsageFlagBits, VkImageAspectFlagBits,
+                          VkImage *, VkDeviceMemory *, VkImageView *);
 
 typedef enum VkFormat VkFormat;
 typedef struct VkDevice_T *VkDevice;

@@ -92,8 +92,13 @@ void recreateSwapChain(Vulkan *vulkan) {
     createSwapChain(vulkan);
     createImageViews(vulkan);
     createRenderPass(vulkan);
-    createColorResources(vulkan);
-    createDepthResources(vulkan);
+    createResourceFormat(vulkan, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+                         VK_IMAGE_ASPECT_DEPTH_BIT, &vulkan->depth.depthImage,
+                         &vulkan->depth.depthImageMemory,
+                         &vulkan->depth.depthImageView);
+    createResourceFormat(vulkan, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                         VK_IMAGE_ASPECT_COLOR_BIT, &vulkan->colorImage,
+                         &vulkan->colorImageMemory, &vulkan->colorImageView);
     createFramebuffers(vulkan);
 
     for (uint32_t i = 0; i < vulkan->shapeCount; i++) {

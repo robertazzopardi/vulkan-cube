@@ -92,28 +92,18 @@ inline void calculateNormals(Vertex *shape, uint32_t vertsToUpdate) {
     }
 }
 
-inline void createDepthResources(Vulkan *vulkan) {
-    const VkFormat depthFormat = findDepthFormat(vulkan);
-
-    createImage(vulkan->swapchain.swapChainExtent->width,
-                vulkan->swapchain.swapChainExtent->height, 1,
-                vulkan->msaaSamples, depthFormat, VK_IMAGE_TILING_OPTIMAL,
-                VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT |
-                    VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-                VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT,
-                // VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                vulkan, &vulkan->depth.depthImage,
-                &vulkan->depth.depthImageMemory);
-
-    vulkan->depth.depthImageView =
-        createImageView(vulkan->device.device, vulkan->depth.depthImage,
-                        depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
-}
-
 void createFramebuffers(Vulkan *vulkan) {
     vulkan->renderBuffers.swapChainFramebuffers =
         malloc(vulkan->swapchain.swapChainImagesCount *
                sizeof(*vulkan->renderBuffers.swapChainFramebuffers));
+
+    VkFramebufferCreateInfo framebufferInfo = {
+        .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+        .renderPass = vulkan->renderPass,
+        .width = vulkan->swapchain.swapChainExtent->width,
+        .height = vulkan->swapchain.swapChainExtent->height,
+        .layers = 1,
+    };
 
     for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
         VkImageView attachments[] = {
@@ -122,14 +112,8 @@ void createFramebuffers(Vulkan *vulkan) {
             vulkan->swapchain.swapChainImageViews[i],
         };
 
-        VkFramebufferCreateInfo framebufferInfo = {};
-        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = vulkan->renderPass;
         framebufferInfo.attachmentCount = SIZEOF(attachments);
         framebufferInfo.pAttachments = attachments;
-        framebufferInfo.width = vulkan->swapchain.swapChainExtent->width;
-        framebufferInfo.height = vulkan->swapchain.swapChainExtent->height;
-        framebufferInfo.layers = 1;
 
         if (vkCreateFramebuffer(
                 vulkan->device.device, &framebufferInfo, NULL,
@@ -174,15 +158,6 @@ void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
     vkBindBufferMemory(vulkan->device.device, *buffer, *bufferMemory, 0);
 }
 
-// for (size_t i = 0; i < SIZEOF(cube1); i++) {
-//     vec3 normal;
-//     getNormal(octahedron1[i][0].pos, octahedron1[i][1].pos,
-//     octahedron1[i][2].pos, normal);
-//     for (size_t j = 0; j < 4; j++) {
-//         glm_vec3_copy(normal, octahedron1[i][j].normal);
-//     }
-// }
-
 void copyBuffer(Vulkan *vulkan, VkBuffer srcBuffer, VkBuffer dstBuffer,
                 VkDeviceSize size) {
     VkCommandBuffer commandBuffer = beginSingleTimeCommands(vulkan);
@@ -213,36 +188,6 @@ void createVertexIndexBuffer(Vulkan *vulkan, void *data, uint64_t bufferSize,
 
     vkDestroyBuffer(vulkan->device.device, stagingBuffer, NULL);
     vkFreeMemory(vulkan->device.device, stagingBufferMemory, NULL);
-}
-
-inline void bindVertexAndIndexBuffers(Vulkan *vulkan) {
-    vulkan->shapeBuffers.vertexBuffer =
-        malloc(vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.vertexBuffer));
-    vulkan->shapeBuffers.vertexBufferMemory = malloc(
-        vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.vertexBufferMemory));
-    vulkan->shapeBuffers.indexBuffer =
-        malloc(vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.indexBuffer));
-    vulkan->shapeBuffers.indexBufferMemory = malloc(
-        vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.indexBufferMemory));
-
-    // for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
-    //     printf("%zu %u\n", sizeof(*vulkan->shapes[i].vertices),
-    //            vulkan->shapes[i].verticesCount);
-    //     createVertexIndexBuffer(vulkan, vulkan->shapes[i].vertices,
-    //                             sizeof(*vulkan->shapes[i].vertices) *
-    //                                 vulkan->shapes[i].verticesCount,
-    //                             &vulkan->shapeBuffers.vertexBuffer[i],
-    //                             &vulkan->shapeBuffers.vertexBufferMemory[i],
-    //                             VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-    //                                 VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-    //     createVertexIndexBuffer(vulkan, vulkan->shapes[i].indices,
-    //                             sizeof(*vulkan->shapes[i].indices) *
-    //                                 vulkan->shapes[i].indicesCount,
-    //                             &vulkan->shapeBuffers.indexBuffer[i],
-    //                             &vulkan->shapeBuffers.indexBufferMemory[i],
-    //                             VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-    //                                 VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
-    // }
 }
 
 inline void generateShape(Vulkan *vulkan, ShapeType shapeType,
@@ -292,4 +237,46 @@ inline void generateShape(Vulkan *vulkan, ShapeType shapeType,
     createTextureSampler(vulkan);
 
     vulkan->shapeCount++;
+
+    vulkan->shapeBuffers.vertexBuffer = realloc(
+        vulkan->shapeBuffers.vertexBuffer,
+        vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.vertexBuffer));
+    vulkan->shapeBuffers.vertexBufferMemory = realloc(
+        vulkan->shapeBuffers.vertexBufferMemory,
+        vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.vertexBufferMemory));
+    vulkan->shapeBuffers.indexBuffer =
+        realloc(vulkan->shapeBuffers.indexBuffer,
+                vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.indexBuffer));
+    vulkan->shapeBuffers.indexBufferMemory = realloc(
+        vulkan->shapeBuffers.indexBufferMemory,
+        vulkan->shapeCount * sizeof(*vulkan->shapeBuffers.indexBufferMemory));
+
+    //
+    uint32_t shape_index = vulkan->shapeCount - 1;
+
+    createVertexIndexBuffer(
+        vulkan, vulkan->shapes[shape_index].vertices,
+        sizeof(*vulkan->shapes[shape_index].vertices) *
+            vulkan->shapes[shape_index].verticesCount,
+        &vulkan->shapeBuffers.vertexBuffer[shape_index],
+        &vulkan->shapeBuffers.vertexBufferMemory[shape_index],
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    createVertexIndexBuffer(
+        vulkan, vulkan->shapes[shape_index].indices,
+        sizeof(*vulkan->shapes[shape_index].indices) *
+            vulkan->shapes[shape_index].indicesCount,
+        &vulkan->shapeBuffers.indexBuffer[shape_index],
+        &vulkan->shapeBuffers.indexBufferMemory[shape_index],
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+
+    createDescriptorSetLayout(
+        vulkan, &vulkan->shapes[shape_index].descriptorSet.descriptorSetLayout);
+    createGraphicsPipeline(
+        vulkan, &vulkan->shapes[shape_index].descriptorSet.descriptorSetLayout,
+        &vulkan->shapes[shape_index].graphicsPipeline);
+    createDescriptorPool(
+        vulkan, &vulkan->shapes[shape_index].descriptorSet.descriptorPool);
+    createUniformBuffers(vulkan, &vulkan->shapes[shape_index].descriptorSet);
+    createDescriptorSets(vulkan, &vulkan->shapes[shape_index].descriptorSet,
+                         &vulkan->shapes[shape_index].texture);
 }
