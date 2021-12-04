@@ -98,12 +98,10 @@ void initVulkan(Vulkan *vulkan) {
 
     createCommandPool(vulkan);
 
-    // generateShape(vulkan, CUBE, "/Users/rob/Downloads/2k_saturn.jpg");
-    generateShape(vulkan, SPHERE, "/Users/rob/Downloads/2k_saturn.jpg");
-    // generateShape(vulkan, CIRCLE,
-    //               "/Users/rob/Downloads/2k_saturn_ring_alpha.png");
-    generateShape(vulkan, RING,
-                  "/Users/rob/Downloads/2k_saturn_ring_alpha.png");
+    // generateShape(vulkan, CUBE, "../assets/2k_saturn.jpg");
+    generateShape(vulkan, SPHERE, "../assets/2k_saturn.jpg");
+    // generateShape(vulkan, CIRCLE, "../assets//2k_saturn_ring_alpha.png");
+    generateShape(vulkan, RING, "../assets/2k_saturn_ring_alpha.png");
 
     createCommandBuffers(vulkan);
 
