@@ -345,8 +345,7 @@ inline void createImageViews(Vulkan *vulkan) {
 inline void createResourceFormat(Vulkan *vulkan,
                                  VkImageUsageFlagBits imageUsageFlags,
                                  VkImageAspectFlagBits aspectFlags,
-                                 VkImage *image, VkDeviceMemory *memory,
-                                 VkImageView *view) {
+                                 Resource *resource) {
 
     VkFormat format = *vulkan->swapchain.swapChainImageFormat;
     if (aspectFlags == VK_IMAGE_ASPECT_DEPTH_BIT) {
@@ -357,44 +356,12 @@ inline void createResourceFormat(Vulkan *vulkan,
                 vulkan->swapchain.swapChainExtent->height, 1,
                 vulkan->msaaSamples, format, VK_IMAGE_TILING_OPTIMAL,
                 VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | imageUsageFlags,
-                VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT, vulkan, image, memory);
+                VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT, vulkan,
+                &resource->image, &resource->memory);
 
-    *view =
-        createImageView(vulkan->device.device, *image, format, aspectFlags, 1);
+    resource->view = createImageView(vulkan->device.device, resource->image,
+                                     format, aspectFlags, 1);
 }
-
-// inline void createDepthResources(Vulkan *vulkan) {
-//     const VkFormat depthFormat = findDepthFormat(vulkan);
-
-//     createImage(vulkan->swapchain.swapChainExtent->width,
-//                 vulkan->swapchain.swapChainExtent->height, 1,
-//                 vulkan->msaaSamples, depthFormat, VK_IMAGE_TILING_OPTIMAL,
-//                 VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT |
-//                     VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-//                 VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT, vulkan,
-//                 &vulkan->depth.depthImage, &vulkan->depth.depthImageMemory);
-
-//     vulkan->depth.depthImageView =
-//         createImageView(vulkan->device.device, vulkan->depth.depthImage,
-//                         depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
-// }
-
-// inline void createColorResources(Vulkan *vulkan) {
-//     VkFormat colorFormat = *vulkan->swapchain.swapChainImageFormat;
-
-//     createImage(vulkan->swapchain.swapChainExtent->width,
-//                 vulkan->swapchain.swapChainExtent->height, 1,
-//                 vulkan->msaaSamples, colorFormat, VK_IMAGE_TILING_OPTIMAL,
-//                 VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT |
-//                     VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-//                 VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT, vulkan,
-//                 &vulkan->colorImage, &vulkan->colorImageMemory);
-
-//     vulkan->colorImageView =
-//         createImageView(vulkan->device.device, vulkan->colorImage,
-//         colorFormat,
-//                         VK_IMAGE_ASPECT_COLOR_BIT, 1);
-// }
 
 inline VkCommandBuffer beginSingleTimeCommands(Vulkan *vulkan) {
     VkCommandBufferAllocateInfo allocInfo = {

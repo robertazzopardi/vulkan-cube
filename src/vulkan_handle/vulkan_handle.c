@@ -87,12 +87,9 @@ void initVulkan(Vulkan *vulkan) {
     createRenderPass(vulkan);
 
     createResourceFormat(vulkan, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-                         VK_IMAGE_ASPECT_DEPTH_BIT, &vulkan->depth.depthImage,
-                         &vulkan->depth.depthImageMemory,
-                         &vulkan->depth.depthImageView);
+                         VK_IMAGE_ASPECT_DEPTH_BIT, &vulkan->depth);
     createResourceFormat(vulkan, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-                         VK_IMAGE_ASPECT_COLOR_BIT, &vulkan->colorImage,
-                         &vulkan->colorImageMemory, &vulkan->colorImageView);
+                         VK_IMAGE_ASPECT_COLOR_BIT, &vulkan->colour);
 
     createFramebuffers(vulkan);
 

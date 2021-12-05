@@ -93,12 +93,9 @@ void recreateSwapChain(Vulkan *vulkan) {
     createImageViews(vulkan);
     createRenderPass(vulkan);
     createResourceFormat(vulkan, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-                         VK_IMAGE_ASPECT_DEPTH_BIT, &vulkan->depth.depthImage,
-                         &vulkan->depth.depthImageMemory,
-                         &vulkan->depth.depthImageView);
+                         VK_IMAGE_ASPECT_DEPTH_BIT, &vulkan->depth);
     createResourceFormat(vulkan, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-                         VK_IMAGE_ASPECT_COLOR_BIT, &vulkan->colorImage,
-                         &vulkan->colorImageMemory, &vulkan->colorImageView);
+                         VK_IMAGE_ASPECT_COLOR_BIT, &vulkan->colour);
     createFramebuffers(vulkan);
 
     for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
@@ -225,14 +222,13 @@ void createSwapChain(Vulkan *vulkan) {
 }
 
 void cleanupSwapChain(Vulkan *vulkan) {
-    vkDestroyImageView(vulkan->device.device, vulkan->colorImageView, NULL);
-    vkDestroyImage(vulkan->device.device, vulkan->colorImage, NULL);
-    vkFreeMemory(vulkan->device.device, vulkan->colorImageMemory, NULL);
+    vkDestroyImageView(vulkan->device.device, vulkan->colour.view, NULL);
+    vkDestroyImage(vulkan->device.device, vulkan->colour.image, NULL);
+    vkFreeMemory(vulkan->device.device, vulkan->colour.memory, NULL);
 
-    vkDestroyImageView(vulkan->device.device, vulkan->depth.depthImageView,
-                       NULL);
-    vkDestroyImage(vulkan->device.device, vulkan->depth.depthImage, NULL);
-    vkFreeMemory(vulkan->device.device, vulkan->depth.depthImageMemory, NULL);
+    vkDestroyImageView(vulkan->device.device, vulkan->depth.view, NULL);
+    vkDestroyImage(vulkan->device.device, vulkan->depth.image, NULL);
+    vkFreeMemory(vulkan->device.device, vulkan->depth.memory, NULL);
 
     vkFreeCommandBuffers(vulkan->device.device,
                          vulkan->renderBuffers.commandPool,

@@ -23,14 +23,12 @@ typedef struct Vulkan {
     ShapeBuffers shapeBuffers;
     Shape *shapes;
     uint32_t shapeCount;
-    Depth depth;
     UniformBufferObject ubo;
     Camera camera;
     Window window;
 
-    VkImage colorImage;
-    VkDeviceMemory colorImageMemory;
-    VkImageView colorImageView;
+    Resource colour;
+    Resource depth;
 } Vulkan;
 
 extern Vulkan initialise();

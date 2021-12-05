@@ -9,6 +9,7 @@ typedef struct VkImage_T *VkImage;
 typedef struct VkDeviceMemory_T *VkDeviceMemory;
 typedef struct VkImageView_T *VkImageView;
 typedef struct VkSampler_T *VkSampler;
+typedef struct Resource Resource;
 
 typedef struct Texture {
     uint32_t mipLevels;
@@ -30,7 +31,7 @@ void createTextureSampler(Vulkan *);
 void createImageViews(Vulkan *);
 
 void createResourceFormat(Vulkan *, VkImageUsageFlagBits, VkImageAspectFlagBits,
-                          VkImage *, VkDeviceMemory *, VkImageView *);
+                          Resource *);
 
 typedef enum VkFormat VkFormat;
 typedef struct VkDevice_T *VkDevice;

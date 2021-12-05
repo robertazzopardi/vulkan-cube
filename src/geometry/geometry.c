@@ -107,8 +107,8 @@ void createFramebuffers(Vulkan *vulkan) {
 
     for (uint32_t i = 0; i < vulkan->swapchain.swapChainImagesCount; i++) {
         VkImageView attachments[] = {
-            vulkan->colorImageView,
-            vulkan->depth.depthImageView,
+            vulkan->colour.view,
+            vulkan->depth.view,
             vulkan->swapchain.swapChainImageViews[i],
         };
 

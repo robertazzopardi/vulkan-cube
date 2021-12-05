@@ -77,11 +77,11 @@ typedef struct VkImage_T *VkImage;
 typedef struct VkDeviceMemory_T *VkDeviceMemory;
 typedef struct VkImageView_T *VkImageView;
 
-typedef struct Depth {
-    VkImage depthImage;
-    VkDeviceMemory depthImageMemory;
-    VkImageView depthImageView;
-} Depth;
+typedef struct Resource {
+    VkImage image;
+    VkDeviceMemory memory;
+    VkImageView view;
+} Resource;
 
 typedef unsigned short uint16_t;
 typedef unsigned int uint32_t;
