@@ -1,6 +1,6 @@
 #include "vulkan_handle/uniforms.h"
-#include "error_handle.h"
 #include "geometry/geometry.h"
+#include "utility/error_handle.h"
 #include "vulkan_handle/memory.h"
 #include "vulkan_handle/vulkan_handle.h"
 #include <cglm/affine.h>
@@ -113,7 +113,7 @@ createDescriptorSetLayoutBinding(VkDescriptorType dType,
         .binding = binding,
         .descriptorCount = 1,
         .descriptorType = dType,
-        .pImmutableSamplers = NULL, // Optional
+        .pImmutableSamplers = NULL,  // Optional
         .stageFlags = sFlags,
     };
     return layoutBinding;
@@ -160,8 +160,7 @@ inline void createUniformBuffers(Vulkan *vulkan, DescriptorSet *descriptorSet) {
     }
 }
 
-inline void updateUniformBuffer(Vulkan *vulkan, DescriptorSet *descriptorSet,
-                                uint32_t currentImage) {
+inline void updateUniformBuffer(Vulkan *vulkan) {
 
     // glm_rotate(vulkan->ubo.model, -vulkan->window.dt * glm_rad(95.0f),
     // GLM_ZUP);

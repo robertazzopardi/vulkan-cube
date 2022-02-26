@@ -1,6 +1,6 @@
 #include "vulkan_handle/render.h"
-#include "error_handle.h"
 #include "geometry/geometry.h"
+#include "utility/error_handle.h"
 #include "vulkan_handle/memory.h"
 #include "vulkan_handle/vulkan_handle.h"
 #include "window/window.h"
@@ -47,8 +47,6 @@ void createCommandBuffers(Vulkan *vulkan) {
     VkViewport viewport = {
         .x = 0.0f,
         .y = 0.0f,
-        // .width = window.width,
-        // .height = window.height,
         .width = width,
         .height = height,
         .minDepth = 0.0f,
@@ -56,8 +54,8 @@ void createCommandBuffers(Vulkan *vulkan) {
     };
 
     VkRect2D scissor = {
-        .offset = (VkOffset2D){0, 0},
-        .extent = (VkExtent2D){width, height},
+        .offset = (VkOffset2D) {0, 0},
+        .extent = (VkExtent2D) {width, height},
     };
 
     VkCommandBufferBeginInfo beginInfo = {};
@@ -66,7 +64,7 @@ void createCommandBuffers(Vulkan *vulkan) {
     VkRenderPassBeginInfo renderPassInfo = {};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = vulkan->renderPass;
-    renderPassInfo.renderArea.offset = (VkOffset2D){0, 0};
+    renderPassInfo.renderArea.offset = (VkOffset2D) {0, 0};
     renderPassInfo.renderArea.extent = *vulkan->swapchain.swapChainExtent;
 
     VkClearValue clearValues[] = {
@@ -193,7 +191,7 @@ void drawFrame(Vulkan *vulkan) {
         THROW_ERROR("failed to acquire swap chain image!\n");
     }
 
-    updateUniformBuffer(vulkan, NULL, imageIndex);
+    updateUniformBuffer(vulkan);
     for (uint32_t i = 0; i < vulkan->shapeCount; i++) {
         mapMemory(
             vulkan->device.device,

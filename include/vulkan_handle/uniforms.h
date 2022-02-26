@@ -32,7 +32,7 @@ typedef struct DescriptorSet {
     VkDeviceMemory *uniformBuffersMemory;
 } DescriptorSet;
 
-void updateUniformBuffer(Vulkan *, DescriptorSet *, uint32_t);
+void updateUniformBuffer(Vulkan *);
 
 void createDescriptorSetLayout(Vulkan *, VkDescriptorSetLayout *);
 
