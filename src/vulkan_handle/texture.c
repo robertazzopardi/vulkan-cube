@@ -30,8 +30,9 @@ static inline void copyBufferToImage(Vulkan *vulkan, VkBuffer buffer,
     endSingleTimeCommands(vulkan, commandBuffer);
 }
 
-static void transitionImageLayout(Vulkan *vulkan, VkImage image,
-                                  VkFormat format __unused,
+static void transitionImageLayout(Vulkan *vulkan, 
+                                  VkImage image,
+                                  VkFormat format,
                                   VkImageLayout oldLayout,
                                   VkImageLayout newLayout, uint32_t mipLevels) {
     VkCommandBuffer commandBuffer = beginSingleTimeCommands(vulkan);

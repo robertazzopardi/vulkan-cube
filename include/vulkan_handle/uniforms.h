@@ -1,6 +1,7 @@
 #ifndef INCLUDE_VULKAN_HANDLE_UNIFORMS
 #define INCLUDE_VULKAN_HANDLE_UNIFORMS
 
+#include <stdint.h>
 #include <cglm/types.h>
 
 typedef struct VkDescriptorSetLayout_T *VkDescriptorSetLayout;
@@ -10,8 +11,6 @@ typedef struct VkDescriptorPool_T *VkDescriptorPool;
 typedef struct VkDescriptorSet_T *VkDescriptorSet;
 typedef struct Vulkan Vulkan;
 typedef struct Texture Texture;
-typedef unsigned int uint32_t;
-typedef unsigned long long uint64_t;
 typedef uint64_t VkDeviceSize;
 
 typedef struct Camera {

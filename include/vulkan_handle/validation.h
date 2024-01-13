@@ -8,7 +8,7 @@ static const char *validationLayers[] = {
     // "VK_LAYER_LUNARG_monitor",
 };
 
-// #define NDEBUG
+#define NDEBUG
 #ifdef NDEBUG
 static const bool enableValidationLayers = false;
 #else

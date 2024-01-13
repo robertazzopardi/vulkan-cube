@@ -4,14 +4,14 @@
 #
 
 # define the C compiler to use
-CC = clang
+CC = gcc
 
 # Acess vulkan sdk path and point to the glslc shader compiler
-GLSLC=$(VULKAN_SDK)/macOS/bin/glslc
+GLSLC=$(VULKAN_SDK)/bin/glslc
 
 # define any compile-time flags
 CFLAGS	:= -Wall -Wextra -W -flto -ffast-math -Oz `sdl2-config --cflags` -std=c18 -fpic -shared
-CFLAGS  += -fsanitize=address -fno-omit-frame-pointer -ffunction-sections -fdata-sections
+# CFLAGS  += -fsanitize=address -fno-omit-frame-pointer -ffunction-sections -fdata-sections
 # CFLAGS  += --analyze
 # CFLAGS  += -g
 
@@ -24,7 +24,7 @@ LFLAGS := -lvulkan -lSDL2 -lSDL2_image
 SCAN =		scan-build
 
 # scan flags
-SCANFLAGS =	-v -analyze-headers -no-failure-reports -enable-checker deadcode.DeadStores --status-bugs
+SCANFLAGS =	-v # -analyze-headers -no-failure-reports -enable-checker deadcode.DeadStores --status-bugs
 
 # define output directory
 OUTPUT	:= bin
@@ -64,10 +64,10 @@ MD	:= mkdir -p
 endif
 
 # define any directories containing header files other than /usr/include
-INCLUDES	:= $(patsubst %,-I%, $(INCLUDEDIRS:%/=%))
+INCLUDES	:= $(patsubst %,-I%, $(INCLUDEDIRS:%/=%)) -I$(VULKAN_SDK)/include
 
 # define the C libs
-LIBS		:= $(patsubst %,-L%, $(LIBDIRS:%/=%))
+LIBS		:= $(patsubst %,-L%, $(LIBDIRS:%/=%)) -L$(VULKAN_SDK)/lib
 
 # define the C source files
 SOURCES		:= $(wildcard $(patsubst %,%/*.c, $(SOURCEDIRS)))
@@ -128,7 +128,7 @@ run: all
 	@echo Executing 'run: all' complete!
 
 run_sphere:
-	$(CC) $(call FIXPATH,$(EXAMPLES)/main_sphere.c) -o $(OUTPUTMAIN) $(OUTPUTLIB) -I$(INCLUDE)
+	$(CC) $(call FIXPATH,$(EXAMPLES)/main_sphere.c) -o $(OUTPUTMAIN) $(OUTPUTLIB) -I$(INCLUDE) $(INCLUDES)
 	$(OUTPUTMAIN)
 
 check: clean all
@@ -149,8 +149,8 @@ compile_shaders: clean_shaders
 # echo include${$(dirname src/shaders/texture/shader.vert)#*src}
 
 	for texture_type in light texture vertex light_texture ; do \
-		GLSLC $(SRC)/shaders/$$texture_type/shader.vert -o $(SRC)/shaders/$$texture_type/vert.spv ; \
-		GLSLC $(SRC)/shaders/$$texture_type/shader.frag -o $(SRC)/shaders/$$texture_type/frag.spv ; \
+		$(GLSLC) $(SRC)/shaders/$$texture_type/shader.vert -o $(SRC)/shaders/$$texture_type/vert.spv ; \
+		$(GLSLC) $(SRC)/shaders/$$texture_type/shader.frag -o $(SRC)/shaders/$$texture_type/frag.spv ; \
 		$(MD) -p $(INCLUDE)/shaders/$$texture_type ; \
 		xxd -i -C $(SRC)/shaders/$$texture_type/frag.spv > $(INCLUDE)/shaders/$$texture_type/$${texture_type}_frag_shader.h ; \
 		echo "#ifndef $${texture_type}_FRAG_SHADER\n#define $${texture_type}_FRAG_SHADER\n" | \

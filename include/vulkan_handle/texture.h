@@ -1,7 +1,8 @@
 #ifndef INCLUDE_VULKAN_HANDLE_TEXTURE
 #define INCLUDE_VULKAN_HANDLE_TEXTURE
 
-typedef unsigned int uint32_t;
+#include <stdint.h>
+
 typedef enum VkSampleCountFlagBits VkSampleCountFlagBits;
 typedef enum VkImageUsageFlagBits VkImageUsageFlagBits;
 typedef enum VkImageAspectFlagBits VkImageAspectFlagBits;

@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <vulkan/vulkan.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 bool checkValidationLayerSupport() {
     uint32_t layerCount;
@@ -34,9 +36,9 @@ bool checkValidationLayerSupport() {
 
 static inline VkBool32
 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-              VkDebugUtilsMessageTypeFlagsEXT messageType __unused,
+              VkDebugUtilsMessageTypeFlagsEXT messageType,
               const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
-              void *pUserData __unused) {
+              void *pUserData) {
     if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
         printf("\n");
     }
